@@ -1,0 +1,5 @@
+# IDE e ferramentas locais
+.idea/
+
+# Saída de build solta na raiz
+/bin/
