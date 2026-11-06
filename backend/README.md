@@ -28,51 +28,55 @@ Spring-Ai/
 └── frontend/                     # Expo app (React Native + TypeScript)
 ```
 
-Backend layout:
+Estrutura do backend (agrupada por assunto; cada módulo tem as próprias camadas):
 
 ```text
 backend/
 ├── compose.yml                   # Postgres + API
 ├── Dockerfile
 ├── build.gradle
-├── .env.example                  # Database, JWT and AI provider variables
+├── .env.example                  # Variáveis de banco, JWT e provedor de IA
 └── src/
     ├── main/
     │   ├── java/dio/budgeting/
-    │   │   ├── domain/           # Entities, value objects, business rules and repository contracts
-    │   │   ├── application/      # Use cases, shared by REST and AI tool calling
-    │   │   │   ├── output/       # Results returned by use cases
-    │   │   │   └── port/         # Interfaces implemented by the infrastructure
-    │   │   └── infrastructure/
-    │   │       ├── http/         # Controllers and error handling
-    │   │       │   ├── request/
-    │   │       │   ├── response/
-    │   │       │   └── exception/
-    │   │       ├── persistence/  # JPA adapters
-    │   │       │   ├── entity/
-    │   │       │   └── repository/
-    │   │       ├── security/     # JWT authentication
-    │   │       └── config/       # Spring configuration
+    │   │   ├── account/          # Conta e busca de destinatário (com proteção contra enumeração)
+    │   │   ├── transaction/      # Lançamentos, saldo e relatório de gastos
+    │   │   ├── transfer/         # Transferências entre contas
+    │   │   ├── auth/             # Cadastro, login, refresh token, bloqueios e JWT
+    │   │   ├── audit/            # Trilha de auditoria
+    │   │   ├── cleanup/          # Limpeza periódica de registros expirados
+    │   │   ├── investment/       # Simulação de investimento
+    │   │   ├── assistant/        # Claudinho: chat, voz, ferramentas e provedor de IA
+    │   │   └── shared/           # Dinheiro (Money), exceções, tratamento de erros e configuração comum
     │   └── resources/
     │       ├── application.properties
-    │       ├── db/migration/     # Flyway migrations
-    │       └── prompts/          # Claudinho's system prompt
+    │       ├── db/migration/     # Migrações Flyway
+    │       └── prompts/          # Prompt de sistema do Claudinho
     └── test/
-        └── java/dio/budgeting/   # Unit, controller and context tests
+        └── java/dio/budgeting/   # Testes unitários, de controller e de contexto (mesma estrutura)
 ```
 
-Dependencies point inward: `infrastructure` depends on `application`, which depends on `domain`, never the other way around.
-
-Mobile layout:
+Dentro de cada módulo:
 
 ```text
-mobile/
+<modulo>/
+├── domain/                       # Entidades, regras de negócio e contratos de repositório
+├── application/                  # Casos de uso e resultados (outputs)
+└── infrastructure/               # Controllers, DTOs, entidades JPA e repositórios
+```
+
+As dependências apontam para dentro: `infrastructure` depende de `application`, que depende de `domain`, nunca o contrário.
+
+Estrutura do frontend:
+
+```text
+frontend/
 └── src/
-    ├── app/                      # Screens (expo-router); (tabs)/ holds the bottom tabs
-    ├── components/               # UI components (chat bubble, forms, dialogs, toasts)
-    ├── hooks/                    # Reusable hooks (notifications)
-    ├── lib/                      # API client, types, formatting, voice and speech helpers
-    └── theme/                    # Colors and spacing
+    ├── app/                      # Telas (expo-router); (tabs)/ guarda as abas inferiores
+    ├── components/               # Componentes de UI (balão do chat, formulários, diálogos, toasts)
+    ├── hooks/                    # Hooks reutilizáveis (notificações)
+    ├── lib/                      # Cliente da API, tipos, formatação e utilitários de voz
+    └── theme/                    # Cores e espaçamentos
 ```
 
 ## Module-Specific Topics
