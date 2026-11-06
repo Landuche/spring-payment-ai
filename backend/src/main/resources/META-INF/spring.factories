@@ -1,0 +1,1 @@
+org.springframework.boot.EnvironmentPostProcessor=dio.budgeting.infrastructure.config.AiProviderDefaults

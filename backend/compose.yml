@@ -1,0 +1,40 @@
+# Segredos e credenciais vêm do arquivo .env (carregado automaticamente pelo compose).
+# Veja .env.example para as variáveis necessárias.
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: transaction
+    # 5433 no host para não colidir com um Postgres já instalado na máquina (5432).
+    ports:
+      - "5433:5432"
+    volumes:
+      - fintech_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d transaction" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/transaction
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      # Provedor de IA (OpenAI ou Groq): só URL e chave; os modelos são escolhidos pela URL.
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com}
+      AI_API_KEY: ${AI_API_KEY}
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  fintech_pgdata:

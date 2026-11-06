@@ -1,0 +1,6 @@
+// Baixa sozinho o JDK pedido em `java.toolchain` (25) quando ele não está instalado na máquina.
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'budgeting'

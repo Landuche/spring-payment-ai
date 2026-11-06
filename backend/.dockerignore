@@ -1,0 +1,13 @@
+# Segredos nunca entram na imagem
+.env
+.env.*
+
+# Artefatos de build e IDE
+build
+.gradle
+.idea
+*.iml
+.git
+
+# O front não faz parte da imagem do backend
+../mobile
