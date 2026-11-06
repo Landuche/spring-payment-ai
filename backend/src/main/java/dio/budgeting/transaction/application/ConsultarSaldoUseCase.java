@@ -5,7 +5,6 @@ import dio.budgeting.shared.domain.Money;
 import dio.budgeting.transaction.domain.Transaction;
 import dio.budgeting.transaction.domain.TransactionRepository;
 
-import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,9 +19,6 @@ public class ConsultarSaldoUseCase {
         this.currentAccount = currentAccount;
     }
 
-    @Tool(name = "consultarSaldo",
-            description = "Consulta o saldo atual da conta. O resultado traz também receitas e despesas, mas ao "
-                    + "responder informe apenas o saldo, a menos que o cliente peça as entradas e saídas")
     public BalanceOutput execute() {
         List<Transaction> transactions = transactionRepository.findAll(currentAccount.current());
 

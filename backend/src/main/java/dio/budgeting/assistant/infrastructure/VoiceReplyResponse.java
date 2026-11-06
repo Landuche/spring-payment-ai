@@ -1,6 +1,6 @@
 package dio.budgeting.assistant.infrastructure;
 
-import dio.budgeting.assistant.application.PropostaDeTransferencia;
+import dio.budgeting.transfer.application.PropostaDeTransferencia;
 
 
 /** Resposta de voz: o que foi ouvido e a resposta do Claudinho (com a proposta de transferência, se houver). */

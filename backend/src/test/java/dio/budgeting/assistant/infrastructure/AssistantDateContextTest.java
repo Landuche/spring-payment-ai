@@ -16,7 +16,7 @@ class AssistantDateContextTest {
     void should_informTodayAndCurrentMonth_inPortuguese() {
         var clock = Clock.fixed(Instant.parse("2026-11-04T15:00:00Z"), SAO_PAULO);
 
-        var contexto = AssistantController.contextoDeData(clock);
+        var contexto = AssistantChat.contextoDeData(clock);
 
         assertThat(contexto)
                 .contains("quarta-feira, 04/11/2026")
@@ -29,6 +29,6 @@ class AssistantDateContextTest {
         // 01:30 UTC de 05/11 ainda é 22:30 de 04/11 em São Paulo.
         var clock = Clock.fixed(Instant.parse("2026-11-05T01:30:00Z"), SAO_PAULO);
 
-        assertThat(AssistantController.contextoDeData(clock)).contains("04/11/2026");
+        assertThat(AssistantChat.contextoDeData(clock)).contains("04/11/2026");
     }
 }

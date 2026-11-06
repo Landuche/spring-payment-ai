@@ -1,6 +1,6 @@
 package dio.budgeting.assistant.infrastructure;
 
-import dio.budgeting.assistant.application.PropostaDeTransferencia;
+import dio.budgeting.transfer.application.PropostaDeTransferencia;
 
 
 /**

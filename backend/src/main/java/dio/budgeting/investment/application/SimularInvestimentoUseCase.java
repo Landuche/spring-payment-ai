@@ -3,8 +3,6 @@ package dio.budgeting.investment.application;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import dio.budgeting.shared.domain.Money;
 
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +28,7 @@ public class SimularInvestimentoUseCase {
         this.taxaMensal = taxaMensal;
     }
 
-    @Tool(name = "simularInvestimento",
-            description = "Simula o montante final de um investimento com juros compostos mensais")
-    public SimulationOutput execute(
-            @ToolParam(description = "Valor a investir em reais, maior que zero. Ex: 1000") BigDecimal valor,
-            @ToolParam(description = "Prazo do investimento em meses, entre 1 e 360") int prazo) {
+    public SimulationOutput execute(BigDecimal valor, int prazo) {
 
         if (prazo < 1 || prazo > MAX_PRAZO_MESES) {
             throw new BusinessRuleViolationException(

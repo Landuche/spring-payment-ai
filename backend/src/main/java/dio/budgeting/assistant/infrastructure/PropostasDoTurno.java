@@ -1,11 +1,12 @@
-package dio.budgeting.assistant.application;
+package dio.budgeting.assistant.infrastructure;
 
+import dio.budgeting.transfer.application.PropostaDeTransferencia;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Propostas que as ferramentas do assistente geraram durante UMA resposta. O controller cria um por mensagem,
+ * Propostas que as ferramentas do assistente geraram durante UMA resposta. O {@link AssistantChat} cria um por mensagem,
  * entrega às ferramentas pelo contexto e depois devolve ao app o que ficou registrado, para ele mostrar o cartão
  * de confirmação. Se o modelo preparar duas vezes na mesma resposta, vale a última.
  */

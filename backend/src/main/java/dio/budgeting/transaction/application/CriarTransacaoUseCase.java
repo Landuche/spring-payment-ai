@@ -10,8 +10,6 @@ import dio.budgeting.transaction.domain.Transaction;
 import dio.budgeting.transaction.domain.TransactionRepository;
 import dio.budgeting.transaction.domain.TransactionType;
 
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,17 +33,8 @@ public class CriarTransacaoUseCase {
         this.clock = clock;
     }
 
-    @Tool(name = "criarTransacao",
-            description = "Registra uma nova receita ou despesa na data de hoje. Não serve para transferências entre contas")
     @Transactional
-    public TransactionOutput execute(
-            @ToolParam(description = "Valor em reais, maior que zero. Ex: 45.90") BigDecimal valor,
-            @ToolParam(description = "Categoria da transação. GROCERIES: mercado, padaria, hortifruti. PHARMA: farmácia, remédios. "
-                    + "AUTO: combustível, estacionamento, oficina, IPVA, carro. OUTROS: qualquer outro gasto, como adega, bar, restaurante, lazer. "
-                    + "Use OUTROS quando nenhuma outra categoria se encaixar. Nunca recuse um gasto por causa da categoria.") Category categoria,
-            @ToolParam(description = "Tipo da transação: RECEITA ou DESPESA") TransactionType tipo,
-            @ToolParam(description = "Descrição curta do gasto ou da receita. Opcional", required = false)
-            String descricao) {
+    public TransactionOutput execute(BigDecimal valor, Category categoria, TransactionType tipo, String descricao) {
 
         var accountId = currentAccount.current();
         var amount = Money.ofPositiveReais(valor);

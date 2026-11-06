@@ -1,4 +1,4 @@
-package dio.budgeting.assistant.application;
+package dio.budgeting.assistant.infrastructure;
 
 import java.math.BigDecimal;
 

@@ -8,8 +8,6 @@ import dio.budgeting.transaction.domain.Transaction;
 import dio.budgeting.transaction.domain.TransactionRepository;
 import dio.budgeting.transaction.domain.TransactionType;
 
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
@@ -28,15 +26,7 @@ public class GerarRelatorioGastosUseCase {
         this.currentAccount = currentAccount;
     }
 
-    @Tool(name = "gerarRelatorioGastos",
-            description = "Gera o relatório de despesas de um mês, opcionalmente filtrado por categoria. "
-                    + "O total e a lista contam só despesas. Sem filtro, informa também o total de transferências "
-                    + "enviadas e recebidas no mês, que NÃO fazem parte do total de gastos")
-    public ExpenseReportOutput execute(
-            @ToolParam(description = "Mês de referência, no formato interno yyyy-MM (ex: 2026-10). Se o cliente disser "
-                    + "\"este mês\" ou não indicar o mês, use o mês atual. Nunca peça nem mostre esse formato ao cliente") String periodo,
-            @ToolParam(description = "Categoria para filtrar. Se omitida, considera todas", required = false)
-            Category categoria) {
+    public ExpenseReportOutput execute(String periodo, Category categoria) {
 
         var month = parsePeriodo(periodo);
         var accountId = currentAccount.current();
