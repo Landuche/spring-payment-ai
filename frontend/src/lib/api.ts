@@ -92,8 +92,7 @@ async function fetchOnce(path: string, init: RequestInit, isAuthPath: boolean): 
       ...(IS_WEB ? { credentials: 'include' as const } : {}),
       headers,
     });
-  } catch (cause) {
-    console.warn('[api] falha de rede em', `${API_URL}${path}`, cause);
+  } catch {
     throw new ApiError('Não foi possível conectar ao servidor. Verifique a conexão.', 0);
   }
 }
