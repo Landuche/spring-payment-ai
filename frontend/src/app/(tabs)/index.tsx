@@ -12,7 +12,7 @@ import { Screen } from '@/components/Screen';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TransactionItem } from '@/components/TransactionItem';
 import { useFinance } from '@/hooks/useFinance';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/lib/notifications-context';
 import { useAuth } from '@/lib/auth-context';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
@@ -32,8 +32,9 @@ export default function DashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       void refresh();
+      void refreshNotifications();
       api.getAccount().then(setAccount).catch(() => setAccount(null));
-    }, [refresh]),
+    }, [refresh, refreshNotifications]),
   );
 
   const refreshAll = useCallback(async () => {

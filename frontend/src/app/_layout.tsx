@@ -1,9 +1,10 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { ToastProvider } from '@/components/Toast';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
+import { NotificationsProvider } from '@/lib/notifications-context';
 import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
 const PUBLIC_ROUTES = new Set(['login', 'signup']);
@@ -76,13 +77,21 @@ function ThemedShell() {
   );
 }
 
+/** Uma conta por vez: a chave refaz o estado das notificações quando outra pessoa entra. */
+function SessionScope({ children }: { readonly children: ReactNode }) {
+  const { session } = useAuth();
+  return <NotificationsProvider key={session?.email ?? 'anonymous'}>{children}</NotificationsProvider>;
+}
+
 export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ToastProvider>
-          <ThemedShell />
-        </ToastProvider>
+        <SessionScope>
+          <ToastProvider>
+            <ThemedShell />
+          </ToastProvider>
+        </SessionScope>
       </AuthProvider>
     </ThemeProvider>
   );

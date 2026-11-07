@@ -8,7 +8,12 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Token de acesso vigente, renovado antes se estiver perto de vencer. null sem sessão. Para quem abre conexões longas. */
+  getAccessToken: () => Promise<string | null>;
 }
+
+/** Renova um pouco antes de vencer, para o token não expirar no meio do handshake. */
+const TOKEN_RENEW_MARGIN_MS = 30_000;
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -29,15 +34,17 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [restoring, setRestoring] = useState(true);
 
   const sessionRef = useRef<Session | null>(null);
+  const issuedAtRef = useRef(0);
 
   const renewing = useRef<Promise<RenewResult> | null>(null);
 
   const persist = useCallback(async (next: Session | null) => {
     sessionRef.current = next;
+    issuedAtRef.current = Date.now();
     setSession(next);
     setAccessToken(next?.accessToken ?? null);
     if (next) {
-      await sessionStorage.write(JSON.stringify({ session: next, issuedAt: Date.now() } satisfies StoredSession));
+      await sessionStorage.write(JSON.stringify({ session: next, issuedAt: issuedAtRef.current } satisfies StoredSession));
     } else {
       await sessionStorage.clear();
     }
@@ -78,6 +85,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       if (raw) {
         try {
           const stored = JSON.parse(raw) as StoredSession;
+          issuedAtRef.current = stored.issuedAt;
           const now = Date.now();
           if (!isRefreshValid(stored, now)) {
             await sessionStorage.clear();
@@ -123,9 +131,18 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     [persist],
   );
 
+  const getAccessToken = useCallback(async (): Promise<string | null> => {
+    const current = sessionRef.current;
+    if (!current) return null;
+    if (Date.now() >= issuedAtRef.current + current.expiresIn * 1000 - TOKEN_RENEW_MARGIN_MS) {
+      await renew();
+    }
+    return sessionRef.current?.accessToken ?? null;
+  }, [renew]);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ session, restoring, signIn, signUp, signOut }),
-    [session, restoring, signIn, signUp, signOut],
+    () => ({ session, restoring, signIn, signUp, signOut, getAccessToken }),
+    [session, restoring, signIn, signUp, signOut, getAccessToken],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

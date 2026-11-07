@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect } from 'react';
 import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { NotificationItem } from '@/components/NotificationItem';
 import { Screen } from '@/components/Screen';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/lib/notifications-context';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
@@ -15,6 +16,12 @@ export default function NotificationsScreen() {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);
   const { items, unread, loading, fresh, refresh, markAllRead } = useNotifications();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
 
   useEffect(() => {
     if (unread > 0) markAllRead();
