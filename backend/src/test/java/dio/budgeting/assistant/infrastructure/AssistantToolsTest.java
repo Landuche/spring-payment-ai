@@ -1,26 +1,20 @@
 package dio.budgeting.assistant.infrastructure;
 
+import dio.budgeting.TestData;
 import dio.budgeting.account.application.GetAccountUseCase;
 import dio.budgeting.account.application.InMemoryAccountRepository;
 import dio.budgeting.account.application.InMemoryLookupGuardRepository;
 import dio.budgeting.account.application.LookupGuardService;
 import dio.budgeting.account.domain.Account;
-import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.audit.application.AuditLog;
 import dio.budgeting.audit.application.InMemoryAuditEventRepository;
 import dio.budgeting.auth.application.InMemoryUserRepository;
-import dio.budgeting.auth.domain.User;
-import dio.budgeting.auth.domain.UserId;
 import dio.budgeting.investment.application.SimulateInvestmentUseCase;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
-import dio.budgeting.shared.domain.Money;
 import dio.budgeting.transaction.application.GetBalanceUseCase;
 import dio.budgeting.transaction.application.CreateTransactionUseCase;
 import dio.budgeting.transaction.application.GenerateExpenseReportUseCase;
 import dio.budgeting.transaction.application.InMemoryTransactionRepository;
-import dio.budgeting.transaction.domain.Category;
-import dio.budgeting.transaction.domain.Transaction;
-import dio.budgeting.transaction.domain.TransactionType;
 import dio.budgeting.transfer.application.InMemoryTransferRepository;
 import dio.budgeting.transfer.application.PrepareTransferUseCase;
 
@@ -32,7 +26,6 @@ import org.springframework.ai.tool.ToolCallback;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Map;
@@ -52,8 +45,8 @@ class AssistantToolsTest {
     private final LookupGuardService lookupGuard =
             new LookupGuardService(new InMemoryLookupGuardRepository(), accounts, audit, clock);
 
-    private final Account source = newAccount("Ana Souza", "0000000001");
-    private final Account destination = newAccount("Bruno Lima", "0000000002");
+    private final Account source = TestData.newAccount(users, accounts, "Ana Souza", "0000000001");
+    private final Account destination = TestData.newAccount(users, accounts, "Bruno Lima", "0000000002");
 
     private final AssistantTools tools = new AssistantTools(
             new CreateTransactionUseCase(transactions, accounts, () -> source.id(), clock),
@@ -78,7 +71,7 @@ class AssistantToolsTest {
 
     @Test
     void should_hideTheContextFromTheModelSchema_andReceiveItWhenTheModelCallsTheTool() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
         var tool = tool("prepareTransfer");
 
         assertThat(tool.getToolDefinition().inputSchema())
@@ -100,7 +93,7 @@ class AssistantToolsTest {
 
     @Test
     void should_keepOnlyTheLastProposal_whenModelPreparesTwice() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         tools.prepareTransfer("0000000002", new BigDecimal("10.00"), null, context);
         tools.prepareTransfer("0000000002", new BigDecimal("25.00"), null, context);
@@ -110,7 +103,7 @@ class AssistantToolsTest {
 
     @Test
     void should_createNoProposal_whenThePreparationIsRefused() {
-        deposit(source, "10.00");
+        TestData.deposit(transactions, source, "10.00");
 
         assertThatThrownBy(() -> tools.prepareTransfer("0000000002", new BigDecimal("50.00"), null, context))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -120,7 +113,7 @@ class AssistantToolsTest {
 
     @Test
     void should_failClearly_whenTheProposalContextIsMissing() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         assertThatThrownBy(() -> tools.prepareTransfer("0000000002", new BigDecimal("10.00"), null, null))
                 .isInstanceOf(IllegalStateException.class);
@@ -128,7 +121,7 @@ class AssistantToolsTest {
 
     @Test
     void should_delegateBalanceToTheUseCase() {
-        deposit(source, "42.00");
+        TestData.deposit(transactions, source, "42.00");
 
         assertThat(tools.getBalance().balance()).isEqualByComparingTo("42.00");
     }
@@ -138,16 +131,5 @@ class AssistantToolsTest {
                 .filter(t -> t.getToolDefinition().name().equals(name))
                 .findFirst()
                 .orElseThrow();
-    }
-
-    private Account newAccount(String name, String number) {
-        var user = users.save(new User(new UserId(), name.toLowerCase().replace(' ', '.') + "@example.com", name, "hash"));
-        return accounts.save(new Account(new AccountId(), user.id(), number));
-    }
-
-    private void deposit(Account account, String amount) {
-        transactions.save(Transaction.create(account.id(), "Saldo inicial",
-                new Money(new BigDecimal(amount).movePointRight(2).longValueExact()),
-                Category.AUTO, TransactionType.INCOME, LocalDate.of(2026, 11, 1)));
     }
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { ChipGroup } from '@/components/ChipGroup';
+import { AmountInput } from '@/components/form';
 import { Screen } from '@/components/Screen';
 import { api, ApiError } from '@/lib/api';
 import { formatBRL, parseAmount } from '@/lib/format';
@@ -21,7 +22,6 @@ export default function InvestScreen() {
   const [result, setResult] = useState<Simulation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { palette } = useTheme();
   const styles = useStyles(makeStyles);
 
   const amount = parseAmount(amountText);
@@ -51,18 +51,7 @@ export default function InvestScreen() {
       </View>
 
       <Card title="Quanto investir?">
-        <View style={styles.inputWrap}>
-          <Text style={styles.currency}>R$</Text>
-          <TextInput
-            value={amountText}
-            onChangeText={setAmountText}
-            keyboardType="decimal-pad"
-            placeholder="0,00"
-            placeholderTextColor={palette.textMuted}
-            style={styles.input}
-            accessibilityLabel="Valor a investir"
-          />
-        </View>
+        <AmountInput value={amountText} onChangeText={setAmountText} accessibilityLabel="Valor a investir" />
 
         <Text style={styles.sectionLabel}>Prazo</Text>
         <ChipGroup value={months} options={TERM_OPTIONS} onChange={setMonths} />
@@ -116,19 +105,6 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   header: { gap: 4 },
   title: { color: palette.text, fontSize: font.title, fontWeight: '800' },
   subtitle: { color: palette.textMuted, fontSize: font.body, lineHeight: 20 },
-  inputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    paddingHorizontal: space.lg,
-    height: 60,
-    borderRadius: radius.md,
-    backgroundColor: palette.surfaceRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.border,
-  },
-  currency: { color: palette.textMuted, fontSize: font.subtitle, fontWeight: '600' },
-  input: { flex: 1, color: palette.text, fontSize: 26, fontWeight: '700', fontVariant: ['tabular-nums'] },
   sectionLabel: { color: palette.textMuted, fontSize: font.caption, textTransform: 'uppercase', letterSpacing: 0.6 },
   error: { color: palette.expense, fontSize: font.body },
   cta: { borderRadius: radius.md, overflow: 'hidden', marginTop: space.sm },

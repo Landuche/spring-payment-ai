@@ -1,5 +1,6 @@
 package dio.budgeting.transfer.application;
 
+import dio.budgeting.TestData;
 import dio.budgeting.account.application.InMemoryAccountRepository;
 import dio.budgeting.account.application.InMemoryLookupGuardRepository;
 import dio.budgeting.account.application.LookupGuardService;
@@ -9,13 +10,10 @@ import dio.budgeting.account.domain.LookupBlockedException;
 import dio.budgeting.audit.application.AuditLog;
 import dio.budgeting.audit.application.InMemoryAuditEventRepository;
 import dio.budgeting.auth.application.InMemoryUserRepository;
-import dio.budgeting.auth.domain.User;
-import dio.budgeting.auth.domain.UserId;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import dio.budgeting.shared.domain.NotFoundException;
 import dio.budgeting.transaction.application.InMemoryTransactionRepository;
 import dio.budgeting.transaction.domain.Category;
-import dio.budgeting.transaction.domain.Transaction;
 import dio.budgeting.transaction.domain.TransactionType;
 
 import org.junit.jupiter.api.Test;
@@ -37,8 +35,8 @@ class TransferUseCaseTest {
     private final InMemoryAccountRepository accounts = new InMemoryAccountRepository();
     private final InMemoryUserRepository users = new InMemoryUserRepository();
 
-    private final Account source = newAccount("Ana Souza", "0000000001");
-    private final Account destination = newAccount("Bruno Lima", "0000000002");
+    private final Account source = TestData.newAccount(users, accounts, "Ana Souza", "0000000001");
+    private final Account destination = TestData.newAccount(users, accounts, "Bruno Lima", "0000000002");
 
     private final InMemoryLookupGuardRepository guards = new InMemoryLookupGuardRepository();
 
@@ -53,7 +51,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_auditRejectedTransfer_forInsufficientFunds() {
-        deposit(source, "10.00");
+        TestData.deposit(transactions, source, "10.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("50.00"), null, "sem-saldo"))
                 .isInstanceOf(dio.budgeting.shared.domain.BusinessRuleViolationException.class);
@@ -67,7 +65,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_blockAfterTenFailedLookups_evenForAValidDestination() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         for (int i = 0; i < dio.budgeting.account.domain.LookupGuard.MAX_LOOKUPS; i++) {
             assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
@@ -81,7 +79,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_resetLookupCounter_afterASuccessfulTransfer() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
         for (int i = 0; i < 9; i++) {
             assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
                     .isInstanceOf(NotFoundException.class);
@@ -94,7 +92,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_debitOrigin_creditDestination_andLinkBothEntriesToTheTransfer() {
-        deposit(source, "500.00");
+        TestData.deposit(transactions, source, "500.00");
 
         var output = useCase.execute("0000000002", null, new BigDecimal("120.00"), "Almoço", "chave-1");
 
@@ -113,7 +111,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_rejectWhenBalanceIsInsufficient_withoutMovingAnything() {
-        deposit(source, "50.00");
+        TestData.deposit(transactions, source, "50.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("50.01"), null, "chave-2"))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -126,7 +124,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_replaySameIdempotencyKey_withoutDebitingAgain() {
-        deposit(source, "500.00");
+        TestData.deposit(transactions, source, "500.00");
 
         var first = useCase.execute("0000000002", null, new BigDecimal("100.00"), null, "chave-3");
         var second = useCase.execute("0000000002", null, new BigDecimal("100.00"), null, "chave-3");
@@ -140,7 +138,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_rejectSelfTransfer() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000001", null, new BigDecimal("10.00"), null, "chave-4"))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -149,7 +147,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_return404_forUnknownDestination() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("10.00"), null, "chave-5"))
                 .isInstanceOf(NotFoundException.class);
@@ -157,9 +155,9 @@ class TransferUseCaseTest {
 
     @Test
     void should_lockBothAccounts_inDeterministicOrder() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
         current = destination.id();
-        deposit(destination, "100.00");
+        TestData.deposit(transactions, destination, "100.00");
         current = source.id();
 
         useCase.execute("0000000002", null, new BigDecimal("10.00"), null, "chave-6");
@@ -173,7 +171,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_acceptFormattedAccountNumber_withDash() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         var output = useCase.execute("0000-000002", null, new BigDecimal("10.00"), null, "chave-7");
 
@@ -183,7 +181,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_requireIdempotencyKey() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("10.00"), null, " "))
                 .isInstanceOf(BusinessRuleViolationException.class);
@@ -191,7 +189,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_transferByEmail_ofTheRecipientOwner() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         useCase.execute(null, "bruno.lima@example.com", new BigDecimal("15.00"), null, "chave-8");
 
@@ -200,7 +198,7 @@ class TransferUseCaseTest {
 
     @Test
     void should_useUserDescription_onBothStatementEntries() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         useCase.execute("0000000002", null, new BigDecimal("10.00"), "Divisão do almoço", "chave-9");
 
@@ -212,26 +210,12 @@ class TransferUseCaseTest {
 
     @Test
     void should_requireExactlyOneDestination() {
-        deposit(source, "100.00");
+        TestData.deposit(transactions, source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute(null, null, new BigDecimal("10.00"), null, "chave-10"))
                 .isInstanceOf(BusinessRuleViolationException.class);
         assertThatThrownBy(() -> useCase.execute("0000000002", "bruno.lima@example.com", new BigDecimal("10.00"), null, "chave-11"))
                 .isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    private Account newAccount(String name, String number) {
-        var user = users.save(new User(new UserId(), name.toLowerCase().replace(' ', '.') + "@example.com", name, "hash"));
-        return accounts.save(new Account(new AccountId(), user.id(), number));
-    }
-
-    private void deposit(Account account, String amount) {
-        var previous = current;
-        current = account.id();
-        transactions.save(Transaction.create(account.id(), "Saldo inicial", new dio.budgeting.shared.domain.Money(
-                new BigDecimal(amount).movePointRight(2).longValueExact()), Category.AUTO, TransactionType.INCOME,
-                java.time.LocalDate.of(2026, 11, 1)));
-        current = previous;
     }
 
     private BigDecimal balance(AccountId account) {
