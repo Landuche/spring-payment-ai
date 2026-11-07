@@ -38,6 +38,9 @@ export function Screen({ children, scroll = true, refreshControl, keyboardShould
           showsVerticalScrollIndicator={false}
           refreshControl={refreshControl}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps ?? 'handled'}
+          // iOS: abre espaço para o teclado e rola até o campo em foco, para ele não ficar escondido atrás do teclado.
+          automaticallyAdjustKeyboardInsets
+          keyboardDismissMode="on-drag"
         >
           {content}
         </ScrollView>
