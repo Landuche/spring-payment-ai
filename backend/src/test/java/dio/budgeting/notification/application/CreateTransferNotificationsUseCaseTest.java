@@ -2,6 +2,8 @@ package dio.budgeting.notification.application;
 
 import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.notification.domain.NotificationType;
+import dio.budgeting.notification.domain.NotificationsCreated;
+import dio.budgeting.outbox.application.InMemoryOutboxRecorder;
 import dio.budgeting.transfer.domain.TransferCompleted;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CreateTransferNotificationsUseCaseTest {
 
     private final InMemoryNotificationRepository notifications = new InMemoryNotificationRepository();
-    private final CreateTransferNotificationsUseCase useCase = new CreateTransferNotificationsUseCase(notifications);
+    private final InMemoryOutboxRecorder outbox = new InMemoryOutboxRecorder();
+    private final CreateTransferNotificationsUseCase useCase =
+            new CreateTransferNotificationsUseCase(notifications, outbox);
 
     private final AccountId source = new AccountId();
     private final AccountId destination = new AccountId();
@@ -64,5 +68,26 @@ class CreateTransferNotificationsUseCaseTest {
                 "Ana S.", "Bruno L.", Instant.parse("2026-11-08T13:00:00Z")));
 
         assertThat(notifications.all()).hasSize(4);
+    }
+
+    @Test
+    void should_announceNewNotificationsOfBothAccounts_throughTheOutbox() {
+        useCase.execute(event);
+
+        assertThat(outbox.all()).hasSize(2)
+                .allSatisfy(recorded -> {
+                    assertThat(recorded.topic()).isEqualTo(NotificationsCreated.TOPIC);
+                    assertThat(recorded.eventType()).isEqualTo(NotificationsCreated.TYPE);
+                })
+                .extracting(recorded -> ((NotificationsCreated) recorded.payload()).accountId())
+                .containsExactlyInAnyOrder(source.uuid(), destination.uuid());
+    }
+
+    @Test
+    void should_notAnnounceAgain_whenTheSameEventIsDeliveredTwice() {
+        useCase.execute(event);
+        useCase.execute(event);
+
+        assertThat(outbox.all()).hasSize(2);
     }
 }

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest(properties = {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "budgeting.security.jwt-secret=segredo-apenas-para-testes-com-mais-de-32-bytes!!",
         "spring.ai.openai.api-key=chave-de-teste",
         "budgeting.outbox.poll-interval-ms=200"
