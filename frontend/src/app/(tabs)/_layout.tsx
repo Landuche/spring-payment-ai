@@ -49,13 +49,13 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: tabIcon('wallet', 'wallet-outline') }} />
-      <Tabs.Screen name="extrato" options={{ title: 'Extrato', tabBarIcon: tabIcon('receipt', 'receipt-outline') }} />
+      <Tabs.Screen name="statement" options={{ title: 'Extrato', tabBarIcon: tabIcon('receipt', 'receipt-outline') }} />
       <Tabs.Screen
-        name="transferencias"
+        name="transfers"
         options={{ title: 'Transferências', tabBarIcon: tabIcon('swap-horizontal', 'swap-horizontal-outline') }}
       />
-      <Tabs.Screen name="assistente" options={{ title: 'Claudinho', tabBarIcon: tabIcon('chatbubbles', 'chatbubbles-outline') }} />
-      <Tabs.Screen name="investir" options={{ title: 'Investir', tabBarIcon: tabIcon('trending-up', 'trending-up-outline') }} />
+      <Tabs.Screen name="assistant" options={{ title: 'Claudinho', tabBarIcon: tabIcon('chatbubbles', 'chatbubbles-outline') }} />
+      <Tabs.Screen name="invest" options={{ title: 'Investir', tabBarIcon: tabIcon('trending-up', 'trending-up-outline') }} />
     </Tabs>
   );
 }

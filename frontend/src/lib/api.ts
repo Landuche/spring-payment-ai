@@ -198,9 +198,9 @@ export const api = {
 
   getTransactions: () => request<Transaction[]>('/transactions'),
 
-  getExpenseReport: (periodo: string, categoria?: Category) => {
-    const query = categoria ? `&categoria=${categoria}` : '';
-    return request<ExpenseReport>(`/api/reports/expenses?periodo=${periodo}${query}`);
+  getExpenseReport: (period: string, category?: Category) => {
+    const query = category ? `&category=${category}` : '';
+    return request<ExpenseReport>(`/api/reports/expenses?period=${period}${query}`);
   },
 
   createTransaction: (input: NewTransaction) => request<Transaction>('/transactions', json({
@@ -213,24 +213,24 @@ export const api = {
   getAccount: () => request<AccountInfo>('/api/account'),
 
   /** Busca o destinatário por número OU e-mail (apenas um). */
-  lookupAccount: (target: { numero: string } | { email: string }) => {
-    const query = 'numero' in target
-      ? `number=${encodeURIComponent(target.numero)}`
+  lookupAccount: (target: { number: string } | { email: string }) => {
+    const query = 'number' in target
+      ? `number=${encodeURIComponent(target.number)}`
       : `email=${encodeURIComponent(target.email)}`;
     return request<AccountInfo>(`/api/accounts/lookup?${query}`);
   },
 
   /** A chave de idempotência deve ser gerada uma vez por intenção e reenviada em qualquer retry. */
   transfer: (
-    input: { destination: { numero: string } | { email: string }; amount: number; description?: string },
+    input: { destination: { number: string } | { email: string }; amount: number; description?: string },
     idempotencyKey: string,
   ) =>
     request<TransferResult>('/api/transfers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
       body: JSON.stringify({
-        ...('numero' in input.destination
-          ? { destinationAccountNumber: input.destination.numero }
+        ...('number' in input.destination
+          ? { destinationAccountNumber: input.destination.number }
           : { destinationEmail: input.destination.email }),
         amount: input.amount,
         description: input.description,
@@ -244,7 +244,7 @@ export const api = {
 
   /** Conta ao Claudinho como terminou o cartão de transferência (enviada, cancelada ou com falha). */
   sendTransferEvent: (
-    input: { tipo: TransferEventType; nomeDestinatario: string; valor: number; motivo?: string },
+    input: { type: TransferEventType; recipientName: string; amount: number; reason?: string },
     conversationId: string,
   ) => request<AssistantReply>('/assistant/event', json({ ...input, conversationId })),
 

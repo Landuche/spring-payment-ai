@@ -50,7 +50,7 @@ export default function DashboardScreen() {
         </View>
         <View style={styles.actions}>
           <Pressable
-            onPress={() => router.push('/notificacoes')}
+            onPress={() => router.push('/notifications')}
             accessibilityRole="button"
             accessibilityLabel={unread > 0 ? `Notificações, ${unread} não lidas` : 'Notificações'}
             style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]}
@@ -93,10 +93,10 @@ export default function DashboardScreen() {
           <View style={styles.accountRow}>
             <View style={styles.flex}>
               <Text style={styles.accountLabel}>Número para receber</Text>
-              <Text style={styles.accountNumber} accessibilityLabel={`Conta ${account.numero}`}>{account.numero}</Text>
+              <Text style={styles.accountNumber} accessibilityLabel={`Conta ${account.number}`}>{account.number}</Text>
             </View>
             <Pressable
-              onPress={() => router.push('/transferencias')}
+              onPress={() => router.push('/transfers')}
               accessibilityRole="button"
               style={({ pressed }) => [styles.transferButton, pressed && { opacity: 0.8 }]}
             >
@@ -109,7 +109,7 @@ export default function DashboardScreen() {
 
       {report ? (
         <Card title="Gastos do mês">
-          <ExpenseBars expenses={report.transacoes} />
+          <ExpenseBars expenses={report.transactions} />
         </Card>
       ) : null}
 
@@ -117,7 +117,7 @@ export default function DashboardScreen() {
         title="Últimas movimentações"
         action={
           transactions.length > RECENT_COUNT ? (
-            <Pressable onPress={() => router.push('/extrato')} accessibilityRole="link">
+            <Pressable onPress={() => router.push('/statement')} accessibilityRole="link">
               <Text style={styles.retry}>Ver tudo</Text>
             </Pressable>
           ) : null

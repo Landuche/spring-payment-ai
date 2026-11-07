@@ -80,7 +80,7 @@ export default function LoginScreen() {
 
       <PrimaryButton label="Entrar" onPress={submit} loading={submitting} />
 
-      <Pressable onPress={() => router.push('/cadastro')} accessibilityRole="link" style={styles.switch}>
+      <Pressable onPress={() => router.push('/signup')} accessibilityRole="link" style={styles.switch}>
         <Text style={styles.switchText}>
           Não tem conta? <Text style={styles.switchLink}>Criar conta</Text>
         </Text>

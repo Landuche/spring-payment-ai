@@ -26,7 +26,7 @@ const DASH = '[-\\u2010-\\u2015\\u2212]';
 const ACCOUNT_NUMBER = new RegExp(`\\b\\d{4}(?:\\s*${DASH}\\s*|\\s)\\d{6}\\b|\\b\\d{10}\\b`, 'g');
 
 /** Qualquer número (com partes separadas por traço) logo depois da palavra "conta". */
-const NUMBER_AFTER_CONTA = new RegExp(`\\b(conta\\s+(?:n[úu]mero\\s+)?)(\\d+(?:\\s*${DASH}\\s*\\d+)*)\\b`, 'gi');
+const NUMBER_AFTER_ACCOUNT = new RegExp(`\\b(conta\\s+(?:n[úu]mero\\s+)?)(\\d+(?:\\s*${DASH}\\s*\\d+)*)\\b`, 'gi');
 
 /**
  * Número de conta é um identificador, não uma quantia: "9886" deve sair "nove, oito, oito, seis" e não "nove mil...".
@@ -35,18 +35,18 @@ const NUMBER_AFTER_CONTA = new RegExp(`\\b(conta\\s+(?:n[úu]mero\\s+)?)(\\d+(?:
 function speakAccountNumbers(text: string): string {
   return text
     .replace(ACCOUNT_NUMBER, (match) => spellDigits(match))
-    .replace(NUMBER_AFTER_CONTA, (_match, prefix: string, digits: string) => `${prefix}${spellDigits(digits)}`);
+    .replace(NUMBER_AFTER_ACCOUNT, (_match, prefix: string, digits: string) => `${prefix}${spellDigits(digits)}`);
 }
 
 /** "R$ 1.234,56" -> "1234 reais e 56 centavos"; "R$ 50,00" -> "50 reais"; "R$ 1,00" -> "1 real". */
 function speakCurrency(text: string): string {
-  return text.replace(/R\$\s*(\d{1,3}(?:\.\d{3})*|\d+)(?:,(\d{1,2}))?/g, (_match, whole: string, cents?: string) => {
+  return text.replace(/R\$\s*(\d{1,3}(?:\.\d{3})*|\d+)(?:,(\d{1,2}))?/g, (_match, whole: string, centsPart?: string) => {
     const reais = Number(whole.replace(/\./g, ''));
-    const centavos = cents ? Number(cents.padEnd(2, '0')) : 0;
+    const cents = centsPart ? Number(centsPart.padEnd(2, '0')) : 0;
     const reaisText = `${reais} ${reais === 1 ? 'real' : 'reais'}`;
-    if (centavos === 0) return reaisText;
-    const centavosText = `${centavos} ${centavos === 1 ? 'centavo' : 'centavos'}`;
-    return reais === 0 ? centavosText : `${reaisText} e ${centavosText}`;
+    if (cents === 0) return reaisText;
+    const centsText = `${cents} ${cents === 1 ? 'centavo' : 'centavos'}`;
+    return reais === 0 ? centsText : `${reaisText} e ${centsText}`;
   });
 }
 

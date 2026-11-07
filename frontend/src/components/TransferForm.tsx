@@ -13,7 +13,7 @@ import { validateEmail } from '@/lib/validation';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-type Destination = { numero: string } | { email: string };
+type Destination = { number: string } | { email: string };
 
 /** Letras ou @ indicam e-mail: aí o campo aceita texto livre. Só dígitos e hífen recebem a máscara do número. */
 const isEmailInput = (value: string) => /[a-z@]/i.test(value);
@@ -49,7 +49,7 @@ function toDestination(raw: string): { destination: Destination } | { error: str
   if (digits.length !== 10) {
     return { error: 'Informe o número da conta (10 dígitos) ou o e-mail do destinatário.' };
   }
-  return { destination: { numero: digits } };
+  return { destination: { number: digits } };
 }
 
 /** Transferência para outra conta. Pede confirmação antes de enviar, porque não dá para desfazer pelo app. */
@@ -110,7 +110,7 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
     try {
       await api.transfer({ destination: resolved.destination, amount, description }, idempotencyKey);
       setConfirming(false);
-      toast.success(`${formatBRL(amount)} enviados para ${recipient.nomeTitular}`);
+      toast.success(`${formatBRL(amount)} enviados para ${recipient.holderName}`);
       onDone();
     } catch (e) {
       setConfirming(false);
@@ -154,8 +154,8 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
           <View style={styles.recipient} accessibilityRole="text">
             <Ionicons name="person-circle-outline" size={34} color={palette.primary} />
             <View style={styles.flex}>
-              <Text style={styles.recipientName}>{recipient.nomeTitular}</Text>
-              <Text style={styles.recipientMeta}>Conta {recipient.numero}</Text>
+              <Text style={styles.recipientName}>{recipient.holderName}</Text>
+              <Text style={styles.recipientMeta}>Conta {recipient.number}</Text>
             </View>
             <Ionicons name="checkmark-circle" size={22} color={palette.income} />
           </View>
@@ -198,7 +198,7 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
         message={
           <Text style={styles.summary}>
             Você vai transferir <Text style={styles.summaryStrong}>{formatBRL(amountValid ? amount : 0)}</Text> para{' '}
-            <Text style={styles.summaryStrong}>{recipient?.nomeTitular}</Text> (conta {recipient?.numero}).{'\n\n'}
+            <Text style={styles.summaryStrong}>{recipient?.holderName}</Text> (conta {recipient?.number}).{'\n\n'}
             Transferências são instantâneas e não podem ser desfeitas pelo app.
           </Text>
         }

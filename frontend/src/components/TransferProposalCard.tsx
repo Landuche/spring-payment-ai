@@ -38,9 +38,9 @@ export function TransferProposalCard({ state, onConfirm, onCancel }: TransferPro
         <Text style={styles.title}>Transferência</Text>
       </View>
 
-      <Row label="Para" value={`${proposal.nomeDestinatario} · conta ${proposal.contaDestino}`} />
-      <Row label="Valor" value={formatBRL(proposal.valor)} strong />
-      {proposal.descricao ? <Row label="Descrição" value={proposal.descricao} /> : null}
+      <Row label="Para" value={`${proposal.recipientName} · conta ${proposal.destinationAccount}`} />
+      <Row label="Valor" value={formatBRL(proposal.amount)} strong />
+      {proposal.description ? <Row label="Descrição" value={proposal.description} /> : null}
 
       {open ? (
         <View style={styles.actions}>

@@ -115,8 +115,8 @@ export default function AssistantScreen() {
     append({ role: 'user', text });
     setBusy(true);
     try {
-      const { reply, transferencia } = await api.sendText(text, conversationId);
-      append({ role: 'assistant', text: reply, transfer: cardFor(transferencia) });
+      const { reply, transfer } = await api.sendText(text, conversationId);
+      append({ role: 'assistant', text: reply, transfer: cardFor(transfer) });
     } catch (error) {
       append({ role: 'assistant', text: failure(error) });
     } finally {
@@ -142,19 +142,19 @@ export default function AssistantScreen() {
     try {
       await api.transfer(
         {
-          destination: { numero: proposal.contaDestino },
-          amount: proposal.valor,
-          description: proposal.descricao ?? undefined,
+          destination: { number: proposal.destinationAccount },
+          amount: proposal.amount,
+          description: proposal.description ?? undefined,
         },
         card.idempotencyKey,
       );
       setTransferStatus(messageId, 'done');
-      toast.success(`${formatBRL(proposal.valor)} enviados para ${proposal.nomeDestinatario}`);
-      void tellClaudinho('TRANSFERENCIA_CONFIRMADA', proposal);
+      toast.success(`${formatBRL(proposal.amount)} enviados para ${proposal.recipientName}`);
+      void tellClaudinho('TRANSFER_CONFIRMED', proposal);
     } catch (error) {
       setTransferStatus(messageId, 'pending');
       toast.error(failure(error));
-      void tellClaudinho('TRANSFERENCIA_FALHOU', proposal, failure(error));
+      void tellClaudinho('TRANSFER_FAILED', proposal, failure(error));
     }
   };
 
@@ -162,24 +162,24 @@ export default function AssistantScreen() {
     const card = messages.find((m) => m.id === messageId)?.transfer;
     if (!card || card.status !== 'pending') return;
     setTransferStatus(messageId, 'cancelled');
-    void tellClaudinho('TRANSFERENCIA_CANCELADA', card.proposal);
+    void tellClaudinho('TRANSFER_CANCELED', card.proposal);
   };
 
   /**
    * Conta ao Claudinho como terminou o cartão (ele não vê o toque), para ele responder na mesma conversa e propor o
    * próximo passo. O resultado já está no cartão e no aviso: se esta chamada falhar, a conversa só segue sem a fala dele.
    */
-  const tellClaudinho = async (tipo: TransferEventType, proposal: TransferProposal, motivo?: string) => {
+  const tellClaudinho = async (type: TransferEventType, proposal: TransferProposal, reason?: string) => {
     // Conversa por voz: a última mensagem do cliente antes da confirmação tem a marca "transcrição de voz".
     // Se foi digitada, o Claudinho fica quieto. Em ambos os casos o toggle de voz manda (ver `speak`).
     const viaVoice = lastUserMessageWasVoice(messages);
     setBusy(true);
     try {
-      const { reply, transferencia } = await api.sendTransferEvent(
-        { tipo, nomeDestinatario: proposal.nomeDestinatario, valor: proposal.valor, motivo },
+      const { reply, transfer } = await api.sendTransferEvent(
+        { type, recipientName: proposal.recipientName, amount: proposal.amount, reason },
         conversationId,
       );
-      append({ role: 'assistant', text: reply, transfer: cardFor(transferencia) });
+      append({ role: 'assistant', text: reply, transfer: cardFor(transfer) });
       if (viaVoice) speak(reply);
     } catch {
       // sem a resposta do Claudinho, o cartão e o aviso já mostram o desfecho
@@ -208,9 +208,9 @@ export default function AssistantScreen() {
     }
     setBusy(true);
     try {
-      const { transcription, reply, transferencia } = await api.sendVoice(uri, conversationId);
+      const { transcription, reply, transfer } = await api.sendVoice(uri, conversationId);
       append({ role: 'user', text: transcription || '(áudio sem fala reconhecida)', kind: 'voice' });
-      append({ role: 'assistant', text: reply, transfer: cardFor(transferencia) });
+      append({ role: 'assistant', text: reply, transfer: cardFor(transfer) });
       speak(reply);
     } catch (error) {
       append({ role: 'assistant', text: failure(error) });

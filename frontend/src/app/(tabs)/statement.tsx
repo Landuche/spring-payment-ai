@@ -10,20 +10,20 @@ import { isCreditType, isTransferType, type Transaction } from '@/lib/types';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-type Filter = 'TODOS' | 'ENTRADAS' | 'SAIDAS' | 'TRANSFERENCIAS';
+type Filter = 'ALL' | 'INCOMING' | 'OUTGOING' | 'TRANSFERS';
 
 const FILTERS: readonly { readonly value: Filter; readonly label: string }[] = [
-  { value: 'TODOS', label: 'Todos' },
-  { value: 'ENTRADAS', label: 'Entradas' },
-  { value: 'SAIDAS', label: 'Saídas' },
-  { value: 'TRANSFERENCIAS', label: 'Transferências' },
+  { value: 'ALL', label: 'Todos' },
+  { value: 'INCOMING', label: 'Entradas' },
+  { value: 'OUTGOING', label: 'Saídas' },
+  { value: 'TRANSFERS', label: 'Transferências' },
 ];
 
 const MATCHES: Record<Filter, (t: Transaction) => boolean> = {
-  TODOS: () => true,
-  ENTRADAS: (t) => isCreditType(t.type),
-  SAIDAS: (t) => !isCreditType(t.type),
-  TRANSFERENCIAS: (t) => isTransferType(t.type),
+  ALL: () => true,
+  INCOMING: (t) => isCreditType(t.type),
+  OUTGOING: (t) => !isCreditType(t.type),
+  TRANSFERS: (t) => isTransferType(t.type),
 };
 
 interface DaySection {
@@ -52,7 +52,7 @@ export default function StatementScreen() {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);
   const { transactions, loading, refresh } = useFinance();
-  const [filter, setFilter] = useState<Filter>('TODOS');
+  const [filter, setFilter] = useState<Filter>('ALL');
 
   // Ao voltar para a aba (ex.: depois de uma transferência), recarrega o extrato.
   useFocusEffect(
@@ -66,8 +66,8 @@ export default function StatementScreen() {
   const totals = useMemo(
     () =>
       filtered.reduce(
-        (acc, t) => (isCreditType(t.type) ? { ...acc, entradas: acc.entradas + t.amount } : { ...acc, saidas: acc.saidas + t.amount }),
-        { entradas: 0, saidas: 0 },
+        (acc, t) => (isCreditType(t.type) ? { ...acc, incoming: acc.incoming + t.amount } : { ...acc, outgoing: acc.outgoing + t.amount }),
+        { incoming: 0, outgoing: 0 },
       ),
     [filtered],
   );
@@ -99,11 +99,11 @@ export default function StatementScreen() {
       <View style={styles.totals}>
         <View style={styles.total}>
           <Text style={styles.totalLabel}>Entradas</Text>
-          <Text style={[styles.totalValue, { color: palette.income }]}>{formatBRL(totals.entradas)}</Text>
+          <Text style={[styles.totalValue, { color: palette.income }]}>{formatBRL(totals.incoming)}</Text>
         </View>
         <View style={styles.total}>
           <Text style={styles.totalLabel}>Saídas</Text>
-          <Text style={[styles.totalValue, { color: palette.expense }]}>{formatBRL(totals.saidas)}</Text>
+          <Text style={[styles.totalValue, { color: palette.expense }]}>{formatBRL(totals.outgoing)}</Text>
         </View>
       </View>
 

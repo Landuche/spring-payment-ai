@@ -6,9 +6,9 @@ import { ToastProvider } from '@/components/Toast';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
-const PUBLIC_ROUTES = new Set(['login', 'cadastro']);
+const PUBLIC_ROUTES = new Set(['login', 'signup']);
 
-/** Guarda de rotas: sem sessão, só telas públicas; com sessão, nada de login/cadastro. */
+/** Guarda de rotas: sem sessão, só telas públicas; com sessão, nada de login/signup. */
 function AuthGate() {
   const { session, restoring } = useAuth();
   const segments = useSegments();
@@ -60,8 +60,8 @@ function Navigator() {
       >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="login" />
-        <Stack.Screen name="cadastro" />
-        <Stack.Screen name="notificacoes" options={{ ...headerOptions, title: 'Notificações' }} />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="notifications" options={{ ...headerOptions, title: 'Notificações' }} />
       </Stack>
     </>
   );

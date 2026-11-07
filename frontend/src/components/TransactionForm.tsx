@@ -36,7 +36,7 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
   const amountValid = Number.isFinite(amount) && amount > 0;
   const canSubmit = amountValid && !submitting;
   // Depósito não tem categoria na tela; entra como "Outros".
-  const effectiveCategory: Category = isDeposit ? 'OUTROS' : category;
+  const effectiveCategory: Category = isDeposit ? 'OTHER' : category;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -45,7 +45,7 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
       await api.createTransaction({
         description,
         category: effectiveCategory,
-        type: isDeposit ? 'RECEITA' : 'DESPESA',
+        type: isDeposit ? 'INCOME' : 'EXPENSE',
         amount,
       });
       setConfirming(false);

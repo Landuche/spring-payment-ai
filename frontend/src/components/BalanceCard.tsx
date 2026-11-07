@@ -13,14 +13,14 @@ export function BalanceCard({ balance }: BalanceCardProps) {
     <LinearGradient colors={gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
       <View style={styles.glow} />
       <Text style={styles.label}>Saldo disponível</Text>
-      <Text style={styles.amount} accessibilityLabel={`Saldo ${formatBRL(balance.saldo)}`}>
-        {formatBRL(balance.saldo)}
+      <Text style={styles.amount} accessibilityLabel={`Saldo ${formatBRL(balance.balance)}`}>
+        {formatBRL(balance.balance)}
       </Text>
 
       <View style={styles.row}>
-        <Stat label="Entradas" value={formatBRL(balance.receitas)} />
+        <Stat label="Entradas" value={formatBRL(balance.income)} />
         <View style={styles.divider} />
-        <Stat label="Saídas" value={formatBRL(balance.despesas)} />
+        <Stat label="Saídas" value={formatBRL(balance.expenses)} />
       </View>
     </LinearGradient>
   );

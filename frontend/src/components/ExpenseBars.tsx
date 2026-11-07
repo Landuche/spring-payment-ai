@@ -13,14 +13,14 @@ export function ExpenseBars({ expenses }: { readonly expenses: readonly Transact
     GROCERIES: palette.primary,
     PHARMA: palette.accent,
     AUTO: palette.warning,
-    OUTROS: palette.primaryStrong,
-    TRANSFERENCIA: palette.textMuted,
+    OTHER: palette.primaryStrong,
+    TRANSFER: palette.textMuted,
   };
 
   const totals = CATEGORIES.map((category) => ({
     category,
     total: expenses
-      .filter((t) => t.type === 'DESPESA' && t.category === category)
+      .filter((t) => t.type === 'EXPENSE' && t.category === category)
       .reduce((sum, t) => sum + t.amount, 0),
   }));
   const max = Math.max(...totals.map((t) => t.total), 0);

@@ -9,8 +9,8 @@ const CATEGORY_ICON: Record<Category, React.ComponentProps<typeof Ionicons>['nam
   GROCERIES: 'cart-outline',
   PHARMA: 'medkit-outline',
   AUTO: 'car-sport-outline',
-  OUTROS: 'ellipsis-horizontal-circle-outline',
-  TRANSFERENCIA: 'swap-horizontal-outline',
+  OTHER: 'ellipsis-horizontal-circle-outline',
+  TRANSFER: 'swap-horizontal-outline',
 };
 
 export function TransactionItem({ transaction }: { readonly transaction: Transaction }) {

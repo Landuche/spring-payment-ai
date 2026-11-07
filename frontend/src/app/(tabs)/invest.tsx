@@ -9,7 +9,7 @@ import { font, gradients, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const PRAZOS = [6, 12, 24, 60] as const;
+const TERMS = [6, 12, 24, 60] as const;
 
 export default function InvestScreen() {
   const [amountText, setAmountText] = useState('1000');
@@ -62,7 +62,7 @@ export default function InvestScreen() {
 
         <Text style={styles.sectionLabel}>Prazo</Text>
         <View style={styles.chips}>
-          {PRAZOS.map((value) => {
+          {TERMS.map((value) => {
             const selected = value === months;
             return (
               <Pressable
@@ -100,12 +100,12 @@ export default function InvestScreen() {
 
       {result ? (
         <LinearGradient colors={gradients.calm} style={styles.resultCard}>
-          <Text style={styles.resultLabel}>Montante em {result.prazoMeses} meses</Text>
-          <Text style={styles.resultValue}>{formatBRL(result.montanteFinal)}</Text>
+          <Text style={styles.resultLabel}>Montante em {result.termMonths} meses</Text>
+          <Text style={styles.resultValue}>{formatBRL(result.finalAmount)}</Text>
           <View style={styles.resultRow}>
-            <ResultStat label="Investido" value={formatBRL(result.valorInvestido)} />
-            <ResultStat label="Rendimento" value={formatBRL(result.rendimento)} highlight />
-            <ResultStat label="Taxa/mês" value={`${(result.taxaMensal * 100).toFixed(2)}%`} />
+            <ResultStat label="Investido" value={formatBRL(result.investedAmount)} />
+            <ResultStat label="Rendimento" value={formatBRL(result.earnings)} highlight />
+            <ResultStat label="Taxa/mês" value={`${(result.monthlyRate * 100).toFixed(2)}%`} />
           </View>
           <Text style={styles.disclaimer}>Simulação ilustrativa, sem considerar impostos ou taxas.</Text>
         </LinearGradient>

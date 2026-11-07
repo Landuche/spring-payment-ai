@@ -1,25 +1,25 @@
 // Espelha os DTOs de saída do backend (Spring Boot). Valores monetários em reais.
 
-export type TransactionType = 'RECEITA' | 'DESPESA' | 'TRANSFERENCIA_RECEBIDA' | 'TRANSFERENCIA_ENVIADA';
+export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER_RECEIVED' | 'TRANSFER_SENT';
 
-export type Category = 'GROCERIES' | 'PHARMA' | 'AUTO' | 'OUTROS' | 'TRANSFERENCIA';
+export type Category = 'GROCERIES' | 'PHARMA' | 'AUTO' | 'OTHER' | 'TRANSFER';
 
 /** Categorias que o usuário escolhe manualmente. */
-export const CATEGORIES: readonly Category[] = ['GROCERIES', 'PHARMA', 'AUTO', 'OUTROS'] as const;
+export const CATEGORIES: readonly Category[] = ['GROCERIES', 'PHARMA', 'AUTO', 'OTHER'] as const;
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   GROCERIES: 'Mercado',
   PHARMA: 'Farmácia',
   AUTO: 'Automóvel',
-  OUTROS: 'Outros',
-  TRANSFERENCIA: 'Transferência',
+  OTHER: 'Outros',
+  TRANSFER: 'Transferência',
 };
 
 /** Lançamentos de transferência entram como entrada/saída, mas não como gasto do mês. */
 export const isTransferType = (type: TransactionType): boolean =>
-  type === 'TRANSFERENCIA_RECEBIDA' || type === 'TRANSFERENCIA_ENVIADA';
+  type === 'TRANSFER_RECEIVED' || type === 'TRANSFER_SENT';
 export const isCreditType = (type: TransactionType): boolean =>
-  type === 'RECEITA' || type === 'TRANSFERENCIA_RECEBIDA';
+  type === 'INCOME' || type === 'TRANSFER_RECEIVED';
 
 export interface Transaction {
   readonly id: string;
@@ -33,43 +33,43 @@ export interface Transaction {
 }
 
 export interface Balance {
-  readonly receitas: number;
-  readonly despesas: number;
-  readonly saldo: number;
+  readonly income: number;
+  readonly expenses: number;
+  readonly balance: number;
 }
 
 export interface ExpenseReport {
-  readonly periodo: string;
-  readonly categoria: Category | 'TODAS';
+  readonly period: string;
+  readonly category: Category | 'ALL';
   readonly total: number;
-  readonly quantidade: number;
-  readonly transacoes: readonly Transaction[];
+  readonly count: number;
+  readonly transactions: readonly Transaction[];
 }
 
 export interface Simulation {
-  readonly valorInvestido: number;
-  readonly montanteFinal: number;
-  readonly rendimento: number;
-  readonly prazoMeses: number;
-  readonly taxaMensal: number;
+  readonly investedAmount: number;
+  readonly finalAmount: number;
+  readonly earnings: number;
+  readonly termMonths: number;
+  readonly monthlyRate: number;
 }
 
 /** Transferência que o Claudinho preparou. Só o toque do cliente no cartão do chat a executa. */
 export interface TransferProposal {
   /** Formato XXXX-XXXXXX. */
-  readonly contaDestino: string;
+  readonly destinationAccount: string;
   /** Mascarado, como na busca de contas ("Bruno L."). */
-  readonly nomeDestinatario: string;
-  readonly valor: number;
-  readonly descricao: string | null;
+  readonly recipientName: string;
+  readonly amount: number;
+  readonly description: string | null;
 }
 
 /** Desfecho do cartão de transferência, que o app conta ao Claudinho para ele responder. */
-export type TransferEventType = 'TRANSFERENCIA_CONFIRMADA' | 'TRANSFERENCIA_CANCELADA' | 'TRANSFERENCIA_FALHOU';
+export type TransferEventType = 'TRANSFER_CONFIRMED' | 'TRANSFER_CANCELED' | 'TRANSFER_FAILED';
 
 export interface AssistantReply {
   readonly reply: string;
-  readonly transferencia: TransferProposal | null;
+  readonly transfer: TransferProposal | null;
 }
 
 export interface VoiceReply extends AssistantReply {
@@ -86,9 +86,9 @@ export interface NewTransaction {
 
 export interface AccountInfo {
   /** Formato XXXX-XXXXXX, número que outras pessoas usam para transferir. */
-  readonly numero: string;
+  readonly number: string;
   /** Nome completo para a própria conta; mascarado quando é a conta de outra pessoa. */
-  readonly nomeTitular: string;
+  readonly holderName: string;
 }
 
 export interface TransferResult {

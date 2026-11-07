@@ -19,7 +19,7 @@ const INITIAL: FinanceState = {
   error: null,
 };
 
-type Resultado =
+type Result =
   | {
       readonly ok: true;
       readonly balance: Balance;
@@ -29,7 +29,7 @@ type Resultado =
   | { readonly ok: false; readonly message: string };
 
 /** Busca os três dados em paralelo. Não toca em estado: quem chama decide como aplicar o resultado. */
-async function buscarDados(): Promise<Resultado> {
+async function fetchData(): Promise<Result> {
   try {
     const [balance, transactions, report] = await Promise.all([
       api.getBalance(),
@@ -43,16 +43,16 @@ async function buscarDados(): Promise<Resultado> {
   }
 }
 
-function aplicar(prev: FinanceState, resultado: Resultado): FinanceState {
-  return resultado.ok
+function apply(prev: FinanceState, result: Result): FinanceState {
+  return result.ok
     ? {
-        balance: resultado.balance,
-        transactions: resultado.transactions,
-        report: resultado.report,
+        balance: result.balance,
+        transactions: result.transactions,
+        report: result.report,
         loading: false,
         error: null,
       }
-    : { ...prev, loading: false, error: resultado.message };
+    : { ...prev, loading: false, error: result.message };
 }
 
 /** Carrega saldo, extrato e relatório do mês. Expõe `refresh` para atualização manual ou ao focar a tela. */
@@ -62,18 +62,18 @@ export function useFinance() {
   // Carga inicial: a resposta chega por callback, sem setState síncrono no effect.
   // `ativo` impede atualizar o estado depois que a tela foi desmontada.
   useEffect(() => {
-    let ativo = true;
-    void buscarDados().then((resultado) => {
-      if (ativo) setState((prev) => aplicar(prev, resultado));
+    let active = true;
+    void fetchData().then((result) => {
+      if (active) setState((prev) => apply(prev, result));
     });
     return () => {
-      ativo = false;
+      active = false;
     };
   }, []);
 
   const refresh = useCallback(() => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
-    return buscarDados().then((resultado) => setState((prev) => aplicar(prev, resultado)));
+    return fetchData().then((result) => setState((prev) => apply(prev, result)));
   }, []);
 
   return { ...state, refresh };
