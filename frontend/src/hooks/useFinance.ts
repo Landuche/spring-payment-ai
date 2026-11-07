@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import { currentPeriod } from '@/lib/format';
+import { useNotifications } from '@/lib/notifications-context';
 import type { Balance, ExpenseReport, Transaction } from '@/lib/types';
 
 interface FinanceState {
@@ -56,7 +57,10 @@ function apply(prev: FinanceState, result: Result): FinanceState {
 
 export function useFinance() {
   const [state, setState] = useState<FinanceState>(INITIAL);
+  const { changes } = useNotifications();
 
+  // Carrega ao abrir e de novo, sem mostrar "carregando", quando chega um aviso em tempo real: transferência
+  // recebida ou enviada muda o saldo, o extrato e o relatório junto com a notificação.
   useEffect(() => {
     let active = true;
     void fetchData().then((result) => {
@@ -65,7 +69,7 @@ export function useFinance() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [changes]);
 
   const refresh = useCallback(() => {
     setState((prev) => ({ ...prev, loading: true, error: null }));

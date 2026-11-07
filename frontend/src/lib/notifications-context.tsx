@@ -11,6 +11,8 @@ interface NotificationsValue {
   readonly loading: boolean;
   /** Ids que estavam não lidos quando a lista foi marcada como lida; ficam destacados enquanto a tela está aberta. */
   readonly fresh: ReadonlySet<string>;
+  /** Quantos avisos de novidade chegaram pelo WebSocket. Telas com dados que mudam junto (saldo, extrato) reagem a isso. */
+  readonly changes: number;
   refresh: () => Promise<void>;
   markAllRead: () => void;
 }
@@ -38,6 +40,7 @@ export function NotificationsProvider({ children }: { readonly children: ReactNo
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set());
+  const [changes, setChanges] = useState(0);
 
   const apply = useCallback((response: NotificationsResponse | null) => {
     if (response) {
@@ -61,7 +64,11 @@ export function NotificationsProvider({ children }: { readonly children: ReactNo
       });
     };
     reload();
-    const closeSocket = connectNotificationSocket({ getToken: getAccessToken, onReady: reload, onChange: reload });
+    const onChange = () => {
+      reload();
+      setChanges((count) => count + 1);
+    };
+    const closeSocket = connectNotificationSocket({ getToken: getAccessToken, onReady: reload, onChange });
     const appState = AppState.addEventListener('change', (state) => {
       if (state === 'active') reload();
     });
@@ -82,8 +89,8 @@ export function NotificationsProvider({ children }: { readonly children: ReactNo
   }, [items]);
 
   const value = useMemo<NotificationsValue>(
-    () => ({ items, unread, loading, fresh, refresh, markAllRead }),
-    [items, unread, loading, fresh, refresh, markAllRead],
+    () => ({ items, unread, loading, fresh, changes, refresh, markAllRead }),
+    [items, unread, loading, fresh, changes, refresh, markAllRead],
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
