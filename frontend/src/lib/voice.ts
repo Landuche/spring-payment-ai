@@ -1,11 +1,15 @@
 import * as Speech from 'expo-speech';
 
+/**
+ * O expo-speech não informa o gênero das vozes (só nome, identificador, idioma e qualidade), vozes estão sendo escolhidas pelo nome.
+ */
 const MALE_VOICE_PREFERENCE = ['felipe', 'antonio', 'daniel'];
 
 let maleVoice: Promise<string | undefined> | null = null;
 
 const isEnhanced = (voice: Speech.Voice) => voice.quality === Speech.VoiceQuality.Enhanced;
 
+/** Procura uma vez e guarda o resultado: as vozes instaladas não mudam enquanto o app está aberto. */
 function findMaleVoice(): Promise<string | undefined> {
   maleVoice ??= Speech.getAvailableVoicesAsync()
     .then((voices) => {
@@ -22,6 +26,7 @@ function findMaleVoice(): Promise<string | undefined> {
   return maleVoice;
 }
 
+/** Adianta a busca da voz para a primeira fala não esperar por ela. */
 export function warmUpVoice(): void {
   void findMaleVoice();
 }
