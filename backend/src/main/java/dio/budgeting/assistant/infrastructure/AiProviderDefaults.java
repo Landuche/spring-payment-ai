@@ -33,7 +33,7 @@ public class AiProviderDefaults implements EnvironmentPostProcessor {
             // O Kokoro não confere a chave, mas o cliente exige uma; não vale mandar a chave da Groq para ele.
             defaults.put(SPEECH + "api-key", "kokoro");
             defaults.put(SPEECH + "options.model", "kokoro");
-            defaults.put(SPEECH + "options.voice", "pf_dora");
+            defaults.put(SPEECH + "options.voice", "pm_alex");
             defaults.put(SPEECH + "options.speed", 1.0);
         } else {
             defaults.put(SPEECH + "options.model", "gpt-4o-mini-tts");

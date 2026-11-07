@@ -50,7 +50,7 @@ class AiProviderDefaultsTest {
 
         assertThat(env.getProperty(SPEECH_URL)).isEqualTo("http://localhost:8880");
         assertThat(env.getProperty(SPEECH_MODEL)).isEqualTo("kokoro");
-        assertThat(env.getProperty(SPEECH_VOICE)).isEqualTo("pf_dora");
+        assertThat(env.getProperty(SPEECH_VOICE)).isEqualTo("pm_alex");
         assertThat(env.getProperty(SPEECH_KEY)).isEqualTo("kokoro");
     }
 
