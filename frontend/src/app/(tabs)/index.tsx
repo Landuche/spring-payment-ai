@@ -36,7 +36,9 @@ export default function DashboardScreen() {
     }, [refresh]),
   );
 
-  const refreshAll = useCallback(() => Promise.all([refresh(), refreshNotifications()]), [refresh, refreshNotifications]);
+  const refreshAll = useCallback(async () => {
+    await Promise.all([refresh(), refreshNotifications()]);
+  }, [refresh, refreshNotifications]);
   const refreshControl = <RefreshControl refreshing={loading} onRefresh={refreshAll} tintColor={palette.text} />;
   const recent = transactions.slice(0, RECENT_COUNT);
 
