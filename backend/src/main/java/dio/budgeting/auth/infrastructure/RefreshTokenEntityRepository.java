@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RefreshTokenEntityRepository extends CrudRepository<RefreshTokenEntity, String> {
+interface RefreshTokenEntityRepository extends CrudRepository<RefreshTokenEntity, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from RefreshTokenEntity t where t.tokenHash = :hash")
     Optional<RefreshTokenEntity> lockByHash(@Param("hash") String hash);

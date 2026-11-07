@@ -20,7 +20,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class RefreshTokenEntity {
+class RefreshTokenEntity {
     @Id
     @Column(name = "token_hash", length = 64)
     private String tokenHash;

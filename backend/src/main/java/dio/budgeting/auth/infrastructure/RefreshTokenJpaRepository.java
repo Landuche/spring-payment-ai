@@ -36,4 +36,9 @@ class RefreshTokenJpaRepository implements RefreshTokenRepository {
     public void revokeFamily(UUID familyId, Instant now) {
         entityRepository.revokeFamily(familyId, now);
     }
+
+    @Override
+    public int deleteExpired(Instant now) {
+        return entityRepository.deleteExpired(now);
+    }
 }

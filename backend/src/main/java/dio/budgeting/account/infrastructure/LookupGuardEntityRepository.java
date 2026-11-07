@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.UUID;
 
-public interface LookupGuardEntityRepository extends CrudRepository<LookupGuardEntity, UUID> {
+interface LookupGuardEntityRepository extends CrudRepository<LookupGuardEntity, UUID> {
 
     /** Só remove contadores zerados e sem bloqueio: sem eles, a linha equivale a um registro novo. */
     @Modifying

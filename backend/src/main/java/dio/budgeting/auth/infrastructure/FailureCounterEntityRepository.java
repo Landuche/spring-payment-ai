@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.Optional;
 
-public interface FailureCounterEntityRepository extends CrudRepository<FailureCounterEntity, String> {
+interface FailureCounterEntityRepository extends CrudRepository<FailureCounterEntity, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from FailureCounterEntity c where c.counterKey = :key")
     Optional<FailureCounterEntity> lockByKey(@Param("key") String key);

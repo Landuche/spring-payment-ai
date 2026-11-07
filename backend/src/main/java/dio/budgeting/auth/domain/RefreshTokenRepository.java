@@ -13,4 +13,7 @@ public interface RefreshTokenRepository {
     RefreshToken save(RefreshToken token);
 
     void revokeFamily(UUID familyId, Instant now);
+
+    /** Remove tokens expirados. Token expirado já é rejeitado antes da checagem de reuso, então apagá-lo não muda nada. */
+    int deleteExpired(Instant now);
 }

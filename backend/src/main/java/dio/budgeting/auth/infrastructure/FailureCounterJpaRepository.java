@@ -5,6 +5,7 @@ import dio.budgeting.auth.domain.FailureCounterRepository;
 
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Repository
@@ -28,5 +29,10 @@ class FailureCounterJpaRepository implements FailureCounterRepository {
     @Override
     public FailureCounter save(FailureCounter counter) {
         return entityRepository.save(FailureCounterEntity.from(counter)).toDomain();
+    }
+
+    @Override
+    public int deleteInactive(Instant cutoff) {
+        return entityRepository.deleteInactive(cutoff);
     }
 }

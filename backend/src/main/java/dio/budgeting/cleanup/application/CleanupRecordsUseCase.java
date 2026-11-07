@@ -1,6 +1,8 @@
 package dio.budgeting.cleanup.application;
 
-import dio.budgeting.cleanup.domain.CleanupRepository;
+import dio.budgeting.account.domain.LookupGuardRepository;
+import dio.budgeting.auth.domain.FailureCounterRepository;
+import dio.budgeting.auth.domain.RefreshTokenRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +27,16 @@ public class CleanupRecordsUseCase {
     private static final Logger log = LoggerFactory.getLogger(CleanupRecordsUseCase.class);
     static final Duration COUNTER_MARGIN = Duration.ofDays(1);
 
-    private final CleanupRepository cleanup;
+    private final FailureCounterRepository failureCounters;
+    private final LookupGuardRepository lookupGuards;
+    private final RefreshTokenRepository refreshTokens;
     private final Clock clock;
 
-    public CleanupRecordsUseCase(CleanupRepository cleanup, Clock clock) {
-        this.cleanup = cleanup;
+    public CleanupRecordsUseCase(FailureCounterRepository failureCounters, LookupGuardRepository lookupGuards,
+                                 RefreshTokenRepository refreshTokens, Clock clock) {
+        this.failureCounters = failureCounters;
+        this.lookupGuards = lookupGuards;
+        this.refreshTokens = refreshTokens;
         this.clock = clock;
     }
 
@@ -37,9 +44,9 @@ public class CleanupRecordsUseCase {
     public Result execute() {
         var now = Instant.now(clock);
         var result = new Result(
-                cleanup.deleteInactiveCounters(now.minus(COUNTER_MARGIN)),
-                cleanup.deleteIdleLookups(now),
-                cleanup.deleteExpiredRefreshTokens(now));
+                failureCounters.deleteInactive(now.minus(COUNTER_MARGIN)),
+                lookupGuards.deleteIdle(now),
+                refreshTokens.deleteExpired(now));
         log.info("Limpeza concluída: contadores de login={}, buscas={}, refresh tokens={}",
                 result.loginCounters(), result.lookups(), result.refreshTokens());
         return result;

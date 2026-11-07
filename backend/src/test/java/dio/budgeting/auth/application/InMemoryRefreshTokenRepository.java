@@ -35,4 +35,11 @@ public class InMemoryRefreshTokenRepository implements RefreshTokenRepository {
                 ? new RefreshToken(t.hash(), t.userId(), t.familyId(), t.expiresAt(), t.usedAt(), now)
                 : t);
     }
+
+    @Override
+    public int deleteExpired(Instant now) {
+        var before = store.size();
+        store.values().removeIf(t -> t.expiresAt().isBefore(now));
+        return before - store.size();
+    }
 }

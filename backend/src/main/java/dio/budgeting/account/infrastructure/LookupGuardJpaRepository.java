@@ -6,6 +6,7 @@ import dio.budgeting.account.domain.LookupGuardRepository;
 
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Repository
@@ -24,5 +25,10 @@ class LookupGuardJpaRepository implements LookupGuardRepository {
     @Override
     public LookupGuard save(LookupGuard guard) {
         return entityRepository.save(LookupGuardEntity.from(guard)).toDomain();
+    }
+
+    @Override
+    public int deleteIdle(Instant now) {
+        return entityRepository.deleteIdle(now);
     }
 }
