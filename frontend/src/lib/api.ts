@@ -154,6 +154,16 @@ function webAudioExtension(mimeType: string): string {
   return mimeType.includes('mp4') ? 'm4a' : 'webm';
 }
 
+/** Falhar aqui (e não no envio) deixa claro se o problema é ler o arquivo gravado ou falar com o servidor. */
+async function readRecording(uri: string): Promise<Blob> {
+  try {
+    return await (await fetch(uri)).blob();
+  } catch (cause) {
+    console.warn('[api] não foi possível ler a gravação', uri, cause);
+    throw new ApiError('Não consegui ler a gravação de áudio.', 0);
+  }
+}
+
 export const api = {
   register: (input: { name: string; email: string; password: string }) =>
     request<Session>('/auth/register', json(input)),
@@ -233,7 +243,7 @@ export const api = {
     const form = new FormData();
     form.append('conversationId', conversationId);
     // A gravação é um arquivo local (nativo) ou um blob URL (web)
-    const blob = await (await fetch(uri)).blob();
+    const blob = await readRecording(uri);
     const extension = Platform.OS === 'web' ? webAudioExtension(blob.type) : 'm4a';
     form.append('file', blob, `comando.${extension}`);
     const response = await send('/assistant/voice', { method: 'POST', body: form });

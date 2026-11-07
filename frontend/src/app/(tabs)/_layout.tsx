@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SIDEBAR_WIDTH } from '@/theme/tokens';
 import { useIsWide, useTheme } from '@/theme/theme-context';
 
-const TAB_BAR_CONTENT_HEIGHT = 40;
+// No Android o ícone e o rótulo precisam de mais altura (padrão do Material: 56) ou o rótulo é cortado embaixo.
+const TAB_BAR_CONTENT_HEIGHT = Platform.OS === 'android' ? 56 : 40;
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -39,7 +40,12 @@ export default function TabsLayout() {
               height: Platform.OS === 'web' ? 60 : TAB_BAR_CONTENT_HEIGHT + insets.bottom,
               paddingBottom: Platform.OS === 'web' ? 0 : insets.bottom,
             },
-        tabBarLabelStyle: { fontSize: wide ? 13 : 11, fontWeight: '600' },
+        // Telas estreitas (como 360 de largura) não comportam "Transferências": o texto encolhe em vez de ser cortado.
+        tabBarLabel: ({ children, color }) => (
+          <Text style={{ color, fontSize: wide ? 13 : 11, fontWeight: '600' }} numberOfLines={1} adjustsFontSizeToFit>
+            {children}
+          </Text>
+        ),
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: tabIcon('wallet', 'wallet-outline') }} />

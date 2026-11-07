@@ -139,25 +139,33 @@ export default function AssistantScreen() {
   };
 
   const startRecording = async () => {
-    const permission = await requestRecordingPermissionsAsync();
-    if (!permission.granted) {
-      append({ role: 'assistant', text: 'Preciso de permissão do microfone para ouvir seus comandos.' });
-      return;
+    try {
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        append({ role: 'assistant', text: 'Preciso de permissão do microfone para ouvir seus comandos.' });
+        return;
+      }
+      // O modo de áudio só existe no iOS; no Android a gravação não precisa dele.
+      if (Platform.OS !== 'android') {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      }
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+    } catch (error) {
+      console.warn('[voz] não foi possível iniciar a gravação', error);
+      append({ role: 'assistant', text: 'Não consegui iniciar a gravação. Tente novamente.' });
     }
-    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
-    await recorder.prepareToRecordAsync();
-    recorder.record();
   };
 
   const stopAndSend = async () => {
-    await recorder.stop();
-    const uri = recorder.uri;
-    if (!uri) {
-      append({ role: 'assistant', text: 'Não consegui capturar o áudio. Tente novamente.' });
-      return;
-    }
     setBusy(true);
     try {
+      await recorder.stop();
+      const uri = recorder.uri;
+      if (!uri) {
+        append({ role: 'assistant', text: 'Não consegui capturar o áudio. Tente novamente.' });
+        return;
+      }
       const { transcription, reply, transfer } = await api.sendVoice(uri, conversationId);
       append({ role: 'user', text: transcription || '(áudio sem fala reconhecida)', kind: 'voice' });
       append({ role: 'assistant', text: reply, transfer: cardFor(transfer) });
@@ -183,7 +191,7 @@ export default function AssistantScreen() {
     <SafeAreaView style={[styles.safe, wide && { paddingRight: SIDEBAR_WIDTH }]} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'web' ? undefined : 'padding'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
       >
         <View style={[styles.column, { maxWidth: wide ? CONTENT_MAX_WIDTH.wide : CONTENT_MAX_WIDTH.compact }]}>
