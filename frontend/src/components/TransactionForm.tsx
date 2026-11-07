@@ -10,10 +10,10 @@ import { CATEGORIES, CATEGORY_LABEL, type Category } from '@/lib/types';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-export type TransactionMode = 'deposito' | 'gasto';
+type TransactionMode = 'deposit' | 'expense';
 
 interface TransactionFormProps {
-  /** "deposito" soma ao saldo; "gasto" registra uma despesa com categoria. */
+  /** "deposit" soma ao saldo; "expense" registra uma despesa com categoria. */
   readonly mode: TransactionMode;
   readonly onDone: () => void;
 }
@@ -24,7 +24,7 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
   const styles = useStyles(makeStyles);
   const form = useStyles(makeFormStyles);
   const toast = useToast();
-  const isDeposit = mode === 'deposito';
+  const isDeposit = mode === 'deposit';
 
   const [description, setDescription] = useState('');
   const [amountText, setAmountText] = useState('');

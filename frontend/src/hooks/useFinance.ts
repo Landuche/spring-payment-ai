@@ -60,7 +60,7 @@ export function useFinance() {
   const [state, setState] = useState<FinanceState>(INITIAL);
 
   // Carga inicial: a resposta chega por callback, sem setState síncrono no effect.
-  // `ativo` impede atualizar o estado depois que a tela foi desmontada.
+  // `active` impede atualizar o estado depois que a tela foi desmontada.
   useEffect(() => {
     let active = true;
     void fetchData().then((result) => {

@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CONTENT_MAX_WIDTH, font, gradients, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-/** Moldura das telas de autenticação: marca no topo, formulário centralizado. */
 export function AuthLayout({ title, subtitle, children }: {
   readonly title: string;
   readonly subtitle: string;

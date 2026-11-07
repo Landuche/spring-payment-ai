@@ -17,10 +17,6 @@ function findMaleVoice(): Promise<string | undefined> {
   maleVoice ??= Speech.getAvailableVoicesAsync()
     .then((voices) => {
       const portuguese = voices.filter((voice) => voice.language.replace('_', '-').toLowerCase() === 'pt-br');
-      if (__DEV__) {
-        console.log('Vozes pt-BR no aparelho:', portuguese.map((v) => `${v.name} [${v.quality}] ${v.identifier}`));
-      }
-
       for (const name of MALE_VOICE_PREFERENCE) {
         const matches = portuguese
           .filter((voice) => `${voice.name} ${voice.identifier}`.toLowerCase().includes(name))

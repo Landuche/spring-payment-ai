@@ -8,7 +8,6 @@ interface SegmentedProps<T extends string> {
   readonly onChange: (value: T) => void;
 }
 
-/** Seletor de uma opção entre poucas, em formato de pílula. */
 export function Segmented<T extends string>({ value, options, onChange }: SegmentedProps<T>) {
   const styles = useStyles(makeStyles);
 

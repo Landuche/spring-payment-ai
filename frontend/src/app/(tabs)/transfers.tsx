@@ -7,12 +7,12 @@ import { TransferForm } from '@/components/TransferForm';
 import { font, space, type Palette } from '@/theme/tokens';
 import { useStyles } from '@/theme/theme-context';
 
-type Mode = 'transferir' | 'depositar' | 'gasto';
+type Mode = 'transfer' | 'deposit' | 'expense';
 
 const MODES = [
-  { value: 'transferir', label: 'Transferir' },
-  { value: 'depositar', label: 'Depositar' },
-  { value: 'gasto', label: 'Registrar gasto' },
+  { value: 'transfer', label: 'Transferir' },
+  { value: 'deposit', label: 'Depositar' },
+  { value: 'expense', label: 'Registrar gasto' },
 ] as const;
 
 /**
@@ -21,7 +21,7 @@ const MODES = [
  */
 export default function TransfersScreen() {
   const styles = useStyles(makeStyles);
-  const [mode, setMode] = useState<Mode>('transferir');
+  const [mode, setMode] = useState<Mode>('transfer');
   const [formKey, setFormKey] = useState(0);
   const reset = () => setFormKey((key) => key + 1);
 
@@ -34,9 +34,9 @@ export default function TransfersScreen() {
 
       <Segmented<Mode> value={mode} options={MODES} onChange={setMode} />
 
-      {mode === 'transferir' ? <TransferForm key={formKey} onDone={reset} /> : null}
-      {mode === 'depositar' ? <TransactionForm key={formKey} mode="deposito" onDone={reset} /> : null}
-      {mode === 'gasto' ? <TransactionForm key={formKey} mode="gasto" onDone={reset} /> : null}
+      {mode === 'transfer' ? <TransferForm key={formKey} onDone={reset} /> : null}
+      {mode === 'deposit' ? <TransactionForm key={formKey} mode="deposit" onDone={reset} /> : null}
+      {mode === 'expense' ? <TransactionForm key={formKey} mode="expense" onDone={reset} /> : null}
     </Screen>
   );
 }

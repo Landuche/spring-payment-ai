@@ -5,7 +5,7 @@ import type { TransferProposal } from '@/lib/types';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-export type TransferCardStatus = 'pending' | 'sending' | 'done' | 'cancelled';
+export type TransferCardStatus = 'pending' | 'sending' | 'done' | 'canceled';
 
 export interface TransferCardState {
   readonly proposal: TransferProposal;

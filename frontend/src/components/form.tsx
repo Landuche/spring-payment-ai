@@ -59,7 +59,6 @@ interface AmountInputProps {
   readonly editable?: boolean;
 }
 
-/** Campo grande de valor em reais. */
 export function AmountInput({ value, onChangeText, accessibilityLabel, editable = true }: AmountInputProps) {
   const { palette } = useTheme();
   const styles = useStyles(makeAmountStyles);

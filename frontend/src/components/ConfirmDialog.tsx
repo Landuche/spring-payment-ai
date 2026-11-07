@@ -18,7 +18,6 @@ interface ConfirmDialogProps {
   readonly onCancel: () => void;
 }
 
-/** Modal de confirmar ou cancelar, igual no celular e na web. */
 export function ConfirmDialog({
   visible,
   title,

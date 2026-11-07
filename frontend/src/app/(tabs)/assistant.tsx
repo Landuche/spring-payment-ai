@@ -1,7 +1,6 @@
 import { useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorderState } from 'expo-audio';
 import { randomUUID } from 'expo-crypto';
-import * as Speech from 'expo-speech';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -18,17 +17,14 @@ import { ChatBubble, type ChatMessage } from '@/components/ChatBubble';
 import { MicButton } from '@/components/MicButton';
 import { useToast } from '@/components/Toast';
 import type { TransferCardState, TransferCardStatus } from '@/components/TransferProposalCard';
+import { useSpokenReplies } from '@/hooks/useSpokenReplies';
 import { api, ApiError } from '@/lib/api';
 import { formatBRL } from '@/lib/format';
-import { prefsStorage } from '@/lib/prefs-storage';
 import type { TransferEventType, TransferProposal } from '@/lib/types';
-import { toSpeech } from '@/lib/speech-text';
-import { speakAloud, warmUpVoice } from '@/lib/voice';
 import { CONTENT_MAX_WIDTH, font, radius, SIDEBAR_WIDTH, space, type Palette } from '@/theme/tokens';
 import { useIsWide, useStyles, useTheme } from '@/theme/theme-context';
 
 const ASSISTANT_NAME = 'Claudinho';
-const VOICE_PREF_KEY = 'claudinho.voice';
 
 const GREETING: ChatMessage = {
   id: 'greeting',
@@ -55,10 +51,7 @@ export default function AssistantScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
-  /** Se o Claudinho lê as respostas de voz em voz alta. Ligado por padrão; a escolha fica salva. */
-  const [voiceOn, setVoiceOn] = useState(true);
-  /** Espelho do estado: a resposta chega depois de um await e precisa ver o valor atual, não o da época do toque. */
-  const voiceOnRef = useRef(true);
+  const { enabled: voiceOn, toggle: toggleVoice, speak } = useSpokenReplies();
   /** Uma conversa por abertura da tela: o backend guarda o histórico com essa chave. */
   const [conversationId] = useState(() => randomUUID());
   const listRef = useRef<FlatList<ChatMessage>>(null);
@@ -78,35 +71,6 @@ export default function AssistantScreen() {
 
   const failure = (error: unknown) =>
     error instanceof ApiError ? error.message : 'Algo deu errado. Tente novamente.';
-
-  useEffect(() => {
-    void prefsStorage.read(VOICE_PREF_KEY).then((saved) => {
-      if (saved === 'off') {
-        setVoiceOn(false);
-        voiceOnRef.current = false;
-      }
-    });
-    warmUpVoice();
-    // Sair da tela interrompe uma fala em andamento.
-    return () => {
-      void Speech.stop();
-    };
-  }, []);
-
-  const toggleVoice = () => {
-    const next = !voiceOn;
-    setVoiceOn(next);
-    voiceOnRef.current = next;
-    void prefsStorage.write(VOICE_PREF_KEY, next ? 'on' : 'off');
-    if (!next) void Speech.stop();
-  };
-
-  /** Lê a resposta em voz alta com a voz do dispositivo (não depende do backend nem de API paga). */
-  const speak = (reply: string) => {
-    if (!voiceOnRef.current) return;
-    void Speech.stop();
-    void speakAloud(toSpeech(reply));
-  };
 
   const sendText = async () => {
     const text = draft.trim();
@@ -161,7 +125,7 @@ export default function AssistantScreen() {
   const cancelTransfer = (messageId: string) => {
     const card = messages.find((m) => m.id === messageId)?.transfer;
     if (!card || card.status !== 'pending') return;
-    setTransferStatus(messageId, 'cancelled');
+    setTransferStatus(messageId, 'canceled');
     void tellClaudinho('TRANSFER_CANCELED', card.proposal);
   };
 

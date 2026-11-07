@@ -10,7 +10,6 @@ interface MicButtonProps {
   readonly onPress: () => void;
 }
 
-/** Botão de microfone com pulso enquanto grava. */
 export function MicButton({ recording, disabled, onPress }: MicButtonProps) {
   const styles = useStyles(makeStyles);
   // Valor animado e interpolações são criados uma única vez, na inicialização: nada de ref lida durante o render.

@@ -9,7 +9,6 @@ interface CardProps {
   readonly children: ReactNode;
 }
 
-/** Superfície elevada com título opcional. Base visual de quase todas as seções. */
 export function Card({ title, action, children }: CardProps) {
   const styles = useStyles(makeStyles);
 

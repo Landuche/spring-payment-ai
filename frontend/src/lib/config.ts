@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 const LOCAL_URL = 'http://localhost:8080';
 
 /**
- * URL do backend, definida em `mobile/.env` como EXPO_PUBLIC_API_URL. Em desenvolvimento:
+ * URL do backend, definida em `frontend/.env` como EXPO_PUBLIC_API_URL. Em desenvolvimento:
  * - Web e emulador iOS: http://localhost:8080 (o padrão, quando a variável está ausente ou vazia)
  * - Celular físico (Expo Go): "localhost" é o próprio celular, então use o endereço público do túnel
  *   (ex.: https://xxxx.trycloudflare.com) ou o IP da sua máquina na rede local (ex.: http://192.168.0.10:8080)
