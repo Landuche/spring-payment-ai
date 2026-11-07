@@ -25,7 +25,7 @@ export default function DashboardScreen() {
   const styles = useStyles(makeStyles);
   const { session, signOut } = useAuth();
   const { balance, transactions, report, loading, error, refresh } = useFinance();
-  const { unread } = useNotifications();
+  const { unread, refresh: refreshNotifications } = useNotifications();
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 
@@ -36,7 +36,8 @@ export default function DashboardScreen() {
     }, [refresh]),
   );
 
-  const refreshControl = <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={palette.text} />;
+  const refreshAll = useCallback(() => Promise.all([refresh(), refreshNotifications()]), [refresh, refreshNotifications]);
+  const refreshControl = <RefreshControl refreshing={loading} onRefresh={refreshAll} tintColor={palette.text} />;
   const recent = transactions.slice(0, RECENT_COUNT);
 
   return (
