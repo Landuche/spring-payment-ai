@@ -14,22 +14,22 @@ import java.util.List;
  * lançamentos sem hora ficam depois dos que têm.
  */
 @Service
-public class ListarTransacoesUseCase {
-    private static final Comparator<Transaction> DA_MAIS_ANTIGA_PARA_A_MAIS_RECENTE =
+public class ListTransactionsUseCase {
+    private static final Comparator<Transaction> OLDEST_FIRST =
             Comparator.comparing(Transaction::occurredAt)
                     .thenComparing(Transaction::createdAt, Comparator.nullsFirst(Comparator.naturalOrder()));
 
     private final TransactionRepository transactionRepository;
     private final CurrentAccountProvider currentAccount;
 
-    public ListarTransacoesUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
+    public ListTransactionsUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
         this.transactionRepository = transactionRepository;
         this.currentAccount = currentAccount;
     }
 
     public List<TransactionOutput> execute() {
         return transactionRepository.findAll(currentAccount.current()).stream()
-                .sorted(DA_MAIS_ANTIGA_PARA_A_MAIS_RECENTE.reversed())
+                .sorted(OLDEST_FIRST.reversed())
                 .map(TransactionOutput::from)
                 .toList();
     }

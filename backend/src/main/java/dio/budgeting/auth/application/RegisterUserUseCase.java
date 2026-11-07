@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
 
 /** Cria o usuário, abre a conta corrente e já devolve uma sessão. */
 @Service
-public class RegistrarUsuarioUseCase {
+public class RegisterUserUseCase {
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-    private static final int MIN_SENHA = 8;
+    private static final int MIN_PASSWORD = 8;
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
@@ -29,7 +29,7 @@ public class RegistrarUsuarioUseCase {
     private final SessionIssuer sessionIssuer;
     private final AuditLog audit;
 
-    public RegistrarUsuarioUseCase(UserRepository userRepository, AccountRepository accountRepository,
+    public RegisterUserUseCase(UserRepository userRepository, AccountRepository accountRepository,
                                    PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer, AuditLog audit) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
@@ -39,26 +39,26 @@ public class RegistrarUsuarioUseCase {
     }
 
     @Transactional
-    public SessionOutput execute(String email, String name, String senha) {
-        validar(email, senha);
+    public SessionOutput execute(String email, String name, String password) {
+        validate(email, password);
         var normalizedEmail = email.strip().toLowerCase(Locale.ROOT);
 
         if (userRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new ConflictException("Já existe uma conta com este e-mail");
         }
 
-        var user = userRepository.save(new User(new UserId(), normalizedEmail, name, passwordEncoder.encode(senha)));
-        var account = accountRepository.save(Account.abrir(user.id()));
-        audit.sucesso(AuditEventType.USUARIO_CADASTRADO, user.id(), account.id(), null);
-        return sessionIssuer.emitir(user, account);
+        var user = userRepository.save(new User(new UserId(), normalizedEmail, name, passwordEncoder.encode(password)));
+        var account = accountRepository.save(Account.open(user.id()));
+        audit.success(AuditEventType.USER_REGISTERED, user.id(), account.id(), null);
+        return sessionIssuer.issue(user, account);
     }
 
-    private static void validar(String email, String senha) {
+    private static void validate(String email, String password) {
         if (email == null || !EMAIL.matcher(email.strip()).matches()) {
             throw new BusinessRuleViolationException("E-mail inválido");
         }
-        if (senha == null || senha.length() < MIN_SENHA) {
-            throw new BusinessRuleViolationException("A senha deve ter pelo menos " + MIN_SENHA + " caracteres");
+        if (password == null || password.length() < MIN_PASSWORD) {
+            throw new BusinessRuleViolationException("A senha deve ter pelo menos " + MIN_PASSWORD + " caracteres");
         }
     }
 }

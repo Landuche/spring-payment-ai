@@ -13,12 +13,12 @@ import java.time.Instant;
 
 /** Logout: revoga a família do refresh token. Token desconhecido é ignorado sem revelar nada. */
 @Service
-public class EncerrarSessaoUseCase {
+public class LogoutUseCase {
     private final RefreshTokenRepository refreshTokens;
     private final AuditLog audit;
     private final Clock clock;
 
-    public EncerrarSessaoUseCase(RefreshTokenRepository refreshTokens, AuditLog audit, Clock clock) {
+    public LogoutUseCase(RefreshTokenRepository refreshTokens, AuditLog audit, Clock clock) {
         this.refreshTokens = refreshTokens;
         this.audit = audit;
         this.clock = clock;
@@ -31,7 +31,7 @@ public class EncerrarSessaoUseCase {
         }
         refreshTokens.findByHash(RefreshToken.hash(refreshToken)).ifPresent(token -> {
             refreshTokens.revokeFamily(token.familyId(), Instant.now(clock));
-            audit.sucesso(AuditEventType.SESSAO_ENCERRADA, token.userId(), null, token.familyId().toString());
+            audit.success(AuditEventType.SESSION_ENDED, token.userId(), null, token.familyId().toString());
         });
     }
 }

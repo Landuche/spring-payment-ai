@@ -41,14 +41,14 @@ public record AuditEvent(
         requireAtMost(reason, 60, "reason");
     }
 
-    public static AuditEvent sucesso(Instant at, AuditEventType type, UserId actor, AccountId account,
+    public static AuditEvent success(Instant at, AuditEventType type, UserId actor, AccountId account,
                                      String reference) {
-        return new AuditEvent(UUID.randomUUID(), at, type, AuditOutcome.SUCESSO, actor, account, null, reference, null);
+        return new AuditEvent(UUID.randomUUID(), at, type, AuditOutcome.SUCCESS, actor, account, null, reference, null);
     }
 
-    public static AuditEvent falha(Instant at, AuditEventType type, UserId actor, AccountId account,
+    public static AuditEvent failure(Instant at, AuditEventType type, UserId actor, AccountId account,
                                    String subjectHash, String reference, String reason) {
-        return new AuditEvent(UUID.randomUUID(), at, type, AuditOutcome.FALHA, actor, account, subjectHash,
+        return new AuditEvent(UUID.randomUUID(), at, type, AuditOutcome.FAILURE, actor, account, subjectHash,
                 reference, reason);
     }
 

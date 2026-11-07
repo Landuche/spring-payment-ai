@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ConsultarSaldoUseCase {
+public class GetBalanceUseCase {
     private final TransactionRepository transactionRepository;
     private final CurrentAccountProvider currentAccount;
 
-    public ConsultarSaldoUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
+    public GetBalanceUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
         this.transactionRepository = transactionRepository;
         this.currentAccount = currentAccount;
     }

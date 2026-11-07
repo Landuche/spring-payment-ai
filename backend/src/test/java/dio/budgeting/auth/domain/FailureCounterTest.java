@@ -9,35 +9,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FailureCounterTest {
 
-    private static final Instant AGORA = Instant.parse("2026-11-03T12:00:00Z");
-    private static final Duration JANELA = Duration.ofMinutes(15);
-    private static final Duration BLOQUEIO = Duration.ofMinutes(15);
+    private static final Instant NOW = Instant.parse("2026-11-03T12:00:00Z");
+    private static final Duration WINDOW = Duration.ofMinutes(15);
+    private static final Duration BLOCK_DURATION = Duration.ofMinutes(15);
 
     @Test
     void should_blockOnTheFifthFailure_withinTheWindow() {
         var c = FailureCounter.fresh("email:a@x.com");
         for (int i = 0; i < 4; i++) {
-            c = c.registrarFalha(AGORA, 5, JANELA, BLOQUEIO);
-            assertThat(c.isBlocked(AGORA)).isFalse();
+            c = c.recordFailure(NOW, 5, WINDOW, BLOCK_DURATION);
+            assertThat(c.isBlocked(NOW)).isFalse();
         }
-        c = c.registrarFalha(AGORA, 5, JANELA, BLOQUEIO);
+        c = c.recordFailure(NOW, 5, WINDOW, BLOCK_DURATION);
 
-        assertThat(c.isBlocked(AGORA)).isTrue();
-        assertThat(c.blockedUntil()).isEqualTo(AGORA.plus(BLOQUEIO));
+        assertThat(c.isBlocked(NOW)).isTrue();
+        assertThat(c.blockedUntil()).isEqualTo(NOW.plus(BLOCK_DURATION));
     }
 
     @Test
     void should_notAccumulate_failuresAcrossWindows() {
         var c = FailureCounter.fresh("email:a@x.com");
         for (int i = 0; i < 4; i++) {
-            c = c.registrarFalha(AGORA, 5, JANELA, BLOQUEIO);
+            c = c.recordFailure(NOW, 5, WINDOW, BLOCK_DURATION);
         }
 
         // Depois da janela, as 4 falhas antigas expiram: a próxima é a primeira da nova janela.
-        var depois = AGORA.plus(JANELA).plusSeconds(1);
-        c = c.registrarFalha(depois, 5, JANELA, BLOQUEIO);
+        var later = NOW.plus(WINDOW).plusSeconds(1);
+        c = c.recordFailure(later, 5, WINDOW, BLOCK_DURATION);
 
-        assertThat(c.isBlocked(depois)).isFalse();
+        assertThat(c.isBlocked(later)).isFalse();
         assertThat(c.failures()).isEqualTo(1);
     }
 
@@ -45,18 +45,18 @@ class FailureCounterTest {
     void should_unblock_afterTheBlockPeriod() {
         var c = FailureCounter.fresh("ip:10.0.0.1");
         for (int i = 0; i < 5; i++) {
-            c = c.registrarFalha(AGORA, 5, JANELA, BLOQUEIO);
+            c = c.recordFailure(NOW, 5, WINDOW, BLOCK_DURATION);
         }
 
-        assertThat(c.isBlocked(AGORA.plus(BLOQUEIO).minusSeconds(1))).isTrue();
-        assertThat(c.isBlocked(AGORA.plus(BLOQUEIO))).isFalse();
+        assertThat(c.isBlocked(NOW.plus(BLOCK_DURATION).minusSeconds(1))).isTrue();
+        assertThat(c.isBlocked(NOW.plus(BLOCK_DURATION))).isFalse();
     }
 
     @Test
     void should_clearOnSuccessfulLogin() {
-        var c = FailureCounter.fresh("email:a@x.com").registrarFalha(AGORA, 5, JANELA, BLOQUEIO);
+        var c = FailureCounter.fresh("email:a@x.com").recordFailure(NOW, 5, WINDOW, BLOCK_DURATION);
 
-        assertThat(c.limpar().failures()).isZero();
-        assertThat(c.limpar().isBlocked(AGORA)).isFalse();
+        assertThat(c.reset().failures()).isZero();
+        assertThat(c.reset().isBlocked(NOW)).isFalse();
     }
 }

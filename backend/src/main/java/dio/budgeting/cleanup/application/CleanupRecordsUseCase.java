@@ -1,6 +1,6 @@
 package dio.budgeting.cleanup.application;
 
-import dio.budgeting.cleanup.domain.LimpezaRepository;
+import dio.budgeting.cleanup.domain.CleanupRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,30 +21,30 @@ import java.time.Instant;
  * A margem de 1 dia nos contadores é conservadora de propósito: apaga um pouco menos do que o mínimo necessário.
  */
 @Service
-public class LimpezaRegistrosUseCase {
-    private static final Logger log = LoggerFactory.getLogger(LimpezaRegistrosUseCase.class);
-    static final Duration MARGEM_CONTADORES = Duration.ofDays(1);
+public class CleanupRecordsUseCase {
+    private static final Logger log = LoggerFactory.getLogger(CleanupRecordsUseCase.class);
+    static final Duration COUNTER_MARGIN = Duration.ofDays(1);
 
-    private final LimpezaRepository limpeza;
+    private final CleanupRepository cleanup;
     private final Clock clock;
 
-    public LimpezaRegistrosUseCase(LimpezaRepository limpeza, Clock clock) {
-        this.limpeza = limpeza;
+    public CleanupRecordsUseCase(CleanupRepository cleanup, Clock clock) {
+        this.cleanup = cleanup;
         this.clock = clock;
     }
 
     @Transactional
-    public Resultado executar() {
-        var agora = Instant.now(clock);
-        var resultado = new Resultado(
-                limpeza.apagarContadoresInativos(agora.minus(MARGEM_CONTADORES)),
-                limpeza.apagarBuscasSemPendencia(agora),
-                limpeza.apagarRefreshTokensExpirados(agora));
+    public Result execute() {
+        var now = Instant.now(clock);
+        var result = new Result(
+                cleanup.deleteInactiveCounters(now.minus(COUNTER_MARGIN)),
+                cleanup.deleteIdleLookups(now),
+                cleanup.deleteExpiredRefreshTokens(now));
         log.info("Limpeza concluída: contadores de login={}, buscas={}, refresh tokens={}",
-                resultado.contadoresLogin(), resultado.buscas(), resultado.refreshTokens());
-        return resultado;
+                result.loginCounters(), result.lookups(), result.refreshTokens());
+        return result;
     }
 
-    public record Resultado(int contadoresLogin, int buscas, int refreshTokens) {
+    public record Result(int loginCounters, int lookups, int refreshTokens) {
     }
 }

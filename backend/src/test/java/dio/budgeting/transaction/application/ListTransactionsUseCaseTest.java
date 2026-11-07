@@ -13,41 +13,41 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ListarTransacoesUseCaseTest {
+class ListTransactionsUseCaseTest {
 
-    private static final LocalDate HOJE = LocalDate.of(2026, 11, 4);
+    private static final LocalDate TODAY = LocalDate.of(2026, 11, 4);
 
-    private final AccountId conta = new AccountId();
+    private final AccountId account = new AccountId();
     private final InMemoryTransactionRepository repository = new InMemoryTransactionRepository();
-    private final ListarTransacoesUseCase useCase = new ListarTransacoesUseCase(repository, () -> conta);
+    private final ListTransactionsUseCase useCase = new ListTransactionsUseCase(repository, () -> account);
 
-    private void salvar(String descricao, LocalDate dia, Instant momento) {
-        repository.save(Transaction.nova(conta, descricao, new Money(1000), Category.GROCERIES,
-                TransactionType.DESPESA, dia, momento));
+    private void store(String description, LocalDate day, Instant moment) {
+        repository.save(Transaction.create(account, description, new Money(1000), Category.GROCERIES,
+                TransactionType.EXPENSE, day, moment));
     }
 
     @Test
     void should_listNewestDayFirst() {
-        salvar("antiga", HOJE.minusDays(2), null);
-        salvar("recente", HOJE, null);
-        salvar("meio", HOJE.minusDays(1), null);
+        store("antiga", TODAY.minusDays(2), null);
+        store("recente", TODAY, null);
+        store("meio", TODAY.minusDays(1), null);
 
         assertThat(useCase.execute()).extracting("description").containsExactly("recente", "meio", "antiga");
     }
 
     @Test
     void should_listLatestMomentFirst_withinTheSameDay() {
-        salvar("manhã", HOJE, Instant.parse("2026-11-04T12:00:00Z"));
-        salvar("noite", HOJE, Instant.parse("2026-11-04T23:00:00Z"));
-        salvar("tarde", HOJE, Instant.parse("2026-11-04T18:00:00Z"));
+        store("manhã", TODAY, Instant.parse("2026-11-04T12:00:00Z"));
+        store("noite", TODAY, Instant.parse("2026-11-04T23:00:00Z"));
+        store("tarde", TODAY, Instant.parse("2026-11-04T18:00:00Z"));
 
         assertThat(useCase.execute()).extracting("description").containsExactly("noite", "tarde", "manhã");
     }
 
     @Test
     void should_putEntriesWithoutMomentAfterTheOnesWithMoment_withinTheSameDay() {
-        salvar("sem hora", HOJE, null);
-        salvar("com hora", HOJE, Instant.parse("2026-11-04T12:00:00Z"));
+        store("sem hora", TODAY, null);
+        store("com hora", TODAY, Instant.parse("2026-11-04T12:00:00Z"));
 
         assertThat(useCase.execute()).extracting("description").containsExactly("com hora", "sem hora");
     }

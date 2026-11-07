@@ -29,7 +29,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class TransferirUseCaseTest {
+class TransferUseCaseTest {
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-11-03T12:00:00Z"), ZoneOffset.UTC);
     private final InMemoryTransactionRepository transactions = new InMemoryTransactionRepository();
@@ -37,39 +37,39 @@ class TransferirUseCaseTest {
     private final InMemoryAccountRepository accounts = new InMemoryAccountRepository();
     private final InMemoryUserRepository users = new InMemoryUserRepository();
 
-    private final Account origem = novaConta("Ana Souza", "0000000001");
-    private final Account destino = novaConta("Bruno Lima", "0000000002");
+    private final Account source = newAccount("Ana Souza", "0000000001");
+    private final Account destination = newAccount("Bruno Lima", "0000000002");
 
     private final InMemoryLookupGuardRepository guards = new InMemoryLookupGuardRepository();
 
     private final InMemoryAuditEventRepository auditEvents = new InMemoryAuditEventRepository();
     private final AuditLog audit = new AuditLog(auditEvents, clock);
 
-    private AccountId atual = origem.id();
+    private AccountId current = source.id();
     private final LookupGuardService lookupGuard =
             new LookupGuardService(guards, accounts, audit, clock);
-    private final TransferirUseCase useCase = new TransferirUseCase(
-            transfers, transactions, accounts, users, () -> atual, lookupGuard, audit, clock);
+    private final TransferUseCase useCase = new TransferUseCase(
+            transfers, transactions, accounts, users, () -> current, lookupGuard, audit, clock);
 
     @Test
     void should_auditRejectedTransfer_forInsufficientFunds() {
-        depositar(origem, "10.00");
+        deposit(source, "10.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("50.00"), null, "sem-saldo"))
                 .isInstanceOf(dio.budgeting.shared.domain.BusinessRuleViolationException.class);
 
         assertThat(auditEvents.all()).anySatisfy(e -> {
-            assertThat(e.type()).isEqualTo(dio.budgeting.audit.domain.AuditEventType.TRANSFERENCIA_RECUSADA);
-            assertThat(e.reason()).isEqualTo("SALDO_INSUFICIENTE");
+            assertThat(e.type()).isEqualTo(dio.budgeting.audit.domain.AuditEventType.TRANSFER_REFUSED);
+            assertThat(e.reason()).isEqualTo("INSUFFICIENT_BALANCE");
         });
         assertThat(transfers.count()).isZero();
     }
 
     @Test
     void should_blockAfterTenFailedLookups_evenForAValidDestination() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
-        for (int i = 0; i < dio.budgeting.account.domain.LookupGuard.MAX_BUSCAS; i++) {
+        for (int i = 0; i < dio.budgeting.account.domain.LookupGuard.MAX_LOOKUPS; i++) {
             assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
                     .isInstanceOf(NotFoundException.class);
         }
@@ -81,7 +81,7 @@ class TransferirUseCaseTest {
 
     @Test
     void should_resetLookupCounter_afterASuccessfulTransfer() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
         for (int i = 0; i < 9; i++) {
             assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
                     .isInstanceOf(NotFoundException.class);
@@ -89,58 +89,58 @@ class TransferirUseCaseTest {
 
         useCase.execute("0000000002", new BigDecimal("1.00"), null, "ok-1");
 
-        assertThat(guards.findByAccount(origem.id()).orElseThrow().attempts()).isZero();
+        assertThat(guards.findByAccount(source.id()).orElseThrow().attempts()).isZero();
     }
 
     @Test
     void should_debitOrigin_creditDestination_andLinkBothEntriesToTheTransfer() {
-        depositar(origem, "500.00");
+        deposit(source, "500.00");
 
         var output = useCase.execute("0000000002", new BigDecimal("120.00"), "Almoço", "chave-1");
 
         assertThat(output.amount()).isEqualByComparingTo("120.00");
         assertThat(output.replayed()).isFalse();
-        assertThat(saldo(origem.id())).isEqualByComparingTo("380.00");
-        assertThat(saldo(destino.id())).isEqualByComparingTo("120.00");
+        assertThat(balance(source.id())).isEqualByComparingTo("380.00");
+        assertThat(balance(destination.id())).isEqualByComparingTo("120.00");
 
-        var lancamentosDaTransferencia = transactions.findAll(origem.id()).stream()
+        var transferEntries = transactions.findAll(source.id()).stream()
                 .filter(t -> t.transferId() != null).toList();
-        assertThat(lancamentosDaTransferencia).hasSize(1);
-        assertThat(lancamentosDaTransferencia.get(0).type()).isEqualTo(TransactionType.TRANSFERENCIA_ENVIADA);
-        assertThat(lancamentosDaTransferencia.get(0).category()).isEqualTo(Category.TRANSFERENCIA);
-        assertThat(lancamentosDaTransferencia.get(0).description()).isEqualTo("Almoço");
+        assertThat(transferEntries).hasSize(1);
+        assertThat(transferEntries.get(0).type()).isEqualTo(TransactionType.TRANSFER_SENT);
+        assertThat(transferEntries.get(0).category()).isEqualTo(Category.TRANSFER);
+        assertThat(transferEntries.get(0).description()).isEqualTo("Almoço");
     }
 
     @Test
     void should_rejectWhenBalanceIsInsufficient_withoutMovingAnything() {
-        depositar(origem, "50.00");
+        deposit(source, "50.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("50.01"), null, "chave-2"))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("Saldo insuficiente");
 
-        assertThat(saldo(origem.id())).isEqualByComparingTo("50.00");
-        assertThat(saldo(destino.id())).isEqualByComparingTo("0");
+        assertThat(balance(source.id())).isEqualByComparingTo("50.00");
+        assertThat(balance(destination.id())).isEqualByComparingTo("0");
         assertThat(transfers.count()).isZero();
     }
 
     @Test
     void should_replaySameIdempotencyKey_withoutDebitingAgain() {
-        depositar(origem, "500.00");
+        deposit(source, "500.00");
 
         var first = useCase.execute("0000000002", new BigDecimal("100.00"), null, "chave-3");
         var second = useCase.execute("0000000002", new BigDecimal("100.00"), null, "chave-3");
 
         assertThat(second.id()).isEqualTo(first.id());
         assertThat(second.replayed()).isTrue();
-        assertThat(saldo(origem.id())).isEqualByComparingTo("400.00");
-        assertThat(saldo(destino.id())).isEqualByComparingTo("100.00");
+        assertThat(balance(source.id())).isEqualByComparingTo("400.00");
+        assertThat(balance(destination.id())).isEqualByComparingTo("100.00");
         assertThat(transfers.count()).isEqualTo(1);
     }
 
     @Test
     void should_rejectSelfTransfer() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000001", new BigDecimal("10.00"), null, "chave-4"))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -149,7 +149,7 @@ class TransferirUseCaseTest {
 
     @Test
     void should_return404_forUnknownDestination() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("10.00"), null, "chave-5"))
                 .isInstanceOf(NotFoundException.class);
@@ -157,33 +157,33 @@ class TransferirUseCaseTest {
 
     @Test
     void should_lockBothAccounts_inDeterministicOrder() {
-        depositar(origem, "100.00");
-        atual = destino.id();
-        depositar(destino, "100.00");
-        atual = origem.id();
+        deposit(source, "100.00");
+        current = destination.id();
+        deposit(destination, "100.00");
+        current = source.id();
 
         useCase.execute("0000000002", new BigDecimal("10.00"), null, "chave-6");
 
-        var ordem = accounts.lockOrder();
-        var esperada = java.util.stream.Stream.of(origem.id(), destino.id())
+        var order = accounts.lockOrder();
+        var expected = java.util.stream.Stream.of(source.id(), destination.id())
                 .sorted(java.util.Comparator.comparing(id -> id.uuid().toString()))
                 .toList();
-        assertThat(ordem.subList(ordem.size() - 2, ordem.size())).containsExactlyElementsOf(esperada);
+        assertThat(order.subList(order.size() - 2, order.size())).containsExactlyElementsOf(expected);
     }
 
     @Test
     void should_acceptFormattedAccountNumber_withDash() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         var output = useCase.execute("0000-000002", new BigDecimal("10.00"), null, "chave-7");
 
         assertThat(output.replayed()).isFalse();
-        assertThat(saldo(destino.id())).isEqualByComparingTo("10.00");
+        assertThat(balance(destination.id())).isEqualByComparingTo("10.00");
     }
 
     @Test
     void should_requireIdempotencyKey() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("10.00"), null, " "))
                 .isInstanceOf(BusinessRuleViolationException.class);
@@ -191,28 +191,28 @@ class TransferirUseCaseTest {
 
     @Test
     void should_transferByEmail_ofTheRecipientOwner() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         useCase.execute(null, "bruno.lima@example.com", new BigDecimal("15.00"), null, "chave-8");
 
-        assertThat(saldo(destino.id())).isEqualByComparingTo("15.00");
+        assertThat(balance(destination.id())).isEqualByComparingTo("15.00");
     }
 
     @Test
     void should_useUserDescription_onBothStatementEntries() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         useCase.execute("0000000002", null, new BigDecimal("10.00"), "Divisão do almoço", "chave-9");
 
-        var enviado = transactions.findAll(origem.id()).stream().filter(t -> t.transferId() != null).findFirst().orElseThrow();
-        var recebido = transactions.findAll(destino.id()).stream().filter(t -> t.transferId() != null).findFirst().orElseThrow();
-        assertThat(enviado.description()).isEqualTo("Divisão do almoço");
-        assertThat(recebido.description()).isEqualTo("Divisão do almoço");
+        var sent = transactions.findAll(source.id()).stream().filter(t -> t.transferId() != null).findFirst().orElseThrow();
+        var received = transactions.findAll(destination.id()).stream().filter(t -> t.transferId() != null).findFirst().orElseThrow();
+        assertThat(sent.description()).isEqualTo("Divisão do almoço");
+        assertThat(received.description()).isEqualTo("Divisão do almoço");
     }
 
     @Test
     void should_requireExactlyOneDestination() {
-        depositar(origem, "100.00");
+        deposit(source, "100.00");
 
         assertThatThrownBy(() -> useCase.execute(null, null, new BigDecimal("10.00"), null, "chave-10"))
                 .isInstanceOf(BusinessRuleViolationException.class);
@@ -220,25 +220,25 @@ class TransferirUseCaseTest {
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
-    private Account novaConta(String nome, String numero) {
-        var user = users.save(new User(new UserId(), nome.toLowerCase().replace(' ', '.') + "@example.com", nome, "hash"));
-        return accounts.save(new Account(new AccountId(), user.id(), numero));
+    private Account newAccount(String name, String number) {
+        var user = users.save(new User(new UserId(), name.toLowerCase().replace(' ', '.') + "@example.com", name, "hash"));
+        return accounts.save(new Account(new AccountId(), user.id(), number));
     }
 
-    private void depositar(Account conta, String valor) {
-        var anterior = atual;
-        atual = conta.id();
+    private void deposit(Account account, String amount) {
+        var previous = current;
+        current = account.id();
         // Entrada direta no extrato para preparar o cenário (o caso de uso de crédito é testado à parte).
-        transactions.save(Transaction.nova(conta.id(), "Saldo inicial", new dio.budgeting.shared.domain.Money(
-                new BigDecimal(valor).movePointRight(2).longValueExact()), Category.AUTO, TransactionType.RECEITA,
+        transactions.save(Transaction.create(account.id(), "Saldo inicial", new dio.budgeting.shared.domain.Money(
+                new BigDecimal(amount).movePointRight(2).longValueExact()), Category.AUTO, TransactionType.INCOME,
                 java.time.LocalDate.of(2026, 11, 1)));
-        atual = anterior;
+        current = previous;
     }
 
-    private BigDecimal saldo(AccountId conta) {
-        long centavos = transactions.findAll(conta).stream()
+    private BigDecimal balance(AccountId account) {
+        long cents = transactions.findAll(account).stream()
                 .mapToLong(t -> t.type().isCredit() ? t.amount().cents() : -t.amount().cents())
                 .sum();
-        return BigDecimal.valueOf(centavos, 2);
+        return BigDecimal.valueOf(cents, 2);
     }
 }

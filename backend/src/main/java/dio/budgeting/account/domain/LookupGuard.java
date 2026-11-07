@@ -10,8 +10,8 @@ import java.time.Instant;
  */
 public record LookupGuard(AccountId accountId, int attempts, Instant blockedUntil) {
 
-    public static final int MAX_BUSCAS = 10;
-    public static final Duration BLOQUEIO = Duration.ofHours(1);
+    public static final int MAX_LOOKUPS = 10;
+    public static final Duration BLOCK_DURATION = Duration.ofHours(1);
 
     public static LookupGuard fresh(AccountId accountId) {
         return new LookupGuard(accountId, 0, null);
@@ -22,19 +22,19 @@ public record LookupGuard(AccountId accountId, int attempts, Instant blockedUnti
     }
 
     /** Registra uma busca. Se o limite for ultrapassado, devolve o estado bloqueado. */
-    public LookupGuard registrarBusca(Instant now) {
+    public LookupGuard recordLookup(Instant now) {
         if (isBlocked(now)) {
             return this;
         }
         int next = attempts + 1;
-        if (next > MAX_BUSCAS) {
-            return new LookupGuard(accountId, 0, now.plus(BLOQUEIO));
+        if (next > MAX_LOOKUPS) {
+            return new LookupGuard(accountId, 0, now.plus(BLOCK_DURATION));
         }
         return new LookupGuard(accountId, next, null);
     }
 
     /** Zera o contador depois de uma transferência concluída. */
-    public LookupGuard limpar() {
+    public LookupGuard reset() {
         return fresh(accountId);
     }
 }

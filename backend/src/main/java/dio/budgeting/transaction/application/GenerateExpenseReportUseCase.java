@@ -15,53 +15,53 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
-public class GerarRelatorioGastosUseCase {
-    private static final String TODAS_CATEGORIAS = "TODAS";
+public class GenerateExpenseReportUseCase {
+    private static final String ALL_CATEGORIES = "ALL";
 
     private final TransactionRepository transactionRepository;
     private final CurrentAccountProvider currentAccount;
 
-    public GerarRelatorioGastosUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
+    public GenerateExpenseReportUseCase(TransactionRepository transactionRepository, CurrentAccountProvider currentAccount) {
         this.transactionRepository = transactionRepository;
         this.currentAccount = currentAccount;
     }
 
-    public ExpenseReportOutput execute(String periodo, Category categoria) {
+    public ExpenseReportOutput execute(String period, Category category) {
 
-        var month = parsePeriodo(periodo);
+        var month = parsePeriod(period);
         var accountId = currentAccount.current();
 
-        List<Transaction> transactions = categoria == null
+        List<Transaction> transactions = category == null
                 ? transactionRepository.findAllBetween(accountId, month.atDay(1), month.atEndOfMonth())
-                : transactionRepository.findAllBetween(accountId, month.atDay(1), month.atEndOfMonth(), categoria);
+                : transactionRepository.findAllBetween(accountId, month.atDay(1), month.atEndOfMonth(), category);
 
         var expenses = transactions.stream()
-                .filter(t -> t.type() == TransactionType.DESPESA)
+                .filter(t -> t.type() == TransactionType.EXPENSE)
                 .toList();
 
         // Transferências não são gasto: ficam fora do total, mas aparecem à parte quando o relatório é geral.
-        var filtradoPorCategoria = categoria != null;
+        var filtradoPorCategoria = category != null;
 
         return new ExpenseReportOutput(
                 month.toString(),
-                filtradoPorCategoria ? categoria.name() : TODAS_CATEGORIAS,
-                soma(expenses, TransactionType.DESPESA).toReais(),
+                filtradoPorCategoria ? category.name() : ALL_CATEGORIES,
+                sum(expenses, TransactionType.EXPENSE).toReais(),
                 expenses.size(),
                 expenses.stream().map(TransactionOutput::from).toList(),
-                filtradoPorCategoria ? null : soma(transactions, TransactionType.TRANSFERENCIA_ENVIADA).toReais(),
-                filtradoPorCategoria ? null : soma(transactions, TransactionType.TRANSFERENCIA_RECEBIDA).toReais());
+                filtradoPorCategoria ? null : sum(transactions, TransactionType.TRANSFER_SENT).toReais(),
+                filtradoPorCategoria ? null : sum(transactions, TransactionType.TRANSFER_RECEIVED).toReais());
     }
 
-    private static Money soma(List<Transaction> transactions, TransactionType tipo) {
+    private static Money sum(List<Transaction> transactions, TransactionType type) {
         return transactions.stream()
-                .filter(t -> t.type() == tipo)
+                .filter(t -> t.type() == type)
                 .map(Transaction::amount)
                 .reduce(Money.ZERO, Money::plus);
     }
 
-    private static YearMonth parsePeriodo(String periodo) {
+    private static YearMonth parsePeriod(String period) {
         try {
-            return YearMonth.parse(periodo);
+            return YearMonth.parse(period);
         } catch (DateTimeParseException | NullPointerException e) {
             throw new BusinessRuleViolationException("Período inválido, use o formato yyyy-MM");
         }

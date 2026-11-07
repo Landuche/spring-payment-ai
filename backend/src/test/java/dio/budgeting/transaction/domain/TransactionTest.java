@@ -14,50 +14,50 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TransactionTest {
 
-    private static final LocalDate HOJE = LocalDate.of(2026, 10, 15);
-    private static final AccountId CONTA = new AccountId();
+    private static final LocalDate TODAY = LocalDate.of(2026, 10, 15);
+    private static final AccountId ACCOUNT = new AccountId();
 
     @Test
     void should_trimDescription_when_valid() {
-        var t = Transaction.nova(CONTA, "  Mercado  ", new Money(1000), Category.GROCERIES, TransactionType.DESPESA, HOJE);
+        var t = Transaction.create(ACCOUNT, "  Mercado  ", new Money(1000), Category.GROCERIES, TransactionType.EXPENSE, TODAY);
         assertThat(t.description()).isEqualTo("Mercado");
     }
 
     @Test
     void should_keepExactMoment_when_informed() {
-        var agora = Instant.parse("2026-10-15T17:23:00Z");
-        var t = Transaction.nova(CONTA, "Mercado", new Money(1000), Category.GROCERIES, TransactionType.DESPESA, HOJE, agora);
-        assertThat(t.createdAt()).isEqualTo(agora);
+        var now = Instant.parse("2026-10-15T17:23:00Z");
+        var t = Transaction.create(ACCOUNT, "Mercado", new Money(1000), Category.GROCERIES, TransactionType.EXPENSE, TODAY, now);
+        assertThat(t.createdAt()).isEqualTo(now);
     }
 
     @Test
     void should_haveNoMoment_when_onlyDateIsKnown() {
-        var t = Transaction.nova(CONTA, "Mercado", new Money(1000), Category.GROCERIES, TransactionType.DESPESA, HOJE);
+        var t = Transaction.create(ACCOUNT, "Mercado", new Money(1000), Category.GROCERIES, TransactionType.EXPENSE, TODAY);
         assertThat(t.createdAt()).isNull();
     }
 
     @Test
     void should_rejectZeroAmount() {
-        assertThatThrownBy(() -> Transaction.nova(CONTA, "Café", new Money(0), Category.GROCERIES, TransactionType.DESPESA, HOJE))
+        assertThatThrownBy(() -> Transaction.create(ACCOUNT, "Café", new Money(0), Category.GROCERIES, TransactionType.EXPENSE, TODAY))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
     void should_useCategoryName_whenDescriptionIsBlank() {
-        var t = Transaction.nova(CONTA, "   ", new Money(100), Category.PHARMA, TransactionType.DESPESA, HOJE);
+        var t = Transaction.create(ACCOUNT, "   ", new Money(100), Category.PHARMA, TransactionType.EXPENSE, TODAY);
         assertThat(t.description()).isEqualTo("Farmácia");
     }
 
     @Test
     void should_rejectTooLongDescription() {
-        var longa = "x".repeat(Transaction.MAX_DESCRIPTION_LENGTH + 1);
-        assertThatThrownBy(() -> Transaction.nova(CONTA, longa, new Money(100), Category.AUTO, TransactionType.DESPESA, HOJE))
+        var longDescription = "x".repeat(Transaction.MAX_DESCRIPTION_LENGTH + 1);
+        assertThatThrownBy(() -> Transaction.create(ACCOUNT, longDescription, new Money(100), Category.AUTO, TransactionType.EXPENSE, TODAY))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
     void should_requireAccount() {
-        assertThatThrownBy(() -> Transaction.nova(null, "Café", new Money(100), Category.AUTO, TransactionType.DESPESA, HOJE))
+        assertThatThrownBy(() -> Transaction.create(null, "Café", new Money(100), Category.AUTO, TransactionType.EXPENSE, TODAY))
                 .isInstanceOf(NullPointerException.class);
     }
 }

@@ -1,9 +1,9 @@
 package dio.budgeting.auth.infrastructure;
 
-import dio.budgeting.auth.application.AutenticarUseCase;
-import dio.budgeting.auth.application.EncerrarSessaoUseCase;
-import dio.budgeting.auth.application.RegistrarUsuarioUseCase;
-import dio.budgeting.auth.application.RenovarSessaoUseCase;
+import dio.budgeting.auth.application.LoginUseCase;
+import dio.budgeting.auth.application.LogoutUseCase;
+import dio.budgeting.auth.application.RegisterUserUseCase;
+import dio.budgeting.auth.application.RefreshSessionUseCase;
 import dio.budgeting.auth.application.SessionOutput;
 import dio.budgeting.auth.domain.AuthenticationFailedException;
 
@@ -37,17 +37,17 @@ public class AuthController {
     static final String REFRESH_COOKIE = "refresh_token";
     private static final String COOKIE_PATH = "/auth";
 
-    private final RegistrarUsuarioUseCase registrarUsuario;
-    private final AutenticarUseCase autenticar;
-    private final RenovarSessaoUseCase renovarSessao;
-    private final EncerrarSessaoUseCase encerrarSessao;
+    private final RegisterUserUseCase registerUser;
+    private final LoginUseCase login;
+    private final RefreshSessionUseCase refreshSession;
+    private final LogoutUseCase logout;
 
-    public AuthController(RegistrarUsuarioUseCase registrarUsuario, AutenticarUseCase autenticar,
-                          RenovarSessaoUseCase renovarSessao, EncerrarSessaoUseCase encerrarSessao) {
-        this.registrarUsuario = registrarUsuario;
-        this.autenticar = autenticar;
-        this.renovarSessao = renovarSessao;
-        this.encerrarSessao = encerrarSessao;
+    public AuthController(RegisterUserUseCase registerUser, LoginUseCase login,
+                          RefreshSessionUseCase refreshSession, LogoutUseCase logout) {
+        this.registerUser = registerUser;
+        this.login = login;
+        this.refreshSession = refreshSession;
+        this.logout = logout;
     }
 
     public record RegisterRequest(
@@ -82,14 +82,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<SessionResponse> register(@Valid @RequestBody RegisterRequest request,
                                                     HttpServletRequest httpRequest) {
-        var session = registrarUsuario.execute(request.email(), request.name(), request.password());
+        var session = registerUser.execute(request.email(), request.name(), request.password());
         return sessionResponse(HttpStatus.CREATED, session, httpRequest);
     }
 
     @PostMapping("/login")
     public ResponseEntity<SessionResponse> login(@Valid @RequestBody LoginRequest request,
                                                  HttpServletRequest httpRequest) {
-        var session = autenticar.execute(request.email(), request.password());
+        var session = login.execute(request.email(), request.password());
         return sessionResponse(HttpStatus.OK, session, httpRequest);
     }
 
@@ -99,14 +99,14 @@ public class AuthController {
                                                    HttpServletRequest httpRequest) {
         var token = refreshTokenFrom(request, httpRequest)
                 .orElseThrow(AuthenticationFailedException::new);
-        return sessionResponse(HttpStatus.OK, renovarSessao.execute(token), httpRequest);
+        return sessionResponse(HttpStatus.OK, refreshSession.execute(token), httpRequest);
     }
 
     /** Revoga a sessão inteira. Sempre 204, mesmo para token desconhecido ou ausente. */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshRequest request,
                                        HttpServletRequest httpRequest) {
-        refreshTokenFrom(request, httpRequest).ifPresent(encerrarSessao::execute);
+        refreshTokenFrom(request, httpRequest).ifPresent(logout::execute);
         var clear = refreshCookie("", 0);
         return isWeb(httpRequest)
                 ? ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, clear.toString()).build()

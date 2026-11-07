@@ -18,12 +18,12 @@ public record Account(AccountId id, UserId ownerId, String number) {
         }
     }
 
-    public static Account abrir(UserId ownerId) {
-        return new Account(new AccountId(), ownerId, gerarNumero());
+    public static Account open(UserId ownerId) {
+        return new Account(new AccountId(), ownerId, generateNumber());
     }
 
     /** Número de 10 dígitos gerado com fonte criptograficamente segura. Unicidade é garantida pelo banco. */
-    static String gerarNumero() {
+    static String generateNumber() {
         return String.format("%010d", RANDOM.nextLong(10_000_000_000L));
     }
 }

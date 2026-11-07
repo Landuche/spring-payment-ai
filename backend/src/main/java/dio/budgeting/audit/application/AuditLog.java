@@ -33,17 +33,17 @@ public class AuditLog {
     }
 
     @Transactional
-    public void sucesso(AuditEventType type, UserId actor, AccountId account, String reference) {
-        events.save(AuditEvent.sucesso(agora(), type, actor, account, reference));
+    public void success(AuditEventType type, UserId actor, AccountId account, String reference) {
+        events.save(AuditEvent.success(now(), type, actor, account, reference));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void falha(AuditEventType type, UserId actor, AccountId account, String subjectHash,
+    public void failure(AuditEventType type, UserId actor, AccountId account, String subjectHash,
                       String reference, String reason) {
-        events.save(AuditEvent.falha(agora(), type, actor, account, subjectHash, reference, reason));
+        events.save(AuditEvent.failure(now(), type, actor, account, subjectHash, reference, reason));
     }
 
-    private Instant agora() {
+    private Instant now() {
         return Instant.now(clock);
     }
 }

@@ -18,8 +18,8 @@ public interface FailureCounterEntityRepository extends CrudRepository<FailureCo
     @Modifying
     @Query("""
             delete from FailureCounterEntity c
-            where (c.blockedUntil is null or c.blockedUntil < :corte)
-              and (c.windowStart is null or c.windowStart < :corte)
+            where (c.blockedUntil is null or c.blockedUntil < :cutoff)
+              and (c.windowStart is null or c.windowStart < :cutoff)
             """)
-    int apagarInativos(@Param("corte") Instant corte);
+    int deleteInactive(@Param("cutoff") Instant cutoff);
 }

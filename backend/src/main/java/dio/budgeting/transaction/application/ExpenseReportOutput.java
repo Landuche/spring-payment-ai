@@ -4,15 +4,15 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * {@code total} e {@code quantidade} contam só despesas. As transferências do período vêm à parte, para o relatório
+ * {@code total} e {@code count} contam só despesas. As transferências do período vêm à parte, para o relatório
  * explicar a variação do saldo sem inflar os gastos; ficam nulas quando o relatório é filtrado por categoria.
  */
 public record ExpenseReportOutput(
-        String periodo,
-        String categoria,
+        String period,
+        String category,
         BigDecimal total,
-        int quantidade,
-        List<TransactionOutput> transacoes,
-        BigDecimal transferenciasEnviadas,
-        BigDecimal transferenciasRecebidas) {
+        int count,
+        List<TransactionOutput> transactions,
+        BigDecimal sentTransfers,
+        BigDecimal receivedTransfers) {
 }

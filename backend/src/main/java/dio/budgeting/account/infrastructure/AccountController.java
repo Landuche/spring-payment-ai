@@ -1,10 +1,10 @@
 package dio.budgeting.account.infrastructure;
 
 import dio.budgeting.account.application.AccountOutput;
-import dio.budgeting.account.application.ConsultarContaUseCase;
+import dio.budgeting.account.application.GetAccountUseCase;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import dio.budgeting.transfer.application.TransferOutput;
-import dio.budgeting.transfer.application.TransferirUseCase;
+import dio.budgeting.transfer.application.TransferUseCase;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -31,12 +31,12 @@ import java.math.BigDecimal;
 public class AccountController {
     static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
 
-    private final ConsultarContaUseCase consultarConta;
-    private final TransferirUseCase transferir;
+    private final GetAccountUseCase getAccount;
+    private final TransferUseCase transferUseCase;
 
-    public AccountController(ConsultarContaUseCase consultarConta, TransferirUseCase transferir) {
-        this.consultarConta = consultarConta;
-        this.transferir = transferir;
+    public AccountController(GetAccountUseCase getAccount, TransferUseCase transferUseCase) {
+        this.getAccount = getAccount;
+        this.transferUseCase = transferUseCase;
     }
 
     /** Informe exatamente um destino: destinationAccountNumber OU destinationEmail (validado no caso de uso). */
@@ -49,7 +49,7 @@ public class AccountController {
 
     @GetMapping("/account")
     public AccountOutput myAccount() {
-        return consultarConta.minhaConta();
+        return getAccount.myAccount();
     }
 
     /** Busca o destinatário por número OU e-mail, para confirmação antes da transferência. */
@@ -59,7 +59,7 @@ public class AccountController {
         if ((number == null) == (email == null)) {
             throw new BusinessRuleViolationException("Informe number ou email (apenas um)");
         }
-        return number != null ? consultarConta.buscarPorNumero(number) : consultarConta.buscarPorEmail(email);
+        return number != null ? getAccount.findByNumber(number) : getAccount.findByEmail(email);
     }
 
     /**
@@ -70,7 +70,7 @@ public class AccountController {
     public ResponseEntity<TransferOutput> transfer(
             @RequestHeader(IDEMPOTENCY_HEADER) String idempotencyKey,
             @Valid @RequestBody TransferRequest request) {
-        var output = transferir.execute(request.destinationAccountNumber(), request.destinationEmail(),
+        var output = transferUseCase.execute(request.destinationAccountNumber(), request.destinationEmail(),
                 request.amount(), request.description(), idempotencyKey);
         return ResponseEntity.status(output.replayed() ? HttpStatus.OK : HttpStatus.CREATED).body(output);
     }

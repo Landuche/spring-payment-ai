@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ListarTransacoesPorCategoriaUseCase {
+public class ListTransactionsByCategoryUseCase {
     private final TransactionRepository transactionRepository;
     private final CurrentAccountProvider currentAccount;
 
-    public ListarTransacoesPorCategoriaUseCase(TransactionRepository transactionRepository,
+    public ListTransactionsByCategoryUseCase(TransactionRepository transactionRepository,
                                                CurrentAccountProvider currentAccount) {
         this.transactionRepository = transactionRepository;
         this.currentAccount = currentAccount;

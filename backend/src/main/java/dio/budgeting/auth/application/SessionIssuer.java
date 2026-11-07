@@ -34,16 +34,16 @@ public class SessionIssuer {
     }
 
     /** Nova sessão: começa uma família nova de refresh tokens. */
-    public SessionOutput emitir(User user, Account account) {
-        return emitir(user, account, UUID.randomUUID());
+    public SessionOutput issue(User user, Account account) {
+        return issue(user, account, UUID.randomUUID());
     }
 
     /** Renovação: o novo refresh token continua a família do anterior. */
-    public SessionOutput emitir(User user, Account account, UUID familyId) {
+    public SessionOutput issue(User user, Account account, UUID familyId) {
         var now = Instant.now(clock);
         var access = tokenProvider.issue(user.id(), account.id());
 
-        var raw = gerarToken();
+        var raw = generateToken();
         refreshTokens.save(new RefreshToken(RefreshToken.hash(raw), user.id(), familyId,
                 now.plus(refreshTtl), null, null));
 
@@ -52,7 +52,7 @@ public class SessionIssuer {
     }
 
     /** 256 bits de entropia, codificados em base64url sem padding. */
-    static String gerarToken() {
+    static String generateToken() {
         var bytes = new byte[32];
         RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);

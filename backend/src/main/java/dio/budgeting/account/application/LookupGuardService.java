@@ -40,23 +40,23 @@ public class LookupGuardService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = LookupBlockedException.class)
-    public void registrarBusca(AccountId accountId) {
+    public void recordLookup(AccountId accountId) {
         // Trava a conta: buscas concorrentes do mesmo usuário são contadas uma a uma.
         accountRepository.lockForUpdate(accountId);
         var now = Instant.now(clock);
 
-        var conta = guardRepository.findByAccount(accountId).orElseGet(() -> LookupGuard.fresh(accountId));
-        var proximaConta = conta.registrarBusca(now);
-        guardRepository.save(proximaConta);
-        if (proximaConta.isBlocked(now)) {
-            audit.falha(AuditEventType.BUSCA_BLOQUEADA, null, accountId, null, null, "LIMITE_DE_BUSCAS");
-            throw new LookupBlockedException(proximaConta.blockedUntil());
+        var account = guardRepository.findByAccount(accountId).orElseGet(() -> LookupGuard.fresh(accountId));
+        var updated = account.recordLookup(now);
+        guardRepository.save(updated);
+        if (updated.isBlocked(now)) {
+            audit.failure(AuditEventType.LOOKUP_BLOCKED, null, accountId, null, null, "LOOKUP_LIMIT");
+            throw new LookupBlockedException(updated.blockedUntil());
         }
     }
 
     /** Chamado dentro da transação da transferência concluída. */
     @Transactional
-    public void limpar(AccountId accountId) {
+    public void reset(AccountId accountId) {
         guardRepository.save(LookupGuard.fresh(accountId));
     }
 }

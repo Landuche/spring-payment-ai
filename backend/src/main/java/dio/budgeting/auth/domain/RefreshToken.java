@@ -40,7 +40,7 @@ public record RefreshToken(
         return usedAt != null;
     }
 
-    public RefreshToken marcarComoUsado(Instant now) {
+    public RefreshToken markAsUsed(Instant now) {
         return new RefreshToken(hash, userId, familyId, expiresAt, now, revokedAt);
     }
 }

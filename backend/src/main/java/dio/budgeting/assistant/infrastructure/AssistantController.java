@@ -37,7 +37,7 @@ public class AssistantController {
      */
     @PostMapping(value = "/event", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public AssistantReplyResponse event(@Valid @RequestBody AssistantEventRequest request) {
-        return chat.reply(AvisosDoApp.mensagem(request), request.conversationId());
+        return chat.reply(AppNotices.message(request), request.conversationId());
     }
 
     @PostMapping(value = "/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,6 +45,6 @@ public class AssistantController {
                                     @RequestParam(value = "conversationId", required = false) String conversationId) {
         var transcription = transcriptionModel.transcribe(file.getResource());
         var reply = chat.reply(transcription, conversationId);
-        return new VoiceReplyResponse(transcription, reply.reply(), reply.transferencia());
+        return new VoiceReplyResponse(transcription, reply.reply(), reply.transfer());
     }
 }

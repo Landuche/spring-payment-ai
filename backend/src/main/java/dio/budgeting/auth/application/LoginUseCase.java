@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Locale;
 
 @Service
-public class AutenticarUseCase {
+public class LoginUseCase {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
@@ -22,7 +22,7 @@ public class AutenticarUseCase {
     private final LoginProtectionService loginProtection;
     private final AuditLog audit;
 
-    public AutenticarUseCase(UserRepository userRepository, AccountRepository accountRepository,
+    public LoginUseCase(UserRepository userRepository, AccountRepository accountRepository,
                              PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer,
                              LoginProtectionService loginProtection, AuditLog audit) {
         this.userRepository = userRepository;
@@ -33,38 +33,38 @@ public class AutenticarUseCase {
         this.audit = audit;
     }
 
-    public SessionOutput execute(String email, String senha) {
+    public SessionOutput execute(String email, String password) {
         var normalizedEmail = email == null ? "" : email.strip().toLowerCase(Locale.ROOT);
         var emailKey = "email:" + normalizedEmail;
         var subject = AuditEvent.hashSubject(email);
 
         // Bloqueio é checado antes de qualquer verificação de senha: conta bloqueada não recebe resposta de credencial.
         try {
-            loginProtection.verificarBloqueio(emailKey);
+            loginProtection.checkBlock(emailKey);
         } catch (LoginBlockedException e) {
-            audit.falha(AuditEventType.LOGIN_BLOQUEADO, null, null, subject, null, "MUITAS_FALHAS");
+            audit.failure(AuditEventType.LOGIN_BLOCKED, null, null, subject, null, "TOO_MANY_FAILURES");
             throw e;
         }
 
-        if (email == null || senha == null) {
-            loginProtection.registrarFalha(emailKey);
-            audit.falha(AuditEventType.LOGIN_FALHOU, null, null, subject, null, "DADOS_AUSENTES");
+        if (email == null || password == null) {
+            loginProtection.recordFailure(emailKey);
+            audit.failure(AuditEventType.LOGIN_FAILED, null, null, subject, null, "MISSING_DATA");
             throw new AuthenticationFailedException();
         }
 
         var user = userRepository.findByEmail(normalizedEmail).orElse(null);
-        if (user == null || !passwordEncoder.matches(senha, user.passwordHash())) {
-            loginProtection.registrarFalha(emailKey);
-            audit.falha(AuditEventType.LOGIN_FALHOU, user == null ? null : user.id(), null, subject, null,
-                    "CREDENCIAIS_INVALIDAS");
+        if (user == null || !passwordEncoder.matches(password, user.passwordHash())) {
+            loginProtection.recordFailure(emailKey);
+            audit.failure(AuditEventType.LOGIN_FAILED, user == null ? null : user.id(), null, subject, null,
+                    "INVALID_CREDENTIALS");
             throw new AuthenticationFailedException();
         }
 
-        loginProtection.registrarSucesso(emailKey);
+        loginProtection.recordSuccess(emailKey);
 
         var account = accountRepository.findByOwner(user.id())
                 .orElseThrow(() -> new IllegalStateException("Usuário sem conta: " + user.id()));
-        audit.sucesso(AuditEventType.LOGIN_REALIZADO, user.id(), account.id(), null);
-        return sessionIssuer.emitir(user, account);
+        audit.success(AuditEventType.LOGIN_SUCCEEDED, user.id(), account.id(), null);
+        return sessionIssuer.issue(user, account);
     }
 }

@@ -19,9 +19,9 @@ import java.time.Instant;
  */
 @Service
 public class LoginProtectionService {
-    static final int MAX_FALHAS_EMAIL = 5;
-    static final Duration JANELA = Duration.ofMinutes(15);
-    static final Duration BLOQUEIO = Duration.ofMinutes(15);
+    static final int MAX_EMAIL_FAILURES = 5;
+    static final Duration WINDOW = Duration.ofMinutes(15);
+    static final Duration BLOCK_DURATION = Duration.ofMinutes(15);
 
     private final FailureCounterRepository counters;
     private final Clock clock;
@@ -32,25 +32,25 @@ public class LoginProtectionService {
     }
 
     /** Lança {@link LoginBlockedException} se o e-mail estiver bloqueado. Não altera estado. */
-    public void verificarBloqueio(String emailKey) {
+    public void checkBlock(String emailKey) {
         var now = Instant.now(clock);
-        var atual = counters.findByKey(emailKey).orElse(null);
-        if (atual != null && atual.isBlocked(now)) {
-            throw new LoginBlockedException(atual.blockedUntil());
+        var current = counters.findByKey(emailKey).orElse(null);
+        if (current != null && current.isBlocked(now)) {
+            throw new LoginBlockedException(current.blockedUntil());
         }
     }
 
     /** Registra uma falha, em transação própria: a contagem persiste mesmo que a transação do chamador seja revertida. */
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = LoginBlockedException.class)
-    public void registrarFalha(String emailKey) {
+    public void recordFailure(String emailKey) {
         var now = Instant.now(clock);
-        var atual = counters.findByKeyForUpdate(emailKey).orElseGet(() -> FailureCounter.fresh(emailKey));
-        counters.save(atual.registrarFalha(now, MAX_FALHAS_EMAIL, JANELA, BLOQUEIO));
+        var current = counters.findByKeyForUpdate(emailKey).orElseGet(() -> FailureCounter.fresh(emailKey));
+        counters.save(current.recordFailure(now, MAX_EMAIL_FAILURES, WINDOW, BLOCK_DURATION));
     }
 
     /** Login correto: zera o contador do e-mail. */
     @Transactional
-    public void registrarSucesso(String emailKey) {
-        counters.save(counters.findByKey(emailKey).orElseGet(() -> FailureCounter.fresh(emailKey)).limpar());
+    public void recordSuccess(String emailKey) {
+        counters.save(counters.findByKey(emailKey).orElseGet(() -> FailureCounter.fresh(emailKey)).reset());
     }
 }

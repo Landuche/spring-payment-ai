@@ -15,7 +15,7 @@ public interface LookupGuardEntityRepository extends CrudRepository<LookupGuardE
     @Query("""
             delete from LookupGuardEntity g
             where g.attempts = 0
-              and (g.blockedUntil is null or g.blockedUntil < :agora)
+              and (g.blockedUntil is null or g.blockedUntil < :now)
             """)
-    int apagarSemPendencia(@Param("agora") Instant agora);
+    int deleteIdle(@Param("now") Instant now);
 }

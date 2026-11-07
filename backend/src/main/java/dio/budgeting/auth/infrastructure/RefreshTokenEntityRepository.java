@@ -21,6 +21,6 @@ public interface RefreshTokenEntityRepository extends CrudRepository<RefreshToke
     int revokeFamily(@Param("family") UUID family, @Param("now") Instant now);
 
     @Modifying
-    @Query("delete from RefreshTokenEntity t where t.expiresAt < :agora")
-    int apagarExpirados(@Param("agora") Instant agora);
+    @Query("delete from RefreshTokenEntity t where t.expiresAt < :now")
+    int deleteExpired(@Param("now") Instant now);
 }

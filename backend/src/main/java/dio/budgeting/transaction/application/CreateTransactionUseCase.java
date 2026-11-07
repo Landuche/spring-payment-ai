@@ -19,13 +19,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Service
-public class CriarTransacaoUseCase {
+public class CreateTransactionUseCase {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final CurrentAccountProvider currentAccount;
     private final Clock clock;
 
-    public CriarTransacaoUseCase(TransactionRepository transactionRepository, AccountRepository accountRepository,
+    public CreateTransactionUseCase(TransactionRepository transactionRepository, AccountRepository accountRepository,
                                  CurrentAccountProvider currentAccount, Clock clock) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
@@ -34,29 +34,29 @@ public class CriarTransacaoUseCase {
     }
 
     @Transactional
-    public TransactionOutput execute(BigDecimal valor, Category categoria, TransactionType tipo, String descricao) {
+    public TransactionOutput execute(BigDecimal amount, Category category, TransactionType type, String description) {
 
         var accountId = currentAccount.current();
-        var amount = Money.ofPositiveReais(valor);
+        var money = Money.ofPositiveReais(amount);
 
-        if (!tipo.isCredit() && tipo.isExpense()) {
+        if (!type.isCredit() && type.isExpense()) {
             // Trava a conta: duas despesas concorrentes não podem ler o mesmo saldo.
             accountRepository.lockForUpdate(accountId);
-            var saldoAtual = saldoAtual(accountId);
-            if (amount.cents() > saldoAtual.cents()) {
+            var currentBalance = currentBalance(accountId);
+            if (money.cents() > currentBalance.cents()) {
                 throw new BusinessRuleViolationException(
-                        "Saldo insuficiente: saldo atual de " + saldoAtual.toReais()
-                                + " reais não cobre a despesa de " + amount.toReais() + " reais");
+                        "Saldo insuficiente: saldo atual de " + currentBalance.toReais()
+                                + " reais não cobre a despesa de " + money.toReais() + " reais");
             }
         }
 
-        var agora = Instant.now(clock);
-        var transaction = Transaction.nova(accountId, descricao, amount, categoria, tipo,
-                LocalDate.ofInstant(agora, clock.getZone()), agora);
+        var now = Instant.now(clock);
+        var transaction = Transaction.create(accountId, description, money, category, type,
+                LocalDate.ofInstant(now, clock.getZone()), now);
         return TransactionOutput.from(transactionRepository.save(transaction));
     }
 
-    private Money saldoAtual(AccountId accountId) {
+    private Money currentBalance(AccountId accountId) {
         return transactionRepository.findAll(accountId).stream()
                 .map(t -> t.type().isCredit() ? t.amount() : new Money(-t.amount().cents()))
                 .reduce(Money.ZERO, Money::plus);

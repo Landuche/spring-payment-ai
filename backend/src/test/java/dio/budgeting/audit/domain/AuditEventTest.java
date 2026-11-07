@@ -24,7 +24,7 @@ class AuditEventTest {
 
     @Test
     void should_rejectReasonLongerThanTheColumn() {
-        assertThatThrownBy(() -> AuditEvent.falha(Instant.now(), AuditEventType.LOGIN_FALHOU, null, null, null,
+        assertThatThrownBy(() -> AuditEvent.failure(Instant.now(), AuditEventType.LOGIN_FAILED, null, null, null,
                 null, "x".repeat(61)))
                 .isInstanceOf(IllegalArgumentException.class);
     }

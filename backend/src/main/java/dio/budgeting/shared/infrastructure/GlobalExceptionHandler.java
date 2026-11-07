@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
                         fe -> fe.getField(),
                         fe -> fe.getDefaultMessage() == null ? "inválido" : fe.getDefaultMessage(),
                         (first, second) -> first));
-        problem.setProperty("campos", fields);
+        problem.setProperty("fields", fields);
         return problem;
     }
 

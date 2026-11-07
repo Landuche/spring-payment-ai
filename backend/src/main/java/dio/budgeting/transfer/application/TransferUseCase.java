@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * </ul>
  */
 @Service
-public class TransferirUseCase {
+public class TransferUseCase {
     private final TransferRepository transferRepository;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
@@ -48,7 +48,7 @@ public class TransferirUseCase {
     private final AuditLog audit;
     private final Clock clock;
 
-    public TransferirUseCase(TransferRepository transferRepository, TransactionRepository transactionRepository,
+    public TransferUseCase(TransferRepository transferRepository, TransactionRepository transactionRepository,
                              AccountRepository accountRepository, UserRepository userRepository,
                              CurrentAccountProvider currentAccount, LookupGuardService lookupGuard,
                              AuditLog audit, Clock clock) {
@@ -63,13 +63,13 @@ public class TransferirUseCase {
     }
 
     @Transactional
-    public TransferOutput execute(String destinationNumber, BigDecimal valor, String descricao, String idempotencyKey) {
-        return execute(destinationNumber, null, valor, descricao, idempotencyKey);
+    public TransferOutput execute(String destinationNumber, BigDecimal amount, String description, String idempotencyKey) {
+        return execute(destinationNumber, null, amount, description, idempotencyKey);
     }
 
     @Transactional
-    public TransferOutput execute(String destinationNumber, String destinationEmail, BigDecimal valor,
-                                  String descricao, String idempotencyKey) {
+    public TransferOutput execute(String destinationNumber, String destinationEmail, BigDecimal amount,
+                                  String description, String idempotencyKey) {
         var origin = currentAccount.current();
 
         var existing = transferRepository.findByIdempotencyKey(origin, idempotencyKey);
@@ -79,9 +79,9 @@ public class TransferirUseCase {
 
         // Toda tentativa de localizar destinatário conta, inclusive as que falham: senão o endpoint de transferência
         // viraria uma forma de enumerar contas, contornando o limite da busca.
-        lookupGuard.registrarBusca(origin);
+        lookupGuard.recordLookup(origin);
 
-        var amount = Money.ofPositiveReais(valor);
+        var money = Money.ofPositiveReais(amount);
         var destination = resolveDestination(destinationNumber, destinationEmail);
 
         if (destination.id().equals(origin)) {
@@ -97,54 +97,54 @@ public class TransferirUseCase {
             return output(replayed.get(), true);
         }
 
-        var contaOrigem = accountRepository.findById(origin)
+        var sourceAccount = accountRepository.findById(origin)
                 .orElseThrow(() -> new IllegalStateException("Conta de origem inexistente"));
-        var saldo = saldo(origin);
-        if (amount.cents() > saldo.cents()) {
+        var balance = balance(origin);
+        if (money.cents() > balance.cents()) {
             // Recusa fica registrada mesmo com o rollback da transferência: é o sinal que a auditoria precisa.
-            audit.falha(AuditEventType.TRANSFERENCIA_RECUSADA, contaOrigem.ownerId(), origin, null,
-                    destination.id().uuid().toString(), "SALDO_INSUFICIENTE");
+            audit.failure(AuditEventType.TRANSFER_REFUSED, sourceAccount.ownerId(), origin, null,
+                    destination.id().uuid().toString(), "INSUFFICIENT_BALANCE");
             throw new BusinessRuleViolationException(
-                    "Saldo insuficiente: saldo atual de " + saldo.toReais() + " reais não cobre a transferência de "
-                            + amount.toReais() + " reais");
+                    "Saldo insuficiente: saldo atual de " + balance.toReais() + " reais não cobre a transferência de "
+                            + money.toReais() + " reais");
         }
 
-        var agora = Instant.now(clock);
+        var now = Instant.now(clock);
         var transfer = transferRepository.save(new Transfer(
-                UUID.randomUUID(), origin, destination.id(), amount, descricao, idempotencyKey, agora));
+                UUID.randomUUID(), origin, destination.id(), money, description, idempotencyKey, now));
 
-        var today = LocalDate.ofInstant(agora, clock.getZone());
-        var titularDestino = nomeDoTitular(destination);
-        var titularOrigem = nomeDoTitular(contaOrigem);
+        var today = LocalDate.ofInstant(now, clock.getZone());
+        var destinationHolder = holderName(destination);
+        var sourceHolder = holderName(sourceAccount);
 
         // Com descrição informada, ela aparece no extrato dos dois lados; sem, usa um texto padrão.
-        var descricaoInformada = transfer.description();
-        var textoEnviado = descricaoInformada != null ? descricaoInformada : "Transferência para " + titularDestino;
-        var textoRecebido = descricaoInformada != null ? descricaoInformada : "Transferência de " + titularOrigem;
+        var providedDescription = transfer.description();
+        var sentText = providedDescription != null ? providedDescription : "Transferência para " + destinationHolder;
+        var receivedText = providedDescription != null ? providedDescription : "Transferência de " + sourceHolder;
 
-        transactionRepository.save(Transaction.deTransferencia(transfer.id(), origin, textoEnviado, amount,
-                TransactionType.TRANSFERENCIA_ENVIADA, today, agora));
-        transactionRepository.save(Transaction.deTransferencia(transfer.id(), destination.id(), textoRecebido, amount,
-                TransactionType.TRANSFERENCIA_RECEBIDA, today, agora));
+        transactionRepository.save(Transaction.fromTransfer(transfer.id(), origin, sentText, money,
+                TransactionType.TRANSFER_SENT, today, now));
+        transactionRepository.save(Transaction.fromTransfer(transfer.id(), destination.id(), receivedText, money,
+                TransactionType.TRANSFER_RECEIVED, today, now));
 
-        audit.sucesso(AuditEventType.TRANSFERENCIA_CONCLUIDA, contaOrigem.ownerId(), origin, transfer.id().toString());
+        audit.success(AuditEventType.TRANSFER_COMPLETED, sourceAccount.ownerId(), origin, transfer.id().toString());
 
         // Transferência concluída: o usuário fez o que buscou, então o contador volta a zero.
-        lookupGuard.limpar(origin);
+        lookupGuard.reset(origin);
 
         return output(transfer, false);
     }
 
     /** Exatamente um destino deve ser informado: número da conta ou e-mail do titular. */
-    private Account resolveDestination(String numero, String email) {
-        var temNumero = numero != null && !numero.isBlank();
+    private Account resolveDestination(String number, String email) {
+        var temNumero = number != null && !number.isBlank();
         var temEmail = email != null && !email.isBlank();
         if (temNumero == temEmail) {
             throw new BusinessRuleViolationException("Informe o número da conta ou o e-mail do destinatário (apenas um)");
         }
 
         if (temNumero) {
-            var digits = numero.replaceAll("\\D", "");
+            var digits = number.replaceAll("\\D", "");
             if (!digits.matches("\\d{10}")) {
                 throw new BusinessRuleViolationException("Número de conta de destino inválido");
             }
@@ -164,13 +164,13 @@ public class TransferirUseCase {
                 .forEach(accountRepository::lockForUpdate);
     }
 
-    private Money saldo(AccountId accountId) {
+    private Money balance(AccountId accountId) {
         return transactionRepository.findAll(accountId).stream()
                 .map(t -> t.type().isCredit() ? t.amount() : new Money(-t.amount().cents()))
                 .reduce(Money.ZERO, Money::plus);
     }
 
-    private String nomeDoTitular(Account account) {
+    private String holderName(Account account) {
         return userRepository.findById(account.ownerId())
                 .map(u -> u.name())
                 .orElse("titular");

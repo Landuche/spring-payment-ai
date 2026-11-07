@@ -5,14 +5,14 @@ import dio.budgeting.account.domain.AccountRepository;
 import dio.budgeting.audit.application.AuditLog;
 import dio.budgeting.audit.application.InMemoryAuditEventRepository;
 import dio.budgeting.audit.domain.AuditEventRepository;
-import dio.budgeting.auth.application.AutenticarUseCase;
-import dio.budgeting.auth.application.EncerrarSessaoUseCase;
+import dio.budgeting.auth.application.LoginUseCase;
+import dio.budgeting.auth.application.LogoutUseCase;
 import dio.budgeting.auth.application.InMemoryFailureCounterRepository;
 import dio.budgeting.auth.application.InMemoryRefreshTokenRepository;
 import dio.budgeting.auth.application.InMemoryUserRepository;
 import dio.budgeting.auth.application.LoginProtectionService;
-import dio.budgeting.auth.application.RegistrarUsuarioUseCase;
-import dio.budgeting.auth.application.RenovarSessaoUseCase;
+import dio.budgeting.auth.application.RegisterUserUseCase;
+import dio.budgeting.auth.application.RefreshSessionUseCase;
 import dio.budgeting.auth.application.SessionIssuer;
 import dio.budgeting.auth.domain.FailureCounterRepository;
 import dio.budgeting.auth.domain.RefreshTokenRepository;
@@ -42,8 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = AuthController.class,
         properties = "budgeting.security.jwt-secret=test-secret-com-pelo-menos-32-bytes-123456")
 @AutoConfigureMockMvc
-@Import({RegistrarUsuarioUseCase.class, AutenticarUseCase.class, JwtTokenProvider.class, LoginProtectionService.class,
-        SessionIssuer.class, RenovarSessaoUseCase.class, EncerrarSessaoUseCase.class,
+@Import({RegisterUserUseCase.class, LoginUseCase.class, JwtTokenProvider.class, LoginProtectionService.class,
+        SessionIssuer.class, RefreshSessionUseCase.class, LogoutUseCase.class,
         AuditLog.class, ClockConfig.class, GlobalExceptionHandler.class, SecurityConfig.class,
         AuthControllerTest.TestRepositoryConfig.class})
 class AuthControllerTest {

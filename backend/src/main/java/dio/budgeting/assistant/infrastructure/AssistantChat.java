@@ -48,30 +48,30 @@ public class AssistantChat {
         String key = currentAccount.current().uuid() + ":"
                 + (conversationId == null || conversationId.isBlank() ? DEFAULT_CONVERSATION : conversationId);
         // As ferramentas deixam aqui o que o app precisa mostrar além do texto (ex.: o cartão de transferência).
-        var proposals = new PropostasDoTurno();
+        var proposals = new TurnProposals();
         var text = chatClient.prompt()
-                .system(systemPrompt + "\n\n" + contextoDeData(clock))
+                .system(systemPrompt + "\n\n" + dateContext(clock))
                 .user(message)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, key))
                 .toolContext(Map.of(AssistantTools.CONTEXT_PROPOSALS, proposals))
                 .call()
                 .content();
-        return new AssistantReplyResponse(text, proposals.transferencia().orElse(null));
+        return new AssistantReplyResponse(text, proposals.transfer().orElse(null));
     }
 
     /**
      * O modelo não sabe que dia é hoje. Sem isso, "relatório deste mês" não tem como ser resolvido e ele acaba
      * perguntando o mês ao cliente.
      */
-    static String contextoDeData(Clock clock) {
-        var hoje = LocalDate.now(clock);
-        var portugues = Locale.of("pt", "BR");
+    static String dateContext(Clock clock) {
+        var today = LocalDate.now(clock);
+        var portuguese = Locale.of("pt", "BR");
         return "## Data de hoje\nHoje é %s, %s. O mês atual é %s de %d (período %s nas ferramentas)."
                 .formatted(
-                        hoje.getDayOfWeek().getDisplayName(TextStyle.FULL, portugues),
-                        hoje.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                        hoje.getMonth().getDisplayName(TextStyle.FULL, portugues),
-                        hoje.getYear(),
-                        YearMonth.from(hoje));
+                        today.getDayOfWeek().getDisplayName(TextStyle.FULL, portuguese),
+                        today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        today.getMonth().getDisplayName(TextStyle.FULL, portuguese),
+                        today.getYear(),
+                        YearMonth.from(today));
     }
 }

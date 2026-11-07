@@ -19,11 +19,11 @@ public record FailureCounter(String key, int failures, Instant windowStart, Inst
     }
 
     /** Registra uma falha. Ao atingir {@code max} dentro da janela, devolve o estado bloqueado até {@code now + block}. */
-    public FailureCounter registrarFalha(Instant now, int max, Duration janela, Duration block) {
+    public FailureCounter recordFailure(Instant now, int max, Duration window, Duration block) {
         if (isBlocked(now)) {
             return this;
         }
-        boolean novaJanela = windowStart == null || !now.isBefore(windowStart.plus(janela));
+        boolean novaJanela = windowStart == null || !now.isBefore(windowStart.plus(window));
         int base = novaJanela ? 0 : failures;
         Instant inicio = novaJanela ? now : windowStart;
         int next = base + 1;
@@ -35,7 +35,7 @@ public record FailureCounter(String key, int failures, Instant windowStart, Inst
     }
 
     /** Zera o contador depois de um login bem-sucedido. */
-    public FailureCounter limpar() {
+    public FailureCounter reset() {
         return fresh(key);
     }
 }

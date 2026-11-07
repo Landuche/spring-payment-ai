@@ -9,18 +9,18 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class SimularInvestimentoUseCaseTest {
+class SimulateInvestmentUseCaseTest {
 
-    private final SimularInvestimentoUseCase useCase = new SimularInvestimentoUseCase(new BigDecimal("0.01"));
+    private final SimulateInvestmentUseCase useCase = new SimulateInvestmentUseCase(new BigDecimal("0.01"));
 
     @Test
     void should_applyMonthlyCompoundInterest() {
         // 1000 * 1.01^12 = 1126.825... -> 1126.83
         var result = useCase.execute(new BigDecimal("1000"), 12);
 
-        assertThat(result.montanteFinal()).isEqualByComparingTo("1126.83");
-        assertThat(result.rendimento()).isEqualByComparingTo("126.83");
-        assertThat(result.prazoMeses()).isEqualTo(12);
+        assertThat(result.finalAmount()).isEqualByComparingTo("1126.83");
+        assertThat(result.earnings()).isEqualByComparingTo("126.83");
+        assertThat(result.termMonths()).isEqualTo(12);
     }
 
     @Test

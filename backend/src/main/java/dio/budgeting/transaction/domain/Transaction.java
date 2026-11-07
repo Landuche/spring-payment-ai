@@ -49,12 +49,12 @@ public record Transaction(
     }
 
     /** Lançamento manual (receita ou despesa). Tipos de transferência só são criados pelo caso de uso de transferência. */
-    public static Transaction nova(AccountId accountId, String description, Money amount, Category category,
+    public static Transaction create(AccountId accountId, String description, Money amount, Category category,
                                    TransactionType type, LocalDate occurredAt) {
-        return nova(accountId, description, amount, category, type, occurredAt, null);
+        return create(accountId, description, amount, category, type, occurredAt, null);
     }
 
-    public static Transaction nova(AccountId accountId, String description, Money amount, Category category,
+    public static Transaction create(AccountId accountId, String description, Money amount, Category category,
                                    TransactionType type, LocalDate occurredAt, Instant createdAt) {
         if (type.isTransfer()) {
             throw new BusinessRuleViolationException("Use a operação de transferência para movimentar entre contas");
@@ -63,14 +63,14 @@ public record Transaction(
                 createdAt, null);
     }
 
-    public static Transaction deTransferencia(UUID transferId, AccountId accountId, String description, Money amount,
+    public static Transaction fromTransfer(UUID transferId, AccountId accountId, String description, Money amount,
                                               TransactionType type, LocalDate occurredAt) {
-        return deTransferencia(transferId, accountId, description, amount, type, occurredAt, null);
+        return fromTransfer(transferId, accountId, description, amount, type, occurredAt, null);
     }
 
-    public static Transaction deTransferencia(UUID transferId, AccountId accountId, String description, Money amount,
+    public static Transaction fromTransfer(UUID transferId, AccountId accountId, String description, Money amount,
                                               TransactionType type, LocalDate occurredAt, Instant createdAt) {
         return new Transaction(new TransactionId(), accountId, description, amount,
-                Category.TRANSFERENCIA, type, occurredAt, createdAt, transferId);
+                Category.TRANSFER, type, occurredAt, createdAt, transferId);
     }
 }

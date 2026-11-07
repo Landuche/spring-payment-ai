@@ -13,15 +13,15 @@ import java.math.BigDecimal;
  * cancelou a operação; isto só deixa o Claudinho saber, para responder e propor o próximo passo.
  */
 public record AssistantEventRequest(
-        @NotNull Tipo tipo,
-        @NotBlank @Size(max = 60) String nomeDestinatario,
-        @NotNull @DecimalMin("0.01") @Digits(integer = 13, fraction = 2) BigDecimal valor,
-        @Size(max = 200) String motivo,
+        @NotNull Type type,
+        @NotBlank @Size(max = 60) String recipientName,
+        @NotNull @DecimalMin("0.01") @Digits(integer = 13, fraction = 2) BigDecimal amount,
+        @Size(max = 200) String reason,
         @Size(max = 64) String conversationId) {
 
-    public enum Tipo {
-        TRANSFERENCIA_CONFIRMADA,
-        TRANSFERENCIA_CANCELADA,
-        TRANSFERENCIA_FALHOU
+    public enum Type {
+        TRANSFER_CONFIRMED,
+        TRANSFER_CANCELED,
+        TRANSFER_FAILED
     }
 }

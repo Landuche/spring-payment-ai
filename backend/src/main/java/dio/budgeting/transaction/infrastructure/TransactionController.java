@@ -1,8 +1,8 @@
 package dio.budgeting.transaction.infrastructure;
 
-import dio.budgeting.transaction.application.CriarTransacaoUseCase;
-import dio.budgeting.transaction.application.ListarTransacoesPorCategoriaUseCase;
-import dio.budgeting.transaction.application.ListarTransacoesUseCase;
+import dio.budgeting.transaction.application.CreateTransactionUseCase;
+import dio.budgeting.transaction.application.ListTransactionsByCategoryUseCase;
+import dio.budgeting.transaction.application.ListTransactionsUseCase;
 import dio.budgeting.transaction.domain.Category;
 
 import jakarta.validation.Valid;
@@ -20,37 +20,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
-    private final CriarTransacaoUseCase criarTransacaoUseCase;
-    private final ListarTransacoesPorCategoriaUseCase listarTransacoesPorCategoriaUseCase;
+    private final CreateTransactionUseCase createTransactionUseCase;
+    private final ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase;
 
-    private final ListarTransacoesUseCase listarTransacoesUseCase;
+    private final ListTransactionsUseCase listTransactionsUseCase;
 
-    public TransactionController(CriarTransacaoUseCase criarTransacaoUseCase,
-                                 ListarTransacoesPorCategoriaUseCase listarTransacoesPorCategoriaUseCase,
-                                 ListarTransacoesUseCase listarTransacoesUseCase) {
-        this.criarTransacaoUseCase = criarTransacaoUseCase;
-        this.listarTransacoesPorCategoriaUseCase = listarTransacoesPorCategoriaUseCase;
-        this.listarTransacoesUseCase = listarTransacoesUseCase;
+    public TransactionController(CreateTransactionUseCase createTransactionUseCase,
+                                 ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase,
+                                 ListTransactionsUseCase listTransactionsUseCase) {
+        this.createTransactionUseCase = createTransactionUseCase;
+        this.listTransactionsByCategoryUseCase = listTransactionsByCategoryUseCase;
+        this.listTransactionsUseCase = listTransactionsUseCase;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TransactionResponse createTransaction(@Valid @RequestBody TransactionRequest request) {
-        var output = criarTransacaoUseCase.execute(
+        var output = createTransactionUseCase.execute(
                 request.amount(), request.category(), request.type(), request.description());
         return TransactionResponse.from(output);
     }
 
     @GetMapping
     public List<TransactionResponse> listTransactions() {
-        return listarTransacoesUseCase.execute().stream()
+        return listTransactionsUseCase.execute().stream()
                 .map(TransactionResponse::from)
                 .toList();
     }
 
     @GetMapping("/{category}")
     public List<TransactionResponse> readTransactions(@PathVariable Category category) {
-        return listarTransacoesPorCategoriaUseCase.execute(category).stream()
+        return listTransactionsByCategoryUseCase.execute(category).stream()
                 .map(TransactionResponse::from)
                 .toList();
     }

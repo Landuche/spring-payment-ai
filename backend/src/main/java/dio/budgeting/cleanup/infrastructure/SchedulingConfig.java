@@ -1,6 +1,6 @@
 package dio.budgeting.cleanup.infrastructure;
 
-import dio.budgeting.cleanup.application.LimpezaRegistrosUseCase;
+import dio.budgeting.cleanup.application.CleanupRecordsUseCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +17,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class SchedulingConfig {
     private static final Logger log = LoggerFactory.getLogger(SchedulingConfig.class);
 
-    private final LimpezaRegistrosUseCase limpeza;
+    private final CleanupRecordsUseCase cleanup;
 
-    public SchedulingConfig(LimpezaRegistrosUseCase limpeza) {
-        this.limpeza = limpeza;
+    public SchedulingConfig(CleanupRecordsUseCase cleanup) {
+        this.cleanup = cleanup;
     }
 
     @Scheduled(cron = "${budgeting.cleanup.cron:0 15 3 * * *}")
-    void limparRegistrosExpirados() {
+    void cleanUpExpiredRecords() {
         try {
-            limpeza.executar();
+            cleanup.execute();
         } catch (RuntimeException e) {
             // Falha na limpeza não pode derrubar a aplicação: o próximo ciclo tenta de novo.
             log.error("Falha na limpeza de registros expirados", e);

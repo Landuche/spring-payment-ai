@@ -5,9 +5,9 @@ public enum Category {
     PHARMA("Farmácia"),
     AUTO("Automóvel"),
     /** Qualquer gasto que não se encaixe nas demais: bar, adega, restaurante, lazer, etc. */
-    OUTROS("Outros"),
+    OTHER("Outros"),
     /** Usada apenas por lançamentos de transferência. */
-    TRANSFERENCIA("Transferência");
+    TRANSFER("Transferência");
 
     private final String displayName;
 

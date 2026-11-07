@@ -19,7 +19,7 @@ import java.time.Instant;
  * o revogamento é gravado mesmo com a resposta 401 (noRollbackFor), senão a proteção não teria efeito.
  */
 @Service
-public class RenovarSessaoUseCase {
+public class RefreshSessionUseCase {
     private final RefreshTokenRepository refreshTokens;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
@@ -27,7 +27,7 @@ public class RenovarSessaoUseCase {
     private final AuditLog audit;
     private final Clock clock;
 
-    public RenovarSessaoUseCase(RefreshTokenRepository refreshTokens, UserRepository userRepository,
+    public RefreshSessionUseCase(RefreshTokenRepository refreshTokens, UserRepository userRepository,
                                 AccountRepository accountRepository, SessionIssuer sessionIssuer, AuditLog audit,
                                 Clock clock) {
         this.refreshTokens = refreshTokens;
@@ -44,25 +44,25 @@ public class RenovarSessaoUseCase {
             throw new AuthenticationFailedException();
         }
         var now = Instant.now(clock);
-        var atual = refreshTokens.findByHashForUpdate(RefreshToken.hash(refreshToken))
+        var current = refreshTokens.findByHashForUpdate(RefreshToken.hash(refreshToken))
                 .orElseThrow(AuthenticationFailedException::new);
 
-        if (atual.isRevoked() || atual.isExpired(now)) {
+        if (current.isRevoked() || current.isExpired(now)) {
             throw new AuthenticationFailedException();
         }
-        if (atual.isUsed()) {
+        if (current.isUsed()) {
             // Token já trocado sendo apresentado de novo: cópia vazada ou replay. Encerra a sessão inteira.
-            refreshTokens.revokeFamily(atual.familyId(), now);
-            audit.falha(AuditEventType.REUSO_REFRESH_TOKEN, atual.userId(), null, null,
-                    atual.familyId().toString(), "TOKEN_JA_USADO");
+            refreshTokens.revokeFamily(current.familyId(), now);
+            audit.failure(AuditEventType.REFRESH_TOKEN_REUSE, current.userId(), null, null,
+                    current.familyId().toString(), "TOKEN_ALREADY_USED");
             throw new AuthenticationFailedException();
         }
 
-        refreshTokens.save(atual.marcarComoUsado(now));
+        refreshTokens.save(current.markAsUsed(now));
 
-        var user = userRepository.findById(atual.userId()).orElseThrow(AuthenticationFailedException::new);
+        var user = userRepository.findById(current.userId()).orElseThrow(AuthenticationFailedException::new);
         var account = accountRepository.findByOwner(user.id()).orElseThrow(AuthenticationFailedException::new);
-        audit.sucesso(AuditEventType.SESSAO_RENOVADA, user.id(), account.id(), atual.familyId().toString());
-        return sessionIssuer.emitir(user, account, atual.familyId());
+        audit.success(AuditEventType.SESSION_RENEWED, user.id(), account.id(), current.familyId().toString());
+        return sessionIssuer.issue(user, account, current.familyId());
     }
 }

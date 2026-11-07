@@ -1,14 +1,14 @@
 package dio.budgeting.transaction.domain;
 
 /**
- * Tipo de lançamento. RECEITA e DESPESA são lançamentos manuais; os de transferência
+ * Tipo de lançamento. INCOME e EXPENSE são lançamentos manuais; os de transferência
  * são gerados pelo caso de uso de transferência e nunca pela criação manual.
  */
 public enum TransactionType {
-    RECEITA(true, false),
-    DESPESA(false, false),
-    TRANSFERENCIA_RECEBIDA(true, true),
-    TRANSFERENCIA_ENVIADA(false, true);
+    INCOME(true, false),
+    EXPENSE(false, false),
+    TRANSFER_RECEIVED(true, true),
+    TRANSFER_SENT(false, true);
 
     private final boolean credit;
     private final boolean transfer;
@@ -29,6 +29,6 @@ public enum TransactionType {
 
     /** Despesa registrada pelo usuário: é a única que conta como gasto nos relatórios. */
     public boolean isExpense() {
-        return this == DESPESA;
+        return this == EXPENSE;
     }
 }
