@@ -23,11 +23,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -99,6 +101,18 @@ class NotificationPushFlowTest {
     }
 
     @Test
+    void should_acceptTheOriginThatTheAppSendsBehindATunnel() throws Exception {
+        var account = newAccount("Fabio Reis");
+        var inbox = new Inbox();
+        var socket = inbox.connect(port, "https://exemplo.trycloudflare.com");
+
+        socket.sendMessage(new TextMessage(authMessage(tokenFor(account))));
+
+        assertThat(inbox.next()).contains("ready");
+        socket.close();
+    }
+
+    @Test
     void should_closeTheConnection_whenTheTokenIsInvalid() throws Exception {
         var inbox = new Inbox();
         var socket = inbox.connect(port);
@@ -135,8 +149,17 @@ class NotificationPushFlowTest {
         private final BlockingQueue<Integer> closes = new LinkedBlockingQueue<>();
 
         WebSocketSession connect(int port) throws Exception {
+            return connect(port, null);
+        }
+
+        /** O app nativo envia sempre um Origin; passar um simula a conexão vinda do app. */
+        WebSocketSession connect(int port, String origin) throws Exception {
+            var headers = new WebSocketHttpHeaders();
+            if (origin != null) {
+                headers.setOrigin(origin);
+            }
             return new StandardWebSocketClient()
-                    .execute(this, "ws://localhost:" + port + "/ws/notifications")
+                    .execute(this, headers, URI.create("ws://localhost:" + port + "/ws/notifications"))
                     .get(10, TimeUnit.SECONDS);
         }
 

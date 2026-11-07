@@ -14,10 +14,13 @@ class WebSocketConfig implements WebSocketConfigurer {
         this.handler = handler;
     }
 
-    /** Mesmas origens do CORS: o app nativo não envia Origin, e o navegador só é aceito vindo de localhost. */
+    /**
+     * Qualquer origem. O app nativo sempre envia o Origin do endereço público (o do túnel, por exemplo), que atrás de
+     * um proxy não bate com o que o Spring enxerga. A checagem de origem protege conexões que se autenticam por
+     * cookie; esta não usa cookie: nasce anônima e só vale depois de a primeira mensagem trazer o token de acesso.
+     */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(handler, "/ws/notifications")
-                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*");
+        registry.addHandler(handler, "/ws/notifications").setAllowedOriginPatterns("*");
     }
 }
