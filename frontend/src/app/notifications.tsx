@@ -1,25 +1,24 @@
 import { useEffect } from 'react';
 import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
+import { NotificationItem } from '@/components/NotificationItem';
 import { Screen } from '@/components/Screen';
-import { TransactionItem } from '@/components/TransactionItem';
-import { useFinance } from '@/hooks/useFinance';
 import { useNotifications } from '@/hooks/useNotifications';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
 /**
- * Notificações de transferência. Abrir a tela marca tudo como lido.
+ * Notificações de transferência. Abrir a tela marca tudo como lido (o contador do sino zera), mas as novas
+ * continuam com um ponto colorido enquanto a tela está aberta, para o usuário ver o que chegou.
  */
 export default function NotificationsScreen() {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);
-  const { transactions, loading, refresh } = useFinance();
-  const { items, unread, fresh, markAllSeen } = useNotifications(transactions);
+  const { items, unread, loading, fresh, refresh, markAllRead } = useNotifications();
 
   useEffect(() => {
-    if (unread > 0) markAllSeen();
-  }, [unread, markAllSeen]);
+    if (unread > 0) markAllRead();
+  }, [unread, markAllRead]);
 
   return (
     <Screen refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={palette.text} />}>
@@ -34,17 +33,17 @@ export default function NotificationsScreen() {
           </Text>
         ) : (
           items.map((item, index) => {
-            const unreadItem = fresh.has(item.id);
+            const isFresh = fresh.has(item.id);
             return (
               <View key={item.id}>
                 {index > 0 ? <View style={styles.separator} /> : null}
                 <View style={styles.row}>
                   <View
-                    style={[styles.dot, { backgroundColor: unreadItem ? palette.accent : 'transparent' }]}
-                    accessibilityLabel={unreadItem ? 'Nova' : 'Já vista'}
+                    style={[styles.dot, { backgroundColor: isFresh ? palette.accent : 'transparent' }]}
+                    accessibilityLabel={isFresh ? 'Nova' : 'Já vista'}
                   />
                   <View style={styles.flex}>
-                    <TransactionItem transaction={item} />
+                    <NotificationItem notification={item} />
                   </View>
                 </View>
               </View>

@@ -7,6 +7,7 @@ import type {
   Category,
   ExpenseReport,
   NewTransaction,
+  NotificationsResponse,
   Simulation,
   Transaction,
   TransferEventType,
@@ -173,6 +174,12 @@ export const api = {
   getBalance: () => request<Balance>('/api/balance'),
 
   getTransactions: () => request<Transaction[]>('/transactions'),
+
+  getNotifications: () => request<NotificationsResponse>('/api/notifications'),
+
+  markNotificationsRead: async (): Promise<void> => {
+    await send('/api/notifications/read', { method: 'POST' });
+  },
 
   getExpenseReport: (period: string, category?: Category) => {
     const query = category ? `&category=${category}` : '';

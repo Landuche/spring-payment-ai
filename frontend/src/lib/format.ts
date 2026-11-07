@@ -26,6 +26,12 @@ export function formatDay(isoDate: string): string {
 
 const TIME_FMT = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+/** "4 de nov., 14:23" a partir de um instante, no fuso do aparelho. */
+export function formatMoment(isoInstant: string): string {
+  const moment = new Date(isoInstant);
+  return Number.isNaN(moment.getTime()) ? '' : `${DATE_FMT.format(moment)}, ${TIME_FMT.format(moment)}`;
+}
+
 export function formatDayTime(isoDate: string, createdAt?: string | null): string {
   if (!createdAt) return formatDay(isoDate);
   const moment = new Date(createdAt);

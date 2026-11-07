@@ -25,7 +25,7 @@ export default function DashboardScreen() {
   const styles = useStyles(makeStyles);
   const { session, signOut } = useAuth();
   const { balance, transactions, report, loading, error, refresh } = useFinance();
-  const { unread } = useNotifications(transactions);
+  const { unread } = useNotifications();
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 

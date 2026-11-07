@@ -86,3 +86,22 @@ export interface TransferResult {
   readonly createdAt: string;
   readonly replayed: boolean;
 }
+
+export type NotificationType = 'TRANSFER_SENT' | 'TRANSFER_RECEIVED';
+
+/** Aviso estruturado: o texto da frase é montado na tela. */
+export interface AppNotification {
+  readonly id: string;
+  readonly type: NotificationType;
+  readonly amount: number;
+  /** Nome mascarado da outra parte ("Bruno L."). */
+  readonly counterpartName: string;
+  readonly createdAt: string;
+  readonly read: boolean;
+}
+
+export interface NotificationsResponse {
+  readonly items: readonly AppNotification[];
+  /** Todos os não lidos da conta, mesmo que a lista traga só os mais recentes. */
+  readonly unread: number;
+}
