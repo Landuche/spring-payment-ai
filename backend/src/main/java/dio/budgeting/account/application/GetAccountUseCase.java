@@ -50,7 +50,7 @@ public class GetAccountUseCase {
         lookupGuard.recordLookup(currentAccount.current());
         var account = accountRepository.findByNumber(digits)
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
-        return new AccountOutput(format(account.number()), mask(holder(account).name()));
+        return new AccountOutput(format(account.number()), holder(account).maskedName());
     }
 
     /**
@@ -65,7 +65,7 @@ public class GetAccountUseCase {
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
         var account = accountRepository.findByOwner(user.id())
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
-        return new AccountOutput(format(account.number()), mask(user.name()));
+        return new AccountOutput(format(account.number()), user.maskedName());
     }
 
     private User holder(Account account) {
@@ -75,14 +75,5 @@ public class GetAccountUseCase {
 
     static String format(String number) {
         return number.substring(0, 4) + "-" + number.substring(4);
-    }
-
-    static String mask(String name) {
-        var parts = name.trim().split("\\s+");
-        var sb = new StringBuilder(parts[0]);
-        for (int i = 1; i < parts.length; i++) {
-            sb.append(' ').append(parts[i].charAt(0)).append('.');
-        }
-        return sb.toString();
     }
 }

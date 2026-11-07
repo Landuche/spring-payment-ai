@@ -10,11 +10,13 @@ import dio.budgeting.account.domain.LookupBlockedException;
 import dio.budgeting.audit.application.AuditLog;
 import dio.budgeting.audit.application.InMemoryAuditEventRepository;
 import dio.budgeting.auth.application.InMemoryUserRepository;
+import dio.budgeting.outbox.application.InMemoryOutboxRecorder;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import dio.budgeting.shared.domain.NotFoundException;
 import dio.budgeting.transaction.application.InMemoryTransactionRepository;
 import dio.budgeting.transaction.domain.Category;
 import dio.budgeting.transaction.domain.TransactionType;
+import dio.budgeting.transfer.domain.TransferCompleted;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +48,50 @@ class TransferUseCaseTest {
     private AccountId current = source.id();
     private final LookupGuardService lookupGuard =
             new LookupGuardService(guards, accounts, audit, clock);
+    private final InMemoryOutboxRecorder outbox = new InMemoryOutboxRecorder();
     private final TransferUseCase useCase = new TransferUseCase(
-            transfers, transactions, accounts, users, () -> current, lookupGuard, audit, clock);
+            transfers, transactions, accounts, users, () -> current, lookupGuard, audit, outbox, clock);
+
+    @Test
+    void should_recordATransferCompletedEvent_withMaskedNames() {
+        TestData.deposit(transactions, source, "100.00");
+
+        var output = useCase.execute("0000000002", null, new BigDecimal("30.00"), null, "evento-1");
+
+        assertThat(outbox.all()).singleElement().satisfies(recorded -> {
+            assertThat(recorded.topic()).isEqualTo(TransferCompleted.TOPIC);
+            assertThat(recorded.eventType()).isEqualTo(TransferCompleted.TYPE);
+            assertThat(recorded.aggregateId()).hasToString(output.id());
+            var event = (TransferCompleted) recorded.payload();
+            assertThat(event.transferId()).hasToString(output.id());
+            assertThat(event.sourceAccountId()).isEqualTo(source.id().uuid());
+            assertThat(event.destinationAccountId()).isEqualTo(destination.id().uuid());
+            assertThat(event.amountCents()).isEqualTo(3000);
+            assertThat(event.sourceName()).isEqualTo("Ana S.");
+            assertThat(event.destinationName()).isEqualTo("Bruno L.");
+        });
+    }
+
+    @Test
+    void should_recordNoEvent_whenTheTransferIsRefused() {
+        TestData.deposit(transactions, source, "10.00");
+
+        assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("50.00"), null, "evento-2"))
+                .isInstanceOf(BusinessRuleViolationException.class);
+
+        assertThat(outbox.all()).isEmpty();
+    }
+
+    @Test
+    void should_recordTheEventOnlyOnce_whenTheSameKeyIsReplayed() {
+        TestData.deposit(transactions, source, "100.00");
+
+        useCase.execute("0000000002", null, new BigDecimal("30.00"), null, "evento-3");
+        var replay = useCase.execute("0000000002", null, new BigDecimal("30.00"), null, "evento-3");
+
+        assertThat(replay.replayed()).isTrue();
+        assertThat(outbox.all()).hasSize(1);
+    }
 
     @Test
     void should_auditRejectedTransfer_forInsufficientFunds() {

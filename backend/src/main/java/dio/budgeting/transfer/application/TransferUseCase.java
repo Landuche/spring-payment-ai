@@ -7,7 +7,9 @@ import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.account.domain.AccountRepository;
 import dio.budgeting.audit.application.AuditLog;
 import dio.budgeting.audit.domain.AuditEventType;
+import dio.budgeting.auth.domain.User;
 import dio.budgeting.auth.domain.UserRepository;
+import dio.budgeting.outbox.application.OutboxRecorder;
 import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import dio.budgeting.shared.domain.Money;
 import dio.budgeting.shared.domain.NotFoundException;
@@ -15,6 +17,7 @@ import dio.budgeting.transaction.domain.Transaction;
 import dio.budgeting.transaction.domain.TransactionRepository;
 import dio.budgeting.transaction.domain.TransactionType;
 import dio.budgeting.transfer.domain.Transfer;
+import dio.budgeting.transfer.domain.TransferCompleted;
 import dio.budgeting.transfer.domain.TransferRepository;
 
 import org.springframework.stereotype.Service;
@@ -46,12 +49,13 @@ public class TransferUseCase {
     private final CurrentAccountProvider currentAccount;
     private final LookupGuardService lookupGuard;
     private final AuditLog audit;
+    private final OutboxRecorder outbox;
     private final Clock clock;
 
     public TransferUseCase(TransferRepository transferRepository, TransactionRepository transactionRepository,
                            AccountRepository accountRepository, UserRepository userRepository,
                            CurrentAccountProvider currentAccount, LookupGuardService lookupGuard,
-                           AuditLog audit, Clock clock) {
+                           AuditLog audit, OutboxRecorder outbox, Clock clock) {
         this.transferRepository = transferRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
@@ -59,6 +63,7 @@ public class TransferUseCase {
         this.currentAccount = currentAccount;
         this.lookupGuard = lookupGuard;
         this.audit = audit;
+        this.outbox = outbox;
         this.clock = clock;
     }
 
@@ -107,13 +112,13 @@ public class TransferUseCase {
                 UUID.randomUUID(), origin, destination.id(), money, description, idempotencyKey, now));
 
         var today = LocalDate.ofInstant(now, clock.getZone());
-        var destinationHolder = holderName(destination);
-        var sourceHolder = holderName(sourceAccount);
+        var destinationHolder = holder(destination);
+        var sourceHolder = holder(sourceAccount);
 
         // Com descrição informada, ela aparece no extrato dos dois lados.
         var providedDescription = transfer.description();
-        var sentText = providedDescription != null ? providedDescription : "Transferência para " + destinationHolder;
-        var receivedText = providedDescription != null ? providedDescription : "Transferência de " + sourceHolder;
+        var sentText = providedDescription != null ? providedDescription : "Transferência para " + destinationHolder.name();
+        var receivedText = providedDescription != null ? providedDescription : "Transferência de " + sourceHolder.name();
 
         transactionRepository.save(Transaction.fromTransfer(transfer.id(), origin, sentText, money,
                 TransactionType.TRANSFER_SENT, today, now));
@@ -121,6 +126,11 @@ public class TransferUseCase {
                 TransactionType.TRANSFER_RECEIVED, today, now));
 
         audit.success(AuditEventType.TRANSFER_COMPLETED, sourceAccount.ownerId(), origin, transfer.id().toString());
+
+        // Mesma transação da transferência: o evento só existe se a transferência existir (padrão outbox).
+        outbox.record(TransferCompleted.TOPIC, transfer.id(), TransferCompleted.TYPE, new TransferCompleted(
+                transfer.id(), origin.uuid(), destination.id().uuid(), money.cents(),
+                sourceHolder.maskedName(), destinationHolder.maskedName(), now));
 
         // Transferência concluída.
         lookupGuard.reset(origin);
@@ -162,10 +172,9 @@ public class TransferUseCase {
                 .reduce(Money.ZERO, Money::plus);
     }
 
-    private String holderName(Account account) {
+    private User holder(Account account) {
         return userRepository.findById(account.ownerId())
-                .map(u -> u.name())
-                .orElse("titular");
+                .orElseThrow(() -> new IllegalStateException("Conta sem titular: " + account.id()));
     }
 
     private static TransferOutput output(Transfer transfer, boolean replayed) {

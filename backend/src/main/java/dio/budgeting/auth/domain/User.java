@@ -19,4 +19,14 @@ public record User(UserId id, String email, String name, String passwordHash) {
         email = email.strip().toLowerCase(Locale.ROOT);
         name = name.strip();
     }
+
+    /** Nome para terceiros: só o primeiro nome por extenso. "Ana Paula Souza" vira "Ana P. S.". */
+    public String maskedName() {
+        var parts = name.split("\\s+");
+        var masked = new StringBuilder(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            masked.append(' ').append(parts[i].charAt(0)).append('.');
+        }
+        return masked.toString();
+    }
 }
