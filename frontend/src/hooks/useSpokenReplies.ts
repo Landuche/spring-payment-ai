@@ -1,8 +1,7 @@
-import * as Speech from 'expo-speech';
 import { useEffect, useRef, useState } from 'react';
 import { prefsStorage } from '@/lib/prefs-storage';
 import { toSpeech } from '@/lib/speech-text';
-import { speakAloud, warmUpVoice } from '@/lib/voice';
+import { speakAloud, stopSpeaking, warmUpVoice } from '@/lib/voice';
 
 const VOICE_PREF_KEY = 'claudinho.voice';
 
@@ -19,9 +18,7 @@ export function useSpokenReplies() {
       }
     });
     warmUpVoice();
-    return () => {
-      void Speech.stop();
-    };
+    return stopSpeaking;
   }, []);
 
   const toggle = () => {
@@ -29,12 +26,12 @@ export function useSpokenReplies() {
     setEnabled(next);
     enabledRef.current = next;
     void prefsStorage.write(VOICE_PREF_KEY, next ? 'on' : 'off');
-    if (!next) void Speech.stop();
+    if (!next) stopSpeaking();
   };
 
   const speak = (reply: string) => {
     if (!enabledRef.current) return;
-    void Speech.stop();
+    stopSpeaking();
     void speakAloud(toSpeech(reply));
   };
 

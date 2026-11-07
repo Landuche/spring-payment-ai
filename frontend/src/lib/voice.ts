@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import { isAiSpeechAvailable, playAiSpeech, stopAiSpeech } from './ai-speech';
 
 /**
  * O expo-speech não informa o gênero das vozes (só nome, identificador, idioma e qualidade), vozes estão sendo escolhidas pelo nome.
@@ -31,7 +32,31 @@ export function warmUpVoice(): void {
   void findMaleVoice();
 }
 
-export async function speakAloud(text: string): Promise<void> {
+async function speakWithDevice(text: string): Promise<void> {
   const voice = await findMaleVoice();
   Speech.speak(text, { language: 'pt-BR', ...(voice ? { voice } : {}) });
+}
+
+// Cada fala ganha um número; se o número mudou quando uma espera termina, outra fala (ou um "silenciar") passou na frente.
+let currentSpeech = 0;
+
+/** Fala com a voz da IA quando o servidor oferece; sem ela, ou se ela falhar, usa a voz do aparelho. */
+export async function speakAloud(text: string): Promise<void> {
+  const mine = ++currentSpeech;
+  const stillWanted = () => mine === currentSpeech;
+  if (await isAiSpeechAvailable()) {
+    try {
+      await playAiSpeech(text, stillWanted);
+      return;
+    } catch {
+      // Sem o áudio da IA nesta fala: segue para a voz do aparelho.
+    }
+  }
+  if (stillWanted()) await speakWithDevice(text);
+}
+
+export function stopSpeaking(): void {
+  currentSpeech += 1;
+  stopAiSpeech();
+  void Speech.stop();
 }

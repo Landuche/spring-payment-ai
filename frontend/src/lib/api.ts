@@ -5,6 +5,7 @@ import type {
   AccountInfo,
   AssistantReply,
   Balance,
+  Capabilities,
   Category,
   ExpenseReport,
   NewTransaction,
@@ -228,6 +229,18 @@ export const api = {
     input: { type: TransferEventType; recipientName: string; amount: number; reason?: string },
     conversationId: string,
   ) => request<AssistantReply>('/assistant/event', json({ ...input, conversationId })),
+
+  getCapabilities: () => request<Capabilities>('/assistant/capabilities'),
+
+  /** Áudio (mp3) do texto, na voz do Claudinho. Sem chave de idempotência, então nunca é repetido sozinho: cada chamada custa. */
+  synthesizeSpeech: async (text: string): Promise<ArrayBuffer> => {
+    const response = await send('/assistant/speech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+      body: JSON.stringify({ text }),
+    });
+    return response.arrayBuffer();
+  },
 
   sendVoice: async (uri: string, conversationId: string): Promise<VoiceReply> => {
     const form = new FormData();
