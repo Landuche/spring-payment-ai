@@ -17,6 +17,33 @@ services:
       timeout: 5s
       retries: 5
 
+  # Broker de um nó só em modo KRaft (sem Zookeeper). Dentro do compose a aplicação usa kafka:9092;
+  # quem roda a aplicação fora do Docker (bootRun) usa localhost:29092.
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,EXTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+      - "29092:29092"
+    volumes:
+      - fintech_kafkadata:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   app:
     build: .
     ports:
@@ -31,9 +58,13 @@ services:
       # Provedor de IA (OpenAI ou Groq): só URL e chave; os modelos são escolhidos pela URL.
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com}
       AI_API_KEY: ${AI_API_KEY}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       database:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
 
 volumes:
   fintech_pgdata:
+  fintech_kafkadata:

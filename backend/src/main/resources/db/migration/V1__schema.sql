@@ -47,6 +47,37 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_account_date ON transactions (account_id, occurred_at);
 CREATE INDEX idx_transactions_transfer ON transactions (transfer_id);
 
+-- Eventos e notificações -----------------------------------------------------------------------------
+-- Outbox: o evento é gravado na mesma transação do fato de negócio e publicado no Kafka depois.
+-- published_at nulo = ainda não publicado.
+CREATE TABLE outbox_event (
+    id           UUID PRIMARY KEY,
+    topic        VARCHAR(100) NOT NULL,
+    aggregate_id UUID         NOT NULL,
+    event_type   VARCHAR(60)  NOT NULL,
+    payload      TEXT         NOT NULL,
+    created_at   TIMESTAMPTZ  NOT NULL,
+    published_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_outbox_pending ON outbox_event (created_at) WHERE published_at IS NULL;
+
+-- Uma linha por conta e por evento. A restrição única torna o consumidor idempotente:
+-- o Kafka entrega "pelo menos uma vez", e reprocessar o mesmo evento não duplica a notificação.
+CREATE TABLE notification (
+    id               UUID PRIMARY KEY,
+    event_id         UUID         NOT NULL,
+    account_id       UUID         NOT NULL REFERENCES account (id),
+    type             VARCHAR(30)  NOT NULL,
+    amount_cents     BIGINT       NOT NULL CHECK (amount_cents > 0),
+    counterpart_name VARCHAR(120) NOT NULL,
+    created_at       TIMESTAMPTZ  NOT NULL,
+    read_at          TIMESTAMPTZ,
+    CONSTRAINT uk_notification_event_account UNIQUE (event_id, account_id)
+);
+
+CREATE INDEX idx_notification_account_time ON notification (account_id, created_at DESC);
+
 -- Proteções de uso ---------------------------------------------------------------------------------
 -- Buscas de destinatário por conta.
 CREATE TABLE lookup_guard (
