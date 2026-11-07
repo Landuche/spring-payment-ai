@@ -44,6 +44,14 @@ services:
       timeout: 10s
       retries: 10
 
+  # Voz local (Kokoro) com a mesma API da OpenAI: é a voz do Claudinho quando o provedor é a Groq, que não tem voz
+  # em português. Com a OpenAI ele não é usado; para não gastar memória, `docker compose stop kokoro`.
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    ports:
+      - "8880:8880"
+    restart: unless-stopped
+
   app:
     build: .
     ports:
@@ -59,6 +67,9 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com}
       AI_API_KEY: ${AI_API_KEY}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      AI_SPEECH: ${AI_SPEECH:-true}
+      # Endereço do Kokoro dentro do compose; só é usado quando o provedor é a Groq.
+      KOKORO_URL: http://kokoro:8880
     depends_on:
       database:
         condition: service_healthy
