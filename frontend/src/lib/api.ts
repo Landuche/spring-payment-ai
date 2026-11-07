@@ -154,13 +154,13 @@ function webAudioExtension(mimeType: string): string {
   return mimeType.includes('mp4') ? 'm4a' : 'webm';
 }
 
-/** Falhar aqui (e não no envio) deixa claro se o problema é ler o arquivo gravado ou falar com o servidor. */
+// O aviso vai só para o log do Metro (a tela mostra a mensagem genérica) e diz se a falha foi ao ler o arquivo.
 async function readRecording(uri: string): Promise<Blob> {
   try {
     return await (await fetch(uri)).blob();
   } catch (cause) {
     console.warn('[api] não foi possível ler a gravação', uri, cause);
-    throw new ApiError('Não consegui ler a gravação de áudio.', 0);
+    throw cause;
   }
 }
 

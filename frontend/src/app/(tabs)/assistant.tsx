@@ -153,7 +153,7 @@ export default function AssistantScreen() {
       recorder.record();
     } catch (error) {
       console.warn('[voz] não foi possível iniciar a gravação', error);
-      append({ role: 'assistant', text: 'Não consegui iniciar a gravação. Tente novamente.' });
+      append({ role: 'assistant', text: failure(error) });
     }
   };
 
