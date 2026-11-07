@@ -1,6 +1,5 @@
 package dio.budgeting.auth.application;
 
-
 import dio.budgeting.auth.domain.RefreshToken;
 import dio.budgeting.auth.domain.RefreshTokenRepository;
 

@@ -28,8 +28,8 @@ public class RefreshSessionUseCase {
     private final Clock clock;
 
     public RefreshSessionUseCase(RefreshTokenRepository refreshTokens, UserRepository userRepository,
-                                AccountRepository accountRepository, SessionIssuer sessionIssuer, AuditLog audit,
-                                Clock clock) {
+                                 AccountRepository accountRepository, SessionIssuer sessionIssuer, AuditLog audit,
+                                 Clock clock) {
         this.refreshTokens = refreshTokens;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;

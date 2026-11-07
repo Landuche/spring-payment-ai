@@ -15,9 +15,10 @@ import java.util.List;
  */
 @Service
 public class ListTransactionsUseCase {
-    private static final Comparator<Transaction> OLDEST_FIRST =
+    private static final Comparator<Transaction> NEWEST_FIRST =
             Comparator.comparing(Transaction::occurredAt)
-                    .thenComparing(Transaction::createdAt, Comparator.nullsFirst(Comparator.naturalOrder()));
+                    .thenComparing(Transaction::createdAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .reversed();
 
     private final TransactionRepository transactionRepository;
     private final CurrentAccountProvider currentAccount;
@@ -29,7 +30,7 @@ public class ListTransactionsUseCase {
 
     public List<TransactionOutput> execute() {
         return transactionRepository.findAll(currentAccount.current()).stream()
-                .sorted(OLDEST_FIRST.reversed())
+                .sorted(NEWEST_FIRST)
                 .map(TransactionOutput::from)
                 .toList();
     }

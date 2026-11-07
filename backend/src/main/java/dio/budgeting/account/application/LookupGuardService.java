@@ -16,7 +16,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Limite de buscas de destinatário por conta: {@link LookupGuard#MAX_BUSCAS} buscas sem transferência concluída
+ * Limite de buscas de destinatário por conta: {@link LookupGuard#MAX_LOOKUPS} buscas sem transferência concluída
  * geram bloqueio temporário. Limites por IP foram deliberadamente deixados de fora: em desenvolvimento e atrás de
  * proxy/Docker, todos os clientes compartilham o mesmo IP, o que bloquearia usuários legítimos.
  *

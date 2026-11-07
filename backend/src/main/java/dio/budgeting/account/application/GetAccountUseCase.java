@@ -9,15 +9,22 @@ import dio.budgeting.shared.domain.NotFoundException;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 @Service
 public class GetAccountUseCase {
+    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern NON_DIGITS = Pattern.compile("\\D");
+    private static final Pattern ACCOUNT_NUMBER = Pattern.compile("\\d{10}");
+
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final CurrentAccountProvider currentAccount;
     private final LookupGuardService lookupGuard;
 
     public GetAccountUseCase(AccountRepository accountRepository, UserRepository userRepository,
-                                 CurrentAccountProvider currentAccount, LookupGuardService lookupGuard) {
+                             CurrentAccountProvider currentAccount, LookupGuardService lookupGuard) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
         this.currentAccount = currentAccount;
@@ -37,11 +44,12 @@ public class GetAccountUseCase {
      * para não expor dados pessoais a quem conhece apenas o número.
      */
     public AccountOutput findByNumber(String number) {
-        if (number == null || !number.replaceAll("\\D", "").matches("\\d{10}")) {
+        var digits = number == null ? "" : NON_DIGITS.matcher(number).replaceAll("");
+        if (!ACCOUNT_NUMBER.matcher(digits).matches()) {
             throw new BusinessRuleViolationException("Número de conta inválido");
         }
         lookupGuard.recordLookup(currentAccount.current());
-        var account = accountRepository.findByNumber(number.replaceAll("\\D", ""))
+        var account = accountRepository.findByNumber(digits)
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
         return new AccountOutput(format(account.number()), mask(holder(account).name()));
     }
@@ -51,11 +59,11 @@ public class GetAccountUseCase {
      * e nome mascarado: a enumeração de e-mails ainda precisa de limite de tentativas no gateway.
      */
     public AccountOutput findByEmail(String email) {
-        if (email == null || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+        if (email == null || !EMAIL.matcher(email).matches()) {
             throw new BusinessRuleViolationException("E-mail inválido");
         }
         lookupGuard.recordLookup(currentAccount.current());
-        var user = userRepository.findByEmail(email.strip().toLowerCase(java.util.Locale.ROOT))
+        var user = userRepository.findByEmail(email.strip().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
         var account = accountRepository.findByOwner(user.id())
                 .orElseThrow(() -> new NotFoundException("Conta não encontrada"));

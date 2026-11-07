@@ -1,6 +1,5 @@
 package dio.budgeting.transfer.application;
 
-
 import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.transfer.domain.Transfer;
 import dio.budgeting.transfer.domain.TransferRepository;

@@ -28,7 +28,7 @@ public class AssistantTools {
     /** Chave do contexto de ferramentas onde o {@link AssistantChat} coloca as {@link TurnProposals}. */
     static final String CONTEXT_PROPOSALS = "proposals";
 
-    private static final String AWAITING_CONFIRMATION = "AWAITING_CUSTOMER_CONFIRMATION";
+    private static final String AWAITING_CUSTOMER_CONFIRMATION = "AWAITING_CUSTOMER_CONFIRMATION";
 
     private final CreateTransactionUseCase createTransaction;
     private final GetBalanceUseCase getBalance;
@@ -104,7 +104,7 @@ public class AssistantTools {
         var proposal = prepareTransfer.execute(recipient, amount, description);
         proposalsOf(toolContext).register(proposal);
 
-        return new TransferPreparation(AWAITING_CONFIRMATION, proposal.recipientName(), proposal.destinationAccount(),
+        return new TransferPreparation(AWAITING_CUSTOMER_CONFIRMATION, proposal.recipientName(), proposal.destinationAccount(),
                 proposal.amount(),
                 "A transferência AINDA NÃO foi feita. O cliente precisa confirmar tocando no botão do cartão que "
                         + "aparece no chat. Avise isso em uma frase, não diga que foi enviada e NÃO sugira nenhuma outra "

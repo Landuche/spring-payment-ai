@@ -5,7 +5,7 @@ import java.time.Instant;
 
 /**
  * Contador de falhas de autenticação por chave (hoje "email:...").
- * Janela fixa: as falhas só acumulam dentro de {@code windowStart + janela}. Ao atingir o máximo, bloqueia por um período.
+ * Janela fixa: as falhas só acumulam dentro de {@code windowStart + window}. Ao atingir o máximo, bloqueia por um período.
  * Imutável: cada operação devolve o novo estado, que o chamador persiste.
  */
 public record FailureCounter(String key, int failures, Instant windowStart, Instant blockedUntil) {
@@ -23,15 +23,15 @@ public record FailureCounter(String key, int failures, Instant windowStart, Inst
         if (isBlocked(now)) {
             return this;
         }
-        boolean novaJanela = windowStart == null || !now.isBefore(windowStart.plus(window));
-        int base = novaJanela ? 0 : failures;
-        Instant inicio = novaJanela ? now : windowStart;
+        boolean newWindow = windowStart == null || !now.isBefore(windowStart.plus(window));
+        int base = newWindow ? 0 : failures;
+        Instant start = newWindow ? now : windowStart;
         int next = base + 1;
 
         if (next >= max) {
             return new FailureCounter(key, 0, null, now.plus(block));
         }
-        return new FailureCounter(key, next, inicio, null);
+        return new FailureCounter(key, next, start, null);
     }
 
     /** Zera o contador depois de um login bem-sucedido. */

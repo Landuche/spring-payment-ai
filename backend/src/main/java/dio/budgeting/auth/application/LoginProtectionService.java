@@ -13,8 +13,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Limite de tentativas de login por e-mail: após {@link #MAX_FALHAS_EMAIL} senhas erradas, a conta fica bloqueada
- * por {@link #BLOQUEIO}. Limite por IP foi removido pelo mesmo motivo dos limites de busca (IP compartilhado em dev e
+ * Limite de tentativas de login por e-mail: após {@link #MAX_EMAIL_FAILURES} senhas erradas, a conta fica bloqueada
+ * por {@link #BLOCK_DURATION}. Limite por IP foi removido pelo mesmo motivo dos limites de busca (IP compartilhado em dev e
  * atrás de proxy).
  */
 @Service

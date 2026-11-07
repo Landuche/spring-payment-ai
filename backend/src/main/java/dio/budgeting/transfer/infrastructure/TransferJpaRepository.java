@@ -4,15 +4,9 @@ import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.transfer.domain.Transfer;
 import dio.budgeting.transfer.domain.TransferRepository;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
-
-interface TransferEntityRepository extends CrudRepository<TransferEntity, UUID> {
-    Optional<TransferEntity> findByOriginAccountIdAndIdempotencyKey(UUID originAccountId, String idempotencyKey);
-}
 
 @Repository
 class TransferJpaRepository implements TransferRepository {

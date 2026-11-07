@@ -1,4 +1,4 @@
-package dio.budgeting.shared.infrastructure;
+package dio.budgeting.assistant.infrastructure;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.retry.NonTransientAiException;
@@ -11,9 +11,9 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GlobalExceptionHandlerAiTest {
+class AssistantExceptionHandlerTest {
 
-    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    private final AssistantExceptionHandler handler = new AssistantExceptionHandler();
 
     @Test
     void should_answerServiceUnavailable_whenAiProviderKeepsFailingWithTransientError() {

@@ -55,7 +55,7 @@ class TransferUseCaseTest {
     void should_auditRejectedTransfer_forInsufficientFunds() {
         deposit(source, "10.00");
 
-        assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("50.00"), null, "sem-saldo"))
+        assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("50.00"), null, "sem-saldo"))
                 .isInstanceOf(dio.budgeting.shared.domain.BusinessRuleViolationException.class);
 
         assertThat(auditEvents.all()).anySatisfy(e -> {
@@ -70,11 +70,11 @@ class TransferUseCaseTest {
         deposit(source, "100.00");
 
         for (int i = 0; i < dio.budgeting.account.domain.LookupGuard.MAX_LOOKUPS; i++) {
-            assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
+            assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
                     .isInstanceOf(NotFoundException.class);
         }
 
-        assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("1.00"), null, "chave-bloqueio"))
+        assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("1.00"), null, "chave-bloqueio"))
                 .isInstanceOf(LookupBlockedException.class);
         assertThat(transfers.count()).isZero();
     }
@@ -83,11 +83,11 @@ class TransferUseCaseTest {
     void should_resetLookupCounter_afterASuccessfulTransfer() {
         deposit(source, "100.00");
         for (int i = 0; i < 9; i++) {
-            assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
+            assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("1.00"), null, "falha-" + UUID.randomUUID()))
                     .isInstanceOf(NotFoundException.class);
         }
 
-        useCase.execute("0000000002", new BigDecimal("1.00"), null, "ok-1");
+        useCase.execute("0000000002", null, new BigDecimal("1.00"), null, "ok-1");
 
         assertThat(guards.findByAccount(source.id()).orElseThrow().attempts()).isZero();
     }
@@ -96,7 +96,7 @@ class TransferUseCaseTest {
     void should_debitOrigin_creditDestination_andLinkBothEntriesToTheTransfer() {
         deposit(source, "500.00");
 
-        var output = useCase.execute("0000000002", new BigDecimal("120.00"), "Almoço", "chave-1");
+        var output = useCase.execute("0000000002", null, new BigDecimal("120.00"), "Almoço", "chave-1");
 
         assertThat(output.amount()).isEqualByComparingTo("120.00");
         assertThat(output.replayed()).isFalse();
@@ -115,7 +115,7 @@ class TransferUseCaseTest {
     void should_rejectWhenBalanceIsInsufficient_withoutMovingAnything() {
         deposit(source, "50.00");
 
-        assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("50.01"), null, "chave-2"))
+        assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("50.01"), null, "chave-2"))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("Saldo insuficiente");
 
@@ -128,8 +128,8 @@ class TransferUseCaseTest {
     void should_replaySameIdempotencyKey_withoutDebitingAgain() {
         deposit(source, "500.00");
 
-        var first = useCase.execute("0000000002", new BigDecimal("100.00"), null, "chave-3");
-        var second = useCase.execute("0000000002", new BigDecimal("100.00"), null, "chave-3");
+        var first = useCase.execute("0000000002", null, new BigDecimal("100.00"), null, "chave-3");
+        var second = useCase.execute("0000000002", null, new BigDecimal("100.00"), null, "chave-3");
 
         assertThat(second.id()).isEqualTo(first.id());
         assertThat(second.replayed()).isTrue();
@@ -142,7 +142,7 @@ class TransferUseCaseTest {
     void should_rejectSelfTransfer() {
         deposit(source, "100.00");
 
-        assertThatThrownBy(() -> useCase.execute("0000000001", new BigDecimal("10.00"), null, "chave-4"))
+        assertThatThrownBy(() -> useCase.execute("0000000001", null, new BigDecimal("10.00"), null, "chave-4"))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("própria conta");
     }
@@ -151,7 +151,7 @@ class TransferUseCaseTest {
     void should_return404_forUnknownDestination() {
         deposit(source, "100.00");
 
-        assertThatThrownBy(() -> useCase.execute("9999999999", new BigDecimal("10.00"), null, "chave-5"))
+        assertThatThrownBy(() -> useCase.execute("9999999999", null, new BigDecimal("10.00"), null, "chave-5"))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -162,7 +162,7 @@ class TransferUseCaseTest {
         deposit(destination, "100.00");
         current = source.id();
 
-        useCase.execute("0000000002", new BigDecimal("10.00"), null, "chave-6");
+        useCase.execute("0000000002", null, new BigDecimal("10.00"), null, "chave-6");
 
         var order = accounts.lockOrder();
         var expected = java.util.stream.Stream.of(source.id(), destination.id())
@@ -175,7 +175,7 @@ class TransferUseCaseTest {
     void should_acceptFormattedAccountNumber_withDash() {
         deposit(source, "100.00");
 
-        var output = useCase.execute("0000-000002", new BigDecimal("10.00"), null, "chave-7");
+        var output = useCase.execute("0000-000002", null, new BigDecimal("10.00"), null, "chave-7");
 
         assertThat(output.replayed()).isFalse();
         assertThat(balance(destination.id())).isEqualByComparingTo("10.00");
@@ -185,7 +185,7 @@ class TransferUseCaseTest {
     void should_requireIdempotencyKey() {
         deposit(source, "100.00");
 
-        assertThatThrownBy(() -> useCase.execute("0000000002", new BigDecimal("10.00"), null, " "))
+        assertThatThrownBy(() -> useCase.execute("0000000002", null, new BigDecimal("10.00"), null, " "))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 

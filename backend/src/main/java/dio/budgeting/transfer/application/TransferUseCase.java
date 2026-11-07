@@ -49,9 +49,9 @@ public class TransferUseCase {
     private final Clock clock;
 
     public TransferUseCase(TransferRepository transferRepository, TransactionRepository transactionRepository,
-                             AccountRepository accountRepository, UserRepository userRepository,
-                             CurrentAccountProvider currentAccount, LookupGuardService lookupGuard,
-                             AuditLog audit, Clock clock) {
+                           AccountRepository accountRepository, UserRepository userRepository,
+                           CurrentAccountProvider currentAccount, LookupGuardService lookupGuard,
+                           AuditLog audit, Clock clock) {
         this.transferRepository = transferRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
@@ -60,11 +60,6 @@ public class TransferUseCase {
         this.lookupGuard = lookupGuard;
         this.audit = audit;
         this.clock = clock;
-    }
-
-    @Transactional
-    public TransferOutput execute(String destinationNumber, BigDecimal amount, String description, String idempotencyKey) {
-        return execute(destinationNumber, null, amount, description, idempotencyKey);
     }
 
     @Transactional
@@ -137,13 +132,13 @@ public class TransferUseCase {
 
     /** Exatamente um destino deve ser informado: número da conta ou e-mail do titular. */
     private Account resolveDestination(String number, String email) {
-        var temNumero = number != null && !number.isBlank();
-        var temEmail = email != null && !email.isBlank();
-        if (temNumero == temEmail) {
+        var hasNumber = number != null && !number.isBlank();
+        var hasEmail = email != null && !email.isBlank();
+        if (hasNumber == hasEmail) {
             throw new BusinessRuleViolationException("Informe o número da conta ou o e-mail do destinatário (apenas um)");
         }
 
-        if (temNumero) {
+        if (hasNumber) {
             var digits = number.replaceAll("\\D", "");
             if (!digits.matches("\\d{10}")) {
                 throw new BusinessRuleViolationException("Número de conta de destino inválido");
@@ -166,7 +161,7 @@ public class TransferUseCase {
 
     private Money balance(AccountId accountId) {
         return transactionRepository.findAll(accountId).stream()
-                .map(t -> t.type().isCredit() ? t.amount() : new Money(-t.amount().cents()))
+                .map(Transaction::signedAmount)
                 .reduce(Money.ZERO, Money::plus);
     }
 

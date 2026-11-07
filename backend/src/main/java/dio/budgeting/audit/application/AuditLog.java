@@ -16,9 +16,9 @@ import java.time.Instant;
 /**
  * Ponto único de gravação da trilha de auditoria. Duas regras de transação:
  * <ul>
- *   <li>{@link #sucesso}: entra na transação do caso de uso. Se a operação for revertida, o registro some junto:
+ *   <li>{@link #success}: entra na transação do caso de uso. Se a operação for revertida, o registro some junto:
  *       não existe "transferência concluída" que não aconteceu.</li>
- *   <li>{@link #falha}: grava em transação própria. Tentativas recusadas são justamente o que a auditoria precisa
+ *   <li>{@link #failure}: grava em transação própria. Tentativas recusadas são justamente o que a auditoria precisa
  *       guardar, e elas acontecem em casos que sofrem rollback.</li>
  * </ul>
  */
@@ -39,7 +39,7 @@ public class AuditLog {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failure(AuditEventType type, UserId actor, AccountId account, String subjectHash,
-                      String reference, String reason) {
+                        String reference, String reason) {
         events.save(AuditEvent.failure(now(), type, actor, account, subjectHash, reference, reason));
     }
 

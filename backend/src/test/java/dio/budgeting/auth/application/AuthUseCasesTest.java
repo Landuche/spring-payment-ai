@@ -30,7 +30,7 @@ class AuthUseCasesTest {
             new LoginProtectionService(new InMemoryFailureCounterRepository(), clock);
 
     private final SessionIssuer issuer = new SessionIssuer(tokens, new InMemoryRefreshTokenRepository(), clock,
-            java.time.Duration.ofDays(30));
+                                                           java.time.Duration.ofDays(30));
     private final InMemoryAuditEventRepository auditRepo = new InMemoryAuditEventRepository();
     private final AuditLog audit = new AuditLog(auditRepo, clock);
     private final RegisterUserUseCase register =

@@ -1,6 +1,5 @@
 package dio.budgeting.transaction.infrastructure;
 
-
 import dio.budgeting.transaction.application.TransactionOutput;
 
 import java.math.BigDecimal;

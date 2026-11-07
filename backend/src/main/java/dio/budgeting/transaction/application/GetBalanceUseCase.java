@@ -22,10 +22,10 @@ public class GetBalanceUseCase {
     public BalanceOutput execute() {
         List<Transaction> transactions = transactionRepository.findAll(currentAccount.current());
 
-        Money entradas = sum(transactions, true);
-        Money saidas = sum(transactions, false);
+        Money credits = sum(transactions, true);
+        Money debits = sum(transactions, false);
 
-        return new BalanceOutput(entradas.toReais(), saidas.toReais(), entradas.minus(saidas).toReais());
+        return new BalanceOutput(credits.toReais(), debits.toReais(), credits.minus(debits).toReais());
     }
 
     private static Money sum(List<Transaction> transactions, boolean credit) {

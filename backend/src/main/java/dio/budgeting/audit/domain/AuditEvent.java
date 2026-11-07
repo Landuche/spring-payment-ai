@@ -47,7 +47,7 @@ public record AuditEvent(
     }
 
     public static AuditEvent failure(Instant at, AuditEventType type, UserId actor, AccountId account,
-                                   String subjectHash, String reference, String reason) {
+                                     String subjectHash, String reference, String reason) {
         return new AuditEvent(UUID.randomUUID(), at, type, AuditOutcome.FAILURE, actor, account, subjectHash,
                 reference, reason);
     }

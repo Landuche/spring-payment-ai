@@ -1,6 +1,5 @@
 package dio.budgeting.auth.application;
 
-
 import dio.budgeting.auth.domain.User;
 import dio.budgeting.auth.domain.UserId;
 import dio.budgeting.auth.domain.UserRepository;

@@ -36,8 +36,8 @@ public class SimulateInvestmentUseCase {
         }
 
         var principal = Money.ofPositiveReais(amount).toReais();
-        var fator = BigDecimal.ONE.add(monthlyRate).pow(termMonths, MathContext.DECIMAL128);
-        var finalAmount = principal.multiply(fator).setScale(2, RoundingMode.HALF_UP);
+        var factor = BigDecimal.ONE.add(monthlyRate).pow(termMonths, MathContext.DECIMAL128);
+        var finalAmount = principal.multiply(factor).setScale(2, RoundingMode.HALF_UP);
 
         return new SimulationOutput(
                 principal,

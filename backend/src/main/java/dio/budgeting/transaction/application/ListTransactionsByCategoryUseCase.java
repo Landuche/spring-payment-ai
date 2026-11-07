@@ -14,7 +14,7 @@ public class ListTransactionsByCategoryUseCase {
     private final CurrentAccountProvider currentAccount;
 
     public ListTransactionsByCategoryUseCase(TransactionRepository transactionRepository,
-                                               CurrentAccountProvider currentAccount) {
+                                             CurrentAccountProvider currentAccount) {
         this.transactionRepository = transactionRepository;
         this.currentAccount = currentAccount;
     }

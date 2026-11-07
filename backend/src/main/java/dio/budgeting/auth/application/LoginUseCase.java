@@ -23,8 +23,8 @@ public class LoginUseCase {
     private final AuditLog audit;
 
     public LoginUseCase(UserRepository userRepository, AccountRepository accountRepository,
-                             PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer,
-                             LoginProtectionService loginProtection, AuditLog audit) {
+                        PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer,
+                        LoginProtectionService loginProtection, AuditLog audit) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;

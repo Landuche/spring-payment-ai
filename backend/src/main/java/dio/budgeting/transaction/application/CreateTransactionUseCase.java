@@ -26,7 +26,7 @@ public class CreateTransactionUseCase {
     private final Clock clock;
 
     public CreateTransactionUseCase(TransactionRepository transactionRepository, AccountRepository accountRepository,
-                                 CurrentAccountProvider currentAccount, Clock clock) {
+                                    CurrentAccountProvider currentAccount, Clock clock) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.currentAccount = currentAccount;
@@ -39,7 +39,7 @@ public class CreateTransactionUseCase {
         var accountId = currentAccount.current();
         var money = Money.ofPositiveReais(amount);
 
-        if (!type.isCredit() && type.isExpense()) {
+        if (type.isExpense()) {
             // Trava a conta: duas despesas concorrentes não podem ler o mesmo saldo.
             accountRepository.lockForUpdate(accountId);
             var currentBalance = currentBalance(accountId);
@@ -58,7 +58,7 @@ public class CreateTransactionUseCase {
 
     private Money currentBalance(AccountId accountId) {
         return transactionRepository.findAll(accountId).stream()
-                .map(t -> t.type().isCredit() ? t.amount() : new Money(-t.amount().cents()))
+                .map(Transaction::signedAmount)
                 .reduce(Money.ZERO, Money::plus);
     }
 }

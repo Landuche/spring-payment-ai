@@ -1,6 +1,5 @@
 package dio.budgeting.account.application;
 
-
 import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.account.domain.LookupGuard;
 import dio.budgeting.account.domain.LookupGuardRepository;

@@ -40,16 +40,16 @@ public class GenerateExpenseReportUseCase {
                 .toList();
 
         // Transferências não são gasto: ficam fora do total, mas aparecem à parte quando o relatório é geral.
-        var filtradoPorCategoria = category != null;
+        var filteredByCategory = category != null;
 
         return new ExpenseReportOutput(
                 month.toString(),
-                filtradoPorCategoria ? category.name() : ALL_CATEGORIES,
+                filteredByCategory ? category.name() : ALL_CATEGORIES,
                 sum(expenses, TransactionType.EXPENSE).toReais(),
                 expenses.size(),
                 expenses.stream().map(TransactionOutput::from).toList(),
-                filtradoPorCategoria ? null : sum(transactions, TransactionType.TRANSFER_SENT).toReais(),
-                filtradoPorCategoria ? null : sum(transactions, TransactionType.TRANSFER_RECEIVED).toReais());
+                filteredByCategory ? null : sum(transactions, TransactionType.TRANSFER_SENT).toReais(),
+                filteredByCategory ? null : sum(transactions, TransactionType.TRANSFER_RECEIVED).toReais());
     }
 
     private static Money sum(List<Transaction> transactions, TransactionType type) {

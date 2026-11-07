@@ -4,15 +4,9 @@ import dio.budgeting.auth.domain.User;
 import dio.budgeting.auth.domain.UserId;
 import dio.budgeting.auth.domain.UserRepository;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
-
-interface UserEntityRepository extends CrudRepository<UserEntity, UUID> {
-    Optional<UserEntity> findByEmail(String email);
-}
 
 @Repository
 class UserJpaRepository implements UserRepository {

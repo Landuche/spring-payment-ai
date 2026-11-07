@@ -30,7 +30,7 @@ public class RegisterUserUseCase {
     private final AuditLog audit;
 
     public RegisterUserUseCase(UserRepository userRepository, AccountRepository accountRepository,
-                                   PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer, AuditLog audit) {
+                               PasswordEncoder passwordEncoder, SessionIssuer sessionIssuer, AuditLog audit) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;

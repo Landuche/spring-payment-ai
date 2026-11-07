@@ -9,11 +9,8 @@ import dio.budgeting.shared.domain.RateLimitExceededException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.ai.retry.TransientAiException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -48,20 +45,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     ProblemDetail handleNotFound(NotFoundException ex) {
         return problem(HttpStatus.NOT_FOUND, "Não encontrado", ex.getMessage());
-    }
-
-    /**
-     * Provedor de IA fora do ar, sem resposta ou no limite de uso, depois de esgotadas as tentativas do Spring AI.
-     * O cliente recebe uma mensagem amigável; o detalhe do provedor (que pode citar chave e cotas) fica só no log.
-     */
-    @ExceptionHandler({TransientAiException.class, NonTransientAiException.class, ResourceAccessException.class})
-    ResponseEntity<ProblemDetail> handleAiUnavailable(RuntimeException ex) {
-        log.warn("Provedor de IA indisponível mesmo após as tentativas: {}", ex.getMessage());
-        var problem = problem(HttpStatus.SERVICE_UNAVAILABLE, "Assistente indisponível",
-                "O Claudinho não conseguiu responder agora. Tente de novo em alguns instantes.");
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .header(HttpHeaders.RETRY_AFTER, "5")
-                .body(problem);
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)

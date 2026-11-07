@@ -1,6 +1,5 @@
 package dio.budgeting.account.application;
 
-
 import dio.budgeting.account.domain.Account;
 import dio.budgeting.account.domain.AccountId;
 import dio.budgeting.account.domain.AccountRepository;

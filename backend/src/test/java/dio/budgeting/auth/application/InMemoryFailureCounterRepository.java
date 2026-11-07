@@ -1,6 +1,5 @@
 package dio.budgeting.auth.application;
 
-
 import dio.budgeting.auth.domain.FailureCounter;
 import dio.budgeting.auth.domain.FailureCounterRepository;
 

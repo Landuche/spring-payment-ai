@@ -1,6 +1,5 @@
 package dio.budgeting.assistant.infrastructure;
 
-
 import java.math.BigDecimal;
 import java.util.Locale;
 

@@ -11,10 +11,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public class JpaTransactionRepository implements TransactionRepository {
+class TransactionJpaRepository implements TransactionRepository {
     private final TransactionEntityRepository entityRepository;
 
-    public JpaTransactionRepository(TransactionEntityRepository entityRepository) {
+    TransactionJpaRepository(TransactionEntityRepository entityRepository) {
         this.entityRepository = entityRepository;
     }
 

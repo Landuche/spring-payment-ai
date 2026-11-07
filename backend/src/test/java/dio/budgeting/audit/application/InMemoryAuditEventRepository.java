@@ -1,6 +1,5 @@
 package dio.budgeting.audit.application;
 
-
 import dio.budgeting.audit.domain.AuditEvent;
 import dio.budgeting.audit.domain.AuditEventRepository;
 

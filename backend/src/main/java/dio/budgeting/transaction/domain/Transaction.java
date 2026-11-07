@@ -48,14 +48,19 @@ public record Transaction(
         }
     }
 
+    /** Valor com sinal: positivo para entradas, negativo para saídas. */
+    public Money signedAmount() {
+        return type.isCredit() ? amount : new Money(-amount.cents());
+    }
+
     /** Lançamento manual (receita ou despesa). Tipos de transferência só são criados pelo caso de uso de transferência. */
     public static Transaction create(AccountId accountId, String description, Money amount, Category category,
-                                   TransactionType type, LocalDate occurredAt) {
+                                     TransactionType type, LocalDate occurredAt) {
         return create(accountId, description, amount, category, type, occurredAt, null);
     }
 
     public static Transaction create(AccountId accountId, String description, Money amount, Category category,
-                                   TransactionType type, LocalDate occurredAt, Instant createdAt) {
+                                     TransactionType type, LocalDate occurredAt, Instant createdAt) {
         if (type.isTransfer()) {
             throw new BusinessRuleViolationException("Use a operação de transferência para movimentar entre contas");
         }
@@ -64,12 +69,12 @@ public record Transaction(
     }
 
     public static Transaction fromTransfer(UUID transferId, AccountId accountId, String description, Money amount,
-                                              TransactionType type, LocalDate occurredAt) {
+                                           TransactionType type, LocalDate occurredAt) {
         return fromTransfer(transferId, accountId, description, amount, type, occurredAt, null);
     }
 
     public static Transaction fromTransfer(UUID transferId, AccountId accountId, String description, Money amount,
-                                              TransactionType type, LocalDate occurredAt, Instant createdAt) {
+                                           TransactionType type, LocalDate occurredAt, Instant createdAt) {
         return new Transaction(new TransactionId(), accountId, description, amount,
                 Category.TRANSFER, type, occurredAt, createdAt, transferId);
     }
