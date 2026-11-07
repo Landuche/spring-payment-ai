@@ -1,6 +1,5 @@
 package dio.budgeting.audit.domain;
 
-/** Catálogo fechado de eventos auditados. Adicionar um tipo é uma decisão de produto, não só de código. */
 public enum AuditEventType {
     USER_REGISTERED,
     LOGIN_SUCCEEDED,

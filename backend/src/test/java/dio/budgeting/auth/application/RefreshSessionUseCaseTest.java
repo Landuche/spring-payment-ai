@@ -65,7 +65,7 @@ class RefreshSessionUseCaseTest {
         var first = issuer.issue(user, account);
         var second = refresh.execute(first.refreshToken());
 
-        // Replay do token já trocado: sinal de roubo. A sessão inteira (inclusive a nova) é revogada.
+        // token já trocado: A sessão inteira (inclusive a nova) é revogada.
         assertThatThrownBy(() -> refresh.execute(first.refreshToken()))
                 .isInstanceOf(AuthenticationFailedException.class);
         assertThatThrownBy(() -> refresh.execute(second.refreshToken()))

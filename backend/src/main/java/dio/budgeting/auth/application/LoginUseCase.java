@@ -38,7 +38,7 @@ public class LoginUseCase {
         var emailKey = "email:" + normalizedEmail;
         var subject = AuditEvent.hashSubject(email);
 
-        // Bloqueio é checado antes de qualquer verificação de senha: conta bloqueada não recebe resposta de credencial.
+        // conta bloqueada não recebe resposta de credencial.
         try {
             loginProtection.checkBlock(emailKey);
         } catch (LoginBlockedException e) {

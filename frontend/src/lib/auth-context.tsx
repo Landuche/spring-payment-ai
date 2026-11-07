@@ -4,7 +4,6 @@ import { sessionStorage } from './session-storage';
 
 interface AuthContextValue {
   readonly session: Session | null;
-  /** true enquanto a sessão persistida ainda está sendo lida (e possivelmente renovada) na inicialização. */
   readonly restoring: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
@@ -13,7 +12,6 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/** Sessão guardada com o instante de emissão, para decidir se o access token ainda vale. */
 interface StoredSession {
   readonly session: Session;
   readonly issuedAt: number;
@@ -30,10 +28,8 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [restoring, setRestoring] = useState(true);
 
-  // Espelho síncrono da sessão: a renovação precisa do refresh token atual sem depender de re-render.
   const sessionRef = useRef<Session | null>(null);
-  // Uma única renovação em voo: duas requisições 401 paralelas não podem disparar dois refresh
-  // (o segundo usaria um token já trocado e derrubaria a sessão pela regra de reuso).
+
   const renewing = useRef<Promise<RenewResult> | null>(null);
 
   const persist = useCallback(async (next: Session | null) => {
@@ -47,7 +43,6 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     }
   }, []);
 
-  /** Troca o refresh token por um novo par. 'expired' encerra a sessão local; 'offline' mantém para tentar depois. */
   const renew = useCallback((): Promise<RenewResult> => {
     if (!renewing.current) {
       renewing.current = (async (): Promise<RenewResult> => {
@@ -76,7 +71,6 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     await persist(null);
   }, [persist]);
 
-  // Restaura a sessão ao abrir o app: usa o access token se ainda vale; senão renova com o refresh token.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -95,7 +89,6 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
             sessionRef.current = stored.session;
             const result = await renew();
             if (result === 'offline' && !cancelled) {
-              // Sem rede no boot: mantém a sessão; a próxima chamada tenta renovar de novo.
               setSession(stored.session);
               setAccessToken(stored.session.accessToken);
             }
@@ -111,7 +104,6 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     };
   }, [renew]);
 
-  // 401 em requisição autenticada: tenta renovar uma vez; a API repete a chamada se der certo.
   useEffect(() => {
     setUnauthorizedHandler(async () => (await renew()) === 'ok');
     return () => setUnauthorizedHandler(null);

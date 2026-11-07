@@ -1,5 +1,3 @@
-/** Validação no cliente: melhora a UX, mas a fonte da verdade é sempre o backend. Espelha as regras do servidor. */
-
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 export function validateEmail(value: string): string | undefined {

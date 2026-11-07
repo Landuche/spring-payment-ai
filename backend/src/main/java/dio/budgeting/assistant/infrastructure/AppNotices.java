@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.util.Locale;
 
 /**
- * Transforma o aviso estruturado do app em uma mensagem que o Claudinho entende. Começa sempre com "[APP]", marca
- * que não é fala do cliente. O texto livre (nome, motivo) é higienizado: sem quebras de linha, sem tamanho
- * excessivo e sem "[APP]", para não conseguir se passar por um aviso do sistema nem injetar instruções.
+ * Transforma o aviso estruturado do app em uma mensagem que o Claudinho entende.
  */
 final class AppNotices {
     private static final String PREFIX = "[APP]";

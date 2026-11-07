@@ -17,9 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
                 .allowedMethods("GET", "POST", "OPTIONS")
                 .allowedHeaders("*")
-                // Necessário para o navegador enviar e aceitar o cookie do refresh token (cliente web).
                 .allowCredentials(true)
-                // Sem isso, o navegador esconde Retry-After do JavaScript e a tela não consegue mostrar o tempo de espera.
                 .exposedHeaders("Retry-After");
     }
 }

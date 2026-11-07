@@ -5,7 +5,6 @@ import dio.budgeting.auth.domain.UserId;
 import java.security.SecureRandom;
 import java.util.Objects;
 
-/** Conta corrente de um usuário. O saldo é derivado do extrato, não armazenado. */
 public record Account(AccountId id, UserId ownerId, String number) {
 
     private static final SecureRandom RANDOM = new SecureRandom();

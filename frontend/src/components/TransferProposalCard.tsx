@@ -10,7 +10,6 @@ export type TransferCardStatus = 'pending' | 'sending' | 'done' | 'canceled';
 export interface TransferCardState {
   readonly proposal: TransferProposal;
   readonly status: TransferCardStatus;
-  /** Uma por proposta: tocar de novo (ou repetir depois de uma falha) não debita duas vezes. */
   readonly idempotencyKey: string;
 }
 
@@ -20,10 +19,6 @@ interface TransferProposalCardProps {
   readonly onCancel: () => void;
 }
 
-/**
- * Cartão de confirmação que o Claudinho coloca no chat quando prepara uma transferência. O modelo só prepara:
- * quem executa é o cliente, tocando em "Transferir". O nome do titular vem do servidor (mascarado), para conferir.
- */
 export function TransferProposalCard({ state, onConfirm, onCancel }: TransferProposalCardProps) {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);

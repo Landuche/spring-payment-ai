@@ -5,7 +5,7 @@ import dio.budgeting.audit.domain.AuditEventRepository;
 
 import org.springframework.stereotype.Repository;
 
-/** Só inserção: a trilha é append-only, e o banco recusa update e delete (trigger na migração). */
+/** append-only, e o banco recusa update e delete. */
 @Repository
 class AuditEventJpaRepository implements AuditEventRepository {
     private final AuditEventEntityRepository entityRepository;

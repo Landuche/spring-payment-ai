@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
-/** {@code createdAt} é o momento exato do lançamento; nulo quando só a data é conhecida. */
 public record TransactionOutput(
         String id,
         String description,

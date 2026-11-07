@@ -9,8 +9,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Agenda a limpeza de registros expirados. Padrão: 03:15 todo dia (horário do Clock da aplicação).
- * Para mudar o horário, defina {@code budgeting.cleanup.cron}.
+ * Agenda a limpeza de registros expirados. Padrão: 03:15 todo dia.
+ * Para alterar o horário, defina {@code budgeting.cleanup.cron}.
  */
 @Configuration
 @EnableScheduling
@@ -28,7 +28,7 @@ public class SchedulingConfig {
         try {
             cleanup.execute();
         } catch (RuntimeException e) {
-            // Falha na limpeza não pode derrubar a aplicação: o próximo ciclo tenta de novo.
+            // Evita derrubar a aplicação se falhar.
             log.error("Falha na limpeza de registros expirados", e);
         }
     }

@@ -2,7 +2,7 @@ package dio.budgeting.transaction.domain;
 
 /**
  * Tipo de lançamento. INCOME e EXPENSE são lançamentos manuais; os de transferência
- * são gerados pelo caso de uso de transferência e nunca pela criação manual.
+ * são gerados pelo caso de uso de transferência.
  */
 public enum TransactionType {
     INCOME(true, false),

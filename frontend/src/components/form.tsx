@@ -2,7 +2,6 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-/** Estilos comuns aos formulários (transferir, depositar, registrar gasto). */
 export const makeFormStyles = (palette: Palette) =>
   StyleSheet.create({
     label: {

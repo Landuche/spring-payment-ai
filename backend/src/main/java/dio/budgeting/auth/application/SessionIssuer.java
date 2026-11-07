@@ -51,7 +51,7 @@ public class SessionIssuer {
                 user.name(), user.email());
     }
 
-    /** 256 bits de entropia, codificados em base64url sem padding. */
+    /** 256 bits, codificados em base64url sem padding. */
     static String generateToken() {
         var bytes = new byte[32];
         RANDOM.nextBytes(bytes);

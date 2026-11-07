@@ -9,7 +9,6 @@ export interface ChatMessage {
   readonly role: 'user' | 'assistant';
   readonly text: string;
   readonly kind?: 'text' | 'voice';
-  /** Cartão de confirmação, quando o Claudinho preparou uma transferência nesta resposta. */
   readonly transfer?: TransferCardState;
 }
 

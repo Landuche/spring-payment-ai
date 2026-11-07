@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Endpoints diretos para o painel: saldo e relatório de gastos (mesmos casos de uso das ferramentas do assistente). */
 @RestController
 @RequestMapping("/api")
 public class FinanceController {

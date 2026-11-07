@@ -21,10 +21,8 @@ const ToastContext = createContext<ToastApi | null>(null);
 
 const FADE_MS = 180;
 const SUCCESS_MS = 2800;
-/** Erros têm mensagens mais longas e importam mais: ficam mais tempo na tela. */
 const ERROR_MS = 5000;
 
-/** Aviso rápido no topo da tela (sucesso ou erro), que some sozinho. Um aviso novo substitui o anterior. */
 export function ToastProvider({ children }: { readonly children: ReactNode }) {
   const styles = useStyles(makeStyles);
   const { palette } = useTheme();

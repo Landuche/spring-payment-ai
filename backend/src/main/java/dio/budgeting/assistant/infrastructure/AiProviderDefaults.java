@@ -8,9 +8,7 @@ import org.springframework.core.env.MapPropertySource;
 import java.util.Map;
 
 /**
- * Escolhe os modelos de chat e de transcrição conforme o provedor configurado em {@code AI_BASE_URL},
- * para que o {@code .env} precise apenas da URL e da chave. Os valores entram com a menor precedência:
- * qualquer propriedade {@code spring.ai.openai.*} definida explicitamente continua valendo.
+ * Escolhe os modelos de chat e de transcrição conforme o provedor configurado em {@code AI_BASE_URL}
  */
 public class AiProviderDefaults implements EnvironmentPostProcessor {
     static final String SOURCE_NAME = "aiProviderDefaults";

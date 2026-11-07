@@ -1,7 +1,3 @@
-/**
- * Tokens visuais. Estilo neobank: superfícies em camadas, gradientes vibrantes e cores semânticas para
- * entrada/saída. Há duas paletas com as mesmas chaves; a escolhida vem do ThemeProvider.
- */
 export const darkPalette = {
   background: '#07070D',
   surface: '#12121C',
@@ -51,11 +47,8 @@ export const font = {
   caption: 12,
 } as const;
 
-/** Largura máxima do conteúdo: no celular ocupa a tela; no desktop usa a largura da janela, com teto. */
 export const CONTENT_MAX_WIDTH = { compact: 560, wide: 1120 } as const;
 
-/** A partir desta largura a navegação vira barra lateral (desktop/web). */
 export const WIDE_BREAKPOINT = 1100;
 
-/** Largura da barra lateral no desktop. */
 export const SIDEBAR_WIDTH = 232;

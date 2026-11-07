@@ -9,7 +9,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Sobe a aplicação inteira contra um Postgres descartável (Testcontainers), rodando as migrações Flyway de verdade.
- * Só exige o Docker em execução: não depende do banco do compose, do arquivo .env nem de variáveis de ambiente.
+ * Só exige o Docker em execução, não depende do banco do compose, do arquivo .env nem de variáveis de ambiente.
  */
 @Testcontainers
 @SpringBootTest(properties = {

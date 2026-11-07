@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Porta de entrada HTTP do assistente (Claudinho). A conversa em si fica no {@link AssistantChat}.
+ * A conversa em si fica no {@link AssistantChat}.
  * <p>
- * A resposta falada fica por conta do app (voz do dispositivo); o backend só transcreve e responde em texto.
+ * A resposta é falada usando a voz do celular, o backend só transcreve e responde em texto.
  */
 @RestController
 @RequestMapping("/assistant")
@@ -31,10 +31,6 @@ public class AssistantController {
         return chat.reply(request.message(), request.conversationId());
     }
 
-    /**
-     * O app avisa o desfecho do cartão de transferência (enviada, cancelada ou com falha) e o Claudinho responde na
-     * mesma conversa, com memória, propondo o próximo passo. Não executa nada: a transferência já foi tratada pelo app.
-     */
     @PostMapping(value = "/event", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public AssistantReplyResponse event(@Valid @RequestBody AssistantEventRequest request) {
         return chat.reply(AppNotices.message(request), request.conversationId());

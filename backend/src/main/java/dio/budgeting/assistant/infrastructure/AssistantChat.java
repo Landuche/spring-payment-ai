@@ -19,11 +19,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Conversa com o Claudinho: monta o prompt do turno, aplica a memória e devolve a resposta com o que o app precisa
- * mostrar além do texto (ex.: o cartão de transferência).
+ * monta o prompt do turno, aplica a memória e devolve a resposta com o que o app precisa.
  * <p>
- * A memória de conversa é isolada por conta: a chave é {@code conta:conversa}, então um cliente nunca lê o histórico
- * de outra conta, mesmo que adivinhe o identificador da conversa.
+ * A memória de conversa é isolada por conta: a chave é {@code conta:conversa}.
  */
 @Service
 public class AssistantChat {
@@ -47,7 +45,6 @@ public class AssistantChat {
     public AssistantReplyResponse reply(String message, String conversationId) {
         String key = currentAccount.current().uuid() + ":"
                 + (conversationId == null || conversationId.isBlank() ? DEFAULT_CONVERSATION : conversationId);
-        // As ferramentas deixam aqui o que o app precisa mostrar além do texto (ex.: o cartão de transferência).
         var proposals = new TurnProposals();
         var text = chatClient.prompt()
                 .system(systemPrompt + "\n\n" + dateContext(clock))
@@ -59,10 +56,6 @@ public class AssistantChat {
         return new AssistantReplyResponse(text, proposals.transfer().orElse(null));
     }
 
-    /**
-     * O modelo não sabe que dia é hoje. Sem isso, "relatório deste mês" não tem como ser resolvido e ele acaba
-     * perguntando o mês ao cliente.
-     */
     static String dateContext(Clock clock) {
         var today = LocalDate.now(clock);
         var portuguese = Locale.of("pt", "BR");

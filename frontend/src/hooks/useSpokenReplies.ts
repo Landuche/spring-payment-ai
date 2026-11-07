@@ -6,10 +6,6 @@ import { speakAloud, warmUpVoice } from '@/lib/voice';
 
 const VOICE_PREF_KEY = 'claudinho.voice';
 
-/**
- * Leitura das respostas em voz alta com a voz do aparelho (não depende do backend nem de API paga).
- * Ligada por padrão; a escolha fica salva. Sair da tela interrompe uma fala em andamento.
- */
 export function useSpokenReplies() {
   const [enabled, setEnabled] = useState(true);
   // Espelho do estado: a resposta chega depois de um await e precisa ver o valor atual, não o da época do toque.

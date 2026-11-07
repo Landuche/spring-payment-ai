@@ -1,7 +1,8 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
+import { ChipGroup } from '@/components/ChipGroup';
 import { Screen } from '@/components/Screen';
 import { TransactionItem } from '@/components/TransactionItem';
 import { useFinance } from '@/hooks/useFinance';
@@ -31,7 +32,6 @@ interface DaySection {
   readonly items: readonly Transaction[];
 }
 
-/** Agrupa por dia, do mais recente para o mais antigo; no mesmo dia, a hora desempata (quando existe). */
 function groupByDay(items: readonly Transaction[]): readonly DaySection[] {
   const sorted = items
     .slice()
@@ -54,7 +54,6 @@ export default function StatementScreen() {
   const { transactions, loading, refresh } = useFinance();
   const [filter, setFilter] = useState<Filter>('ALL');
 
-  // Ao voltar para a aba (ex.: depois de uma transferência), recarrega o extrato.
   useFocusEffect(
     useCallback(() => {
       void refresh();
@@ -79,22 +78,7 @@ export default function StatementScreen() {
         <Text style={styles.subtitle}>Todas as suas movimentações, da mais recente para a mais antiga.</Text>
       </View>
 
-      <View style={styles.chips} accessibilityRole="radiogroup">
-        {FILTERS.map((option) => {
-          const selected = option.value === filter;
-          return (
-            <Pressable
-              key={option.value}
-              onPress={() => setFilter(option.value)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              style={[styles.chip, selected && styles.chipSelected]}
-            >
-              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{option.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ChipGroup value={filter} options={FILTERS} onChange={setFilter} />
 
       <View style={styles.totals}>
         <View style={styles.total}>
@@ -134,18 +118,6 @@ const makeStyles = (palette: Palette) =>
     header: { gap: 4 },
     title: { color: palette.text, fontSize: font.title, fontWeight: '800' },
     subtitle: { color: palette.textMuted, fontSize: font.body, lineHeight: 20 },
-    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-    chip: {
-      paddingHorizontal: space.lg,
-      paddingVertical: space.sm,
-      borderRadius: radius.pill,
-      backgroundColor: palette.surfaceRaised,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: palette.border,
-    },
-    chipSelected: { backgroundColor: palette.primaryStrong, borderColor: palette.primaryStrong },
-    chipText: { color: palette.textMuted, fontWeight: '600', fontSize: font.body },
-    chipTextSelected: { color: '#FFFFFF' },
     totals: { flexDirection: 'row', gap: space.md },
     total: {
       flex: 1,

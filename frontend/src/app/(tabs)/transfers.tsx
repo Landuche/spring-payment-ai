@@ -15,10 +15,6 @@ const MODES = [
   { value: 'expense', label: 'Registrar gasto' },
 ] as const;
 
-/**
- * Movimentações da própria conta: transferir para outra conta, depositar (entrada) ou registrar um gasto (saída).
- * Depois de concluir, o formulário é recriado do zero (nova `key`): campos limpos e uma nova chave de idempotência.
- */
 export default function TransfersScreen() {
   const styles = useStyles(makeStyles);
   const [mode, setMode] = useState<Mode>('transfer');

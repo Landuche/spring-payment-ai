@@ -40,8 +40,7 @@ public class GetAccountUseCase {
     }
 
     /**
-     * Confirmação antes de transferir. Devolve só o nome mascarado do titular,
-     * para não expor dados pessoais a quem conhece apenas o número.
+     * Confirmação antes de transferir. Devolve só o nome mascarado do titular.
      */
     public AccountOutput findByNumber(String number) {
         var digits = number == null ? "" : NON_DIGITS.matcher(number).replaceAll("");
@@ -55,8 +54,7 @@ public class GetAccountUseCase {
     }
 
     /**
-     * Busca por e-mail (como uma chave Pix). Resposta idêntica para "não existe" e "bloqueado",
-     * e nome mascarado: a enumeração de e-mails ainda precisa de limite de tentativas no gateway.
+     * Busca por e-mail (como uma chave Pix).
      */
     public AccountOutput findByEmail(String email) {
         if (email == null || !EMAIL.matcher(email).matches()) {
@@ -79,7 +77,6 @@ public class GetAccountUseCase {
         return number.substring(0, 4) + "-" + number.substring(4);
     }
 
-    /** "Ana Paula Souza" -> "Ana P. S." */
     static String mask(String name) {
         var parts = name.trim().split("\\s+");
         var sb = new StringBuilder(parts[0]);

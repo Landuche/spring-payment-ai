@@ -39,7 +39,6 @@ public class GenerateExpenseReportUseCase {
                 .filter(t -> t.type() == TransactionType.EXPENSE)
                 .toList();
 
-        // Transferências não são gasto: ficam fora do total, mas aparecem à parte quando o relatório é geral.
         var filteredByCategory = category != null;
 
         return new ExpenseReportOutput(

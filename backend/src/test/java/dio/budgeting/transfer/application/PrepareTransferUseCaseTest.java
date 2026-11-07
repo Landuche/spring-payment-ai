@@ -59,7 +59,6 @@ class PrepareTransferUseCaseTest {
         assertThat(proposal.recipientName()).isEqualTo("Bruno L.");
         assertThat(proposal.amount()).isEqualByComparingTo("30.00");
         assertThat(proposal.description()).isEqualTo("Pizza");
-        // Preparar não move dinheiro: nenhuma transferência e nenhum lançamento novo.
         assertThat(transfers.count()).isZero();
         assertThat(transactions.findAll(source.id())).hasSize(1);
         assertThat(transactions.findAll(destination.id())).isEmpty();

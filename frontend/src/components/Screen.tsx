@@ -7,18 +7,9 @@ import { useIsWide, useStyles } from '@/theme/theme-context';
 interface ScreenProps extends Pick<ScrollViewProps, 'refreshControl' | 'keyboardShouldPersistTaps'> {
   readonly children: ReactNode;
   readonly scroll?: boolean;
-  /**
-   * true nas telas dentro das abas, que têm a barra lateral no desktop. A barra ocupa a esquerda,
-   * então a área de conteúdo reserva o mesmo espaço à direita: assim o conteúdo fica centralizado
-   * na janela inteira, e não na área que sobra depois da barra.
-   */
   readonly sidebar?: boolean;
 }
 
-/**
- * Container padrão: no celular ocupa a tela; no desktop a coluna cresce até um teto de largura,
- * em vez de ficar pequena e centralizada numa janela larga.
- */
 export function Screen({ children, scroll = true, refreshControl, keyboardShouldPersistTaps, sidebar = false }: ScreenProps) {
   const styles = useStyles(makeStyles);
   const wide = useIsWide();
@@ -38,7 +29,6 @@ export function Screen({ children, scroll = true, refreshControl, keyboardShould
           showsVerticalScrollIndicator={false}
           refreshControl={refreshControl}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps ?? 'handled'}
-          // iOS: abre espaço para o teclado e rola até o campo em foco, para ele não ficar escondido atrás do teclado.
           automaticallyAdjustKeyboardInsets
           keyboardDismissMode="on-drag"
         >

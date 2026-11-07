@@ -4,7 +4,6 @@ import { CATEGORIES, CATEGORY_LABEL, type Category, type Transaction } from '@/l
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-/** Gastos do mês agrupados por categoria, em barras proporcionais ao maior valor. */
 export function ExpenseBars({ expenses }: { readonly expenses: readonly Transaction[] }) {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);

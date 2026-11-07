@@ -228,7 +228,6 @@ class TransferUseCaseTest {
     private void deposit(Account account, String amount) {
         var previous = current;
         current = account.id();
-        // Entrada direta no extrato para preparar o cenário (o caso de uso de crédito é testado à parte).
         transactions.save(Transaction.create(account.id(), "Saldo inicial", new dio.budgeting.shared.domain.Money(
                 new BigDecimal(amount).movePointRight(2).longValueExact()), Category.AUTO, TransactionType.INCOME,
                 java.time.LocalDate.of(2026, 11, 1)));

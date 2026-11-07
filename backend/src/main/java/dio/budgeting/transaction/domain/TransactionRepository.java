@@ -5,7 +5,6 @@ import dio.budgeting.account.domain.AccountId;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Todas as consultas são sempre restritas a uma conta: não existe leitura global. */
 public interface TransactionRepository {
     Transaction save(Transaction transaction);
 

@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "Cabeçalho obrigatório", "Cabeçalho " + ex.getHeaderName() + " é obrigatório");
     }
 
-    /** 429 com Retry-After (segundos até o desbloqueio), como manda a RFC 9110. */
+    /** 429 com Retry-After, padrão RFC 9110. */
     @ExceptionHandler(RateLimitExceededException.class)
     ResponseEntity<ProblemDetail> handleRateLimited(RateLimitExceededException ex) {
         var seconds = Math.max(1, Duration.between(Instant.now(), ex.getUntil()).toSeconds());
@@ -64,8 +64,8 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Última linha de defesa contra corrida (ex.: mesma Idempotency-Key em paralelo): a constraint única do banco
-     * impede o duplicado, e o cliente recebe 409 em vez de 500. O reenvio com a mesma chave devolve o resultado.
+     * duas requisições com a mesma Idempotency-Key: a restrição única do banco barra a segunda.
+     * retorna 409 em vez de 500. Repetir com a mesma chave devolve o resultado da primeira.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {

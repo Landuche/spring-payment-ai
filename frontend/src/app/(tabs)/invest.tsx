@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card } from '@/components/Card';
+import { ChipGroup } from '@/components/ChipGroup';
 import { Screen } from '@/components/Screen';
 import { api, ApiError } from '@/lib/api';
 import { formatBRL, parseAmount } from '@/lib/format';
@@ -9,7 +10,10 @@ import { font, gradients, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const TERMS = [6, 12, 24, 60] as const;
+const TERM_LABEL = (months: number) =>
+  months < 12 ? `${months} meses` : months === 12 ? '1 ano' : `${months / 12} anos`;
+
+const TERM_OPTIONS = ([6, 12, 24, 60] as const).map((value) => ({ value: value as number, label: TERM_LABEL(value) }));
 
 export default function InvestScreen() {
   const [amountText, setAmountText] = useState('1000');
@@ -61,24 +65,7 @@ export default function InvestScreen() {
         </View>
 
         <Text style={styles.sectionLabel}>Prazo</Text>
-        <View style={styles.chips}>
-          {TERMS.map((value) => {
-            const selected = value === months;
-            return (
-              <Pressable
-                key={value}
-                onPress={() => setMonths(value)}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                style={[styles.chip, selected && styles.chipSelected]}
-              >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                  {value < 12 ? `${value} meses` : value === 12 ? '1 ano' : `${value / 12} anos`}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <ChipGroup value={months} options={TERM_OPTIONS} onChange={setMonths} />
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -143,18 +130,6 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   currency: { color: palette.textMuted, fontSize: font.subtitle, fontWeight: '600' },
   input: { flex: 1, color: palette.text, fontSize: 26, fontWeight: '700', fontVariant: ['tabular-nums'] },
   sectionLabel: { color: palette.textMuted, fontSize: font.caption, textTransform: 'uppercase', letterSpacing: 0.6 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: {
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm,
-    borderRadius: radius.pill,
-    backgroundColor: palette.surfaceRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.border,
-  },
-  chipSelected: { backgroundColor: palette.primaryStrong, borderColor: palette.primaryStrong },
-  chipText: { color: palette.textMuted, fontWeight: '600', fontSize: font.body },
-  chipTextSelected: { color: '#FFFFFF' },
   error: { color: palette.expense, fontSize: font.body },
   cta: { borderRadius: radius.md, overflow: 'hidden', marginTop: space.sm },
   ctaGradient: { height: 52, alignItems: 'center', justifyContent: 'center' },

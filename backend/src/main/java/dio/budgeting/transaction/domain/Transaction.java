@@ -9,11 +9,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Lançamento imutável em uma conta. Invariantes garantidas no construtor.
- * {@code transferId} só é preenchido nos lançamentos gerados por uma transferência.
- * {@code createdAt} é o momento exato; é opcional (nulo quando só a data é conhecida).
- */
 public record Transaction(
         TransactionId id,
         AccountId accountId,
@@ -48,12 +43,10 @@ public record Transaction(
         }
     }
 
-    /** Valor com sinal: positivo para entradas, negativo para saídas. */
     public Money signedAmount() {
         return type.isCredit() ? amount : new Money(-amount.cents());
     }
 
-    /** Lançamento manual (receita ou despesa). Tipos de transferência só são criados pelo caso de uso de transferência. */
     public static Transaction create(AccountId accountId, String description, Money amount, Category category,
                                      TransactionType type, LocalDate occurredAt) {
         return create(accountId, description, amount, category, type, occurredAt, null);

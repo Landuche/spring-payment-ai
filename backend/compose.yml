@@ -1,5 +1,4 @@
-# Segredos e credenciais vêm do arquivo .env (carregado automaticamente pelo compose).
-# Veja .env.example para as variáveis necessárias.
+# Segredos e credenciais vêm do arquivo .env.
 services:
   database:
     image: postgres:16-alpine
@@ -7,7 +6,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: transaction
-    # 5433 no host para não colidir com um Postgres já instalado na máquina (5432).
+    # 5433 no host para não colidir com um Postgres da máquina (5432).
     ports:
       - "5433:5432"
     volumes:

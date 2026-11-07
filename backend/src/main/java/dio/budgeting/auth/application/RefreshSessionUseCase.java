@@ -14,10 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Troca um refresh token por um novo par (rotação). Reuso de token já trocado revoga a família inteira:
- * o revogamento é gravado mesmo com a resposta 401 (noRollbackFor), senão a proteção não teria efeito.
- */
 @Service
 public class RefreshSessionUseCase {
     private final RefreshTokenRepository refreshTokens;

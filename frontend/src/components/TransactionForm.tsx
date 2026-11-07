@@ -1,27 +1,26 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput } from 'react-native';
 import { Card } from '@/components/Card';
+import { ChipGroup } from '@/components/ChipGroup';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { AmountInput, makeFormStyles } from '@/components/form';
 import { useToast } from '@/components/Toast';
 import { api, ApiError } from '@/lib/api';
 import { formatBRL, parseAmount } from '@/lib/format';
 import { CATEGORIES, CATEGORY_LABEL, type Category } from '@/lib/types';
-import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
 type TransactionMode = 'deposit' | 'expense';
 
+const CATEGORY_OPTIONS = CATEGORIES.map((value) => ({ value, label: CATEGORY_LABEL[value] }));
+
 interface TransactionFormProps {
-  /** "deposit" soma ao saldo; "expense" registra uma despesa com categoria. */
   readonly mode: TransactionMode;
   readonly onDone: () => void;
 }
 
-/** Depósito (entrada) e registro manual de gasto (saída). Os dois pedem confirmação antes de salvar. */
 export function TransactionForm({ mode, onDone }: TransactionFormProps) {
   const { palette } = useTheme();
-  const styles = useStyles(makeStyles);
   const form = useStyles(makeFormStyles);
   const toast = useToast();
   const isDeposit = mode === 'deposit';
@@ -35,7 +34,6 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
   const amount = parseAmount(amountText);
   const amountValid = Number.isFinite(amount) && amount > 0;
   const canSubmit = amountValid && !submitting;
-  // Depósito não tem categoria na tela; entra como "Outros".
   const effectiveCategory: Category = isDeposit ? 'OTHER' : category;
 
   const submit = async () => {
@@ -89,22 +87,7 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
         {isDeposit ? null : (
           <>
             <Text style={form.label}>Categoria</Text>
-            <View style={styles.chips}>
-              {CATEGORIES.map((value) => {
-                const selected = value === category;
-                return (
-                  <Pressable
-                    key={value}
-                    onPress={() => setCategory(value)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    style={[styles.chip, selected && styles.chipSelected]}
-                  >
-                    <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{CATEGORY_LABEL[value]}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <ChipGroup value={category} options={CATEGORY_OPTIONS} onChange={setCategory} />
           </>
         )}
 
@@ -135,19 +118,3 @@ export function TransactionForm({ mode, onDone }: TransactionFormProps) {
     </>
   );
 }
-
-const makeStyles = (palette: Palette) =>
-  StyleSheet.create({
-    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-    chip: {
-      paddingHorizontal: space.lg,
-      paddingVertical: space.sm,
-      borderRadius: radius.pill,
-      backgroundColor: palette.surfaceRaised,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: palette.border,
-    },
-    chipSelected: { backgroundColor: palette.primaryStrong, borderColor: palette.primaryStrong },
-    chipText: { color: palette.textMuted, fontWeight: '600', fontSize: font.body },
-    chipTextSelected: { color: '#FFFFFF' },
-  });

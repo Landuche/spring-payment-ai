@@ -23,7 +23,7 @@ public class AccountController {
         return getAccount.myAccount();
     }
 
-    /** Busca o destinatário por número OU e-mail, para confirmação antes da transferência. */
+    /** Busca o destinatário por número ou e-mail.*/
     @GetMapping("/accounts/lookup")
     public AccountOutput lookup(@RequestParam(required = false) String number,
                                 @RequestParam(required = false) String email) {

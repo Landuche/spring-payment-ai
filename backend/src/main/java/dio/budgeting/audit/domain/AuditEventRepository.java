@@ -1,6 +1,6 @@
 package dio.budgeting.audit.domain;
 
-/** Trilha append-only: não existe update nem delete. O banco também recusa ambos (trigger na migração). */
+/** append-only, sem update nem delete. */
 public interface AuditEventRepository {
     void save(AuditEvent event);
 }

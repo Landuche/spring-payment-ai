@@ -35,7 +35,6 @@ const GREETING: ChatMessage = {
 let messageCounter = 0;
 const nextId = () => `msg-${++messageCounter}`;
 
-/** A última mensagem do cliente veio de uma gravação (tem a marca "transcrição de voz")? */
 function lastUserMessageWasVoice(messages: readonly ChatMessage[]): boolean {
   for (let i = messages.length - 1; i >= 0; i -= 1) {
     if (messages[i].role === 'user') return messages[i].kind === 'voice';
@@ -43,7 +42,6 @@ function lastUserMessageWasVoice(messages: readonly ChatMessage[]): boolean {
   return false;
 }
 
-/** Cartão de confirmação para uma proposta do Claudinho (ou nada, quando ele não preparou transferência). */
 const cardFor = (proposal: TransferProposal | null): TransferCardState | undefined =>
   proposal ? { proposal, status: 'pending', idempotencyKey: randomUUID() } : undefined;
 
@@ -52,7 +50,6 @@ export default function AssistantScreen() {
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const { enabled: voiceOn, toggle: toggleVoice, speak } = useSpokenReplies();
-  /** Uma conversa por abertura da tela: o backend guarda o histórico com essa chave. */
   const [conversationId] = useState(() => randomUUID());
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const { palette } = useTheme();
@@ -93,11 +90,6 @@ export default function AssistantScreen() {
       prev.map((m) => (m.id === messageId && m.transfer ? { ...m, transfer: { ...m.transfer, status } } : m)),
     );
 
-  /**
-   * Quem envia o dinheiro é o toque do cliente, nunca o modelo. O pedido vai pelo mesmo endpoint da aba
-   * Transferências (saldo, conta própria e idempotência validados de novo no servidor); a chave é a da proposta,
-   * então repetir o toque depois de uma falha não debita duas vezes.
-   */
   const confirmTransfer = async (messageId: string) => {
     const card = messages.find((m) => m.id === messageId)?.transfer;
     if (!card || card.status !== 'pending') return;
@@ -129,13 +121,7 @@ export default function AssistantScreen() {
     void tellClaudinho('TRANSFER_CANCELED', card.proposal);
   };
 
-  /**
-   * Conta ao Claudinho como terminou o cartão (ele não vê o toque), para ele responder na mesma conversa e propor o
-   * próximo passo. O resultado já está no cartão e no aviso: se esta chamada falhar, a conversa só segue sem a fala dele.
-   */
   const tellClaudinho = async (type: TransferEventType, proposal: TransferProposal, reason?: string) => {
-    // Conversa por voz: a última mensagem do cliente antes da confirmação tem a marca "transcrição de voz".
-    // Se foi digitada, o Claudinho fica quieto. Em ambos os casos o toggle de voz manda (ver `speak`).
     const viaVoice = lastUserMessageWasVoice(messages);
     setBusy(true);
     try {

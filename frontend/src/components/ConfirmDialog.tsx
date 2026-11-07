@@ -6,13 +6,10 @@ import { useStyles } from '@/theme/theme-context';
 interface ConfirmDialogProps {
   readonly visible: boolean;
   readonly title: string;
-  /** Texto ou conteúdo com o resumo do que vai acontecer. */
   readonly message: ReactNode;
   readonly confirmLabel: string;
   readonly cancelLabel?: string;
-  /** Pinta o botão de confirmar como ação de risco (ex.: sair da conta). */
   readonly destructive?: boolean;
-  /** Enquanto a ação roda, os botões ficam travados e o fundo não fecha o modal. */
   readonly busy?: boolean;
   readonly onConfirm: () => void;
   readonly onCancel: () => void;

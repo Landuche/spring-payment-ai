@@ -14,8 +14,7 @@ import java.time.Instant;
 
 /**
  * Limite de tentativas de login por e-mail: após {@link #MAX_EMAIL_FAILURES} senhas erradas, a conta fica bloqueada
- * por {@link #BLOCK_DURATION}. Limite por IP foi removido pelo mesmo motivo dos limites de busca (IP compartilhado em dev e
- * atrás de proxy).
+ * por {@link #BLOCK_DURATION}.
  */
 @Service
 public class LoginProtectionService {
@@ -31,7 +30,7 @@ public class LoginProtectionService {
         this.clock = clock;
     }
 
-    /** Lança {@link LoginBlockedException} se o e-mail estiver bloqueado. Não altera estado. */
+    /** Lança {@link LoginBlockedException} se o e-mail estiver bloqueado. Não altera. */
     public void checkBlock(String emailKey) {
         var now = Instant.now(clock);
         var current = counters.findByKey(emailKey).orElse(null);
@@ -40,7 +39,7 @@ public class LoginProtectionService {
         }
     }
 
-    /** Registra uma falha, em transação própria: a contagem persiste mesmo que a transação do chamador seja revertida. */
+    /** Registra uma falha, em transação, a contagem persiste mesmo que a transação do chamador seja revertida. */
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = LoginBlockedException.class)
     public void recordFailure(String emailKey) {
         var now = Instant.now(clock);
@@ -48,7 +47,7 @@ public class LoginProtectionService {
         counters.save(current.recordFailure(now, MAX_EMAIL_FAILURES, WINDOW, BLOCK_DURATION));
     }
 
-    /** Login correto: zera o contador do e-mail. */
+    /** Login correto zera o contador do e-mail. */
     @Transactional
     public void recordSuccess(String emailKey) {
         counters.save(counters.findByKey(emailKey).orElseGet(() -> FailureCounter.fresh(emailKey)).reset());

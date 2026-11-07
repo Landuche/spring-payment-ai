@@ -5,8 +5,7 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * Valor monetário em centavos. Nunca usa double para dinheiro.
- * Aceita valores negativos (ex.: saldo), a positividade é regra de cada caso de uso.
+ * Valor monetário em centavos.
  */
 public record Money(long cents) {
 

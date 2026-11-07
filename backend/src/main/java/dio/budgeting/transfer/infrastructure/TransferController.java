@@ -31,7 +31,6 @@ public class TransferController {
         this.transferUseCase = transferUseCase;
     }
 
-    /** Informe exatamente um destino: destinationAccountNumber OU destinationEmail (validado no caso de uso). */
     public record TransferRequest(
             @Pattern(regexp = "\\d{4}-?\\d{6}", message = "número de conta inválido") String destinationAccountNumber,
             @Email @Size(max = 160) String destinationEmail,
@@ -39,10 +38,6 @@ public class TransferController {
             @Size(max = 120) String description) {
     }
 
-    /**
-     * 201 na primeira execução; 200 quando a mesma Idempotency-Key já foi processada
-     * (nenhum débito novo). Clientes podem repetir a chamada com segurança após timeouts.
-     */
     @PostMapping("/transfers")
     public ResponseEntity<TransferOutput> transfer(
             @RequestHeader(IDEMPOTENCY_HEADER) String idempotencyKey,

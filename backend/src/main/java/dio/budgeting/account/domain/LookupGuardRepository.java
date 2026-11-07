@@ -8,6 +8,6 @@ public interface LookupGuardRepository {
 
     LookupGuard save(LookupGuard guard);
 
-    /** Remove contadores sem busca acumulada e sem bloqueio ativo: sem eles, a linha equivale a um registro novo. */
+    /** Remove contadores sem busca acumulada e sem bloqueio ativo. */
     int deleteIdle(Instant now);
 }

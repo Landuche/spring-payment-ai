@@ -5,7 +5,7 @@ import dio.budgeting.shared.domain.BusinessRuleViolationException;
 import java.util.Locale;
 import java.util.Objects;
 
-/** Usuário autenticável. A senha chega já codificada (hash); o domínio nunca vê a senha em texto. */
+/** Usuário autenticável. A senha chega já codificada. */
 public record User(UserId id, String email, String name, String passwordHash) {
     public User {
         Objects.requireNonNull(id, "O identificador é obrigatório");

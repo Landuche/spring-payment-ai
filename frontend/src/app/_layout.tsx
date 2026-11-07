@@ -8,7 +8,7 @@ import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
 const PUBLIC_ROUTES = new Set(['login', 'signup']);
 
-/** Guarda de rotas: sem sessão, só telas públicas; com sessão, nada de login/signup. */
+/** sem sessão, só telas públicas */
 function AuthGate() {
   const { session, restoring } = useAuth();
   const segments = useSegments();
@@ -45,7 +45,6 @@ function Navigator() {
     headerShown: true,
     headerStyle: { backgroundColor: palette.surface },
     headerTintColor: palette.text,
-    // Sem isso o iOS mostra o nome da rota anterior, "(tabs)". Só a seta serve de "voltar".
     headerBackButtonDisplayMode: 'minimal' as const,
   };
 
@@ -67,7 +66,6 @@ function Navigator() {
   );
 }
 
-/** A barra de status acompanha o tema: claro no fundo escuro e vice-versa. */
 function ThemedShell() {
   const { resolved } = useTheme();
   return (

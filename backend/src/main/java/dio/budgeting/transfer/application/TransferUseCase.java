@@ -85,8 +85,6 @@ public class TransferUseCase {
 
         lockInOrder(origin, destination.id());
 
-        // Segunda checagem, agora com a conta travada: uma requisição concorrente com a mesma chave pode ter
-        // commitado enquanto esta esperava o lock. Sem isso, a inserção estouraria a constraint única.
         var replayed = transferRepository.findByIdempotencyKey(origin, idempotencyKey);
         if (replayed.isPresent()) {
             return output(replayed.get(), true);
@@ -96,7 +94,7 @@ public class TransferUseCase {
                 .orElseThrow(() -> new IllegalStateException("Conta de origem inexistente"));
         var balance = balance(origin);
         if (money.cents() > balance.cents()) {
-            // Recusa fica registrada mesmo com o rollback da transferência: é o sinal que a auditoria precisa.
+            // Recusa fica registrada mesmo com o rollback.
             audit.failure(AuditEventType.TRANSFER_REFUSED, sourceAccount.ownerId(), origin, null,
                     destination.id().uuid().toString(), "INSUFFICIENT_BALANCE");
             throw new BusinessRuleViolationException(
@@ -112,7 +110,7 @@ public class TransferUseCase {
         var destinationHolder = holderName(destination);
         var sourceHolder = holderName(sourceAccount);
 
-        // Com descrição informada, ela aparece no extrato dos dois lados; sem, usa um texto padrão.
+        // Com descrição informada, ela aparece no extrato dos dois lados.
         var providedDescription = transfer.description();
         var sentText = providedDescription != null ? providedDescription : "Transferência para " + destinationHolder;
         var receivedText = providedDescription != null ? providedDescription : "Transferência de " + sourceHolder;
@@ -124,13 +122,12 @@ public class TransferUseCase {
 
         audit.success(AuditEventType.TRANSFER_COMPLETED, sourceAccount.ownerId(), origin, transfer.id().toString());
 
-        // Transferência concluída: o usuário fez o que buscou, então o contador volta a zero.
+        // Transferência concluída.
         lookupGuard.reset(origin);
 
         return output(transfer, false);
     }
 
-    /** Exatamente um destino deve ser informado: número da conta ou e-mail do titular. */
     private Account resolveDestination(String number, String email) {
         var hasNumber = number != null && !number.isBlank();
         var hasEmail = email != null && !email.isBlank();

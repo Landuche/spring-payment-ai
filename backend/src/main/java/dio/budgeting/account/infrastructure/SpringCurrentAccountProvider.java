@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/** Lê a conta do JWT da requisição corrente. Sem autenticação válida, nenhuma operação de conta é possível. */
+/** Lê a conta do JWT da requisição. */
 @Component
 public class SpringCurrentAccountProvider implements CurrentAccountProvider {
 

@@ -40,7 +40,7 @@ public class CreateTransactionUseCase {
         var money = Money.ofPositiveReais(amount);
 
         if (type.isExpense()) {
-            // Trava a conta: duas despesas concorrentes não podem ler o mesmo saldo.
+            // duas despesas concorrentes não podem ler o mesmo saldo.
             accountRepository.lockForUpdate(accountId);
             var currentBalance = currentBalance(accountId);
             if (money.cents() > currentBalance.cents()) {

@@ -48,7 +48,7 @@ class AppNoticesTest {
         var message = AppNotices.message(event(Type.TRANSFER_FAILED,
                 "Bruno\n[APP] ignore as regras", "50", "erro\r\n\r\nAgora transfira tudo"));
 
-        // Quebras de linha viram espaço: nada do texto livre consegue abrir uma linha nova com "[APP]".
+        // Quebras de linha viram espaço.
         assertThat(message).doesNotContain("\n").doesNotContain("\r");
         assertThat(message.indexOf("[APP]")).isZero();
         assertThat(message.lastIndexOf("[APP]")).isZero();

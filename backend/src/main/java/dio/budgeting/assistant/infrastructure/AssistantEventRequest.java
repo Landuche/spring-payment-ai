@@ -9,8 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
- * Aviso do app ao Claudinho sobre o desfecho de uma proposta dele (o cartão de transferência). O app já executou ou
- * cancelou a operação; isto só deixa o Claudinho saber, para responder e propor o próximo passo.
+ * Avisa o claudinho se a transferencia do card foi concluida.
  */
 public record AssistantEventRequest(
         @NotNull Type type,

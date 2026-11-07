@@ -14,13 +14,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Ponto único de gravação da trilha de auditoria. Duas regras de transação:
- * <ul>
- *   <li>{@link #success}: entra na transação do caso de uso. Se a operação for revertida, o registro some junto:
- *       não existe "transferência concluída" que não aconteceu.</li>
- *   <li>{@link #failure}: grava em transação própria. Tentativas recusadas são justamente o que a auditoria precisa
- *       guardar, e elas acontecem em casos que sofrem rollback.</li>
- * </ul>
+ * Regras de transação.
  */
 @Service
 public class AuditLog {

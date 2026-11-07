@@ -39,7 +39,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(Customizer.withDefaults())
-                        // Rotas /auth não avaliam Bearer: um token vencido não pode impedir renovação ou logout.
+                        // Rotas /auth não avaliam Bearer.
+                        // um token vencido não pode impedir renovação ou logout.
                         .bearerTokenResolver(request -> request.getRequestURI().startsWith("/auth/")
                                 ? null
                                 : new DefaultBearerTokenResolver().resolve(request)))

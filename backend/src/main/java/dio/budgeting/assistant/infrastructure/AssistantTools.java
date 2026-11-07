@@ -20,8 +20,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 /**
- * Ferramentas que o modelo pode chamar. É o único ponto que conhece o Spring AI: cada método só traduz a chamada do
- * modelo para o caso de uso correspondente, que continua sem saber que existe uma IA. A IA nunca acessa repositórios.
+ * Ferramentas que o modelo pode chamar.
  */
 @Component
 public class AssistantTools {

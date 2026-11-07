@@ -11,7 +11,6 @@ const OPTIONS: readonly { readonly mode: ThemeMode; readonly label: string; read
   { mode: 'dark', label: 'Escuro', icon: 'moon-outline' },
 ];
 
-/** Seletor de tema: sistema, claro ou escuro. A escolha fica guardada no aparelho. */
 export function ThemeToggle() {
   const { mode, setMode, palette } = useTheme();
   const styles = useStyles(makeStyles);

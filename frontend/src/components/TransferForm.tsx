@@ -15,9 +15,9 @@ import { useStyles, useTheme } from '@/theme/theme-context';
 
 type Destination = { number: string } | { email: string };
 
-/** Letras ou @ indicam e-mail: aí o campo aceita texto livre. Só dígitos e hífen recebem a máscara do número. */
+/** Letras ou @ indicam e-mail */
 const isEmailInput = (value: string) => /[a-z@]/i.test(value);
-/** Aceita "1234-567890" ou só dígitos; devolve só os 10 dígitos. */
+/** Aceita "1234-567890" ou só dígitos, devolve só os 10 dígitos. */
 const onlyDigits = (value: string) => value.replace(/\D/g, '').slice(0, 10);
 const formatNumber = (digits: string) => (digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits);
 
@@ -52,7 +52,6 @@ function toDestination(raw: string): { destination: Destination } | { error: str
   return { destination: { number: digits } };
 }
 
-/** Transferência para outra conta. Pede confirmação antes de enviar, porque não dá para desfazer pelo app. */
 export function TransferForm({ onDone }: { readonly onDone: () => void }) {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);
@@ -69,7 +68,6 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Uma chave por intenção: retries (inclusive após timeout) reenviam a mesma, e o servidor não debita de novo.
   const [idempotencyKey] = useState(() => randomUUID());
 
   const amount = parseAmount(amountText);
@@ -88,7 +86,6 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
       setRecipient(await api.lookupAccount(resolved.destination));
     } catch (e) {
       setRecipient(null);
-      // Mesma mensagem para "não existe" e "não encontrado por e-mail": não revela quem tem conta.
       setLookupError(lookupMessage(e));
     } finally {
       setLooking(false);
@@ -96,9 +93,7 @@ export function TransferForm({ onDone }: { readonly onDone: () => void }) {
   };
 
   const changeTarget = (value: string) => {
-    // E-mail é digitado livre; número recebe a máscara 0000-000000.
     setTarget(isEmailInput(value) ? value : formatNumber(onlyDigits(value)));
-    // Trocar o destinatário invalida a confirmação anterior.
     setRecipient(null);
     setLookupError(null);
   };

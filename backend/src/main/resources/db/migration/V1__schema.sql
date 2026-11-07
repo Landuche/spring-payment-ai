@@ -40,7 +40,6 @@ CREATE TABLE transactions (
     category     VARCHAR(30)  NOT NULL,
     type         VARCHAR(30)  NOT NULL,
     occurred_at  DATE         NOT NULL,
-    -- Momento exato do lançamento (o extrato mostra a hora). Opcional: lançamentos sem hora mostram só a data.
     created_at   TIMESTAMPTZ,
     transfer_id  UUID         REFERENCES transfers (id)
 );
@@ -49,7 +48,7 @@ CREATE INDEX idx_transactions_account_date ON transactions (account_id, occurred
 CREATE INDEX idx_transactions_transfer ON transactions (transfer_id);
 
 -- Proteções de uso ---------------------------------------------------------------------------------
--- Buscas de destinatário por conta (enumeração de usuários).
+-- Buscas de destinatário por conta.
 CREATE TABLE lookup_guard (
     account_id    UUID PRIMARY KEY REFERENCES account (id),
     attempts      INT         NOT NULL DEFAULT 0 CHECK (attempts >= 0),
@@ -78,8 +77,7 @@ CREATE TABLE refresh_token (
 CREATE INDEX idx_refresh_token_family ON refresh_token (family_id);
 
 -- Auditoria ----------------------------------------------------------------------------------------
--- Sem chaves estrangeiras de propósito: a gravação de falhas roda em transação própria e não pode
--- esperar locks da transação de negócio. Os identificadores são apenas referências.
+-- Sem chaves estrangeiras
 CREATE TABLE audit_event (
     id            UUID PRIMARY KEY,
     occurred_at   TIMESTAMPTZ NOT NULL,
@@ -95,7 +93,7 @@ CREATE TABLE audit_event (
 CREATE INDEX idx_audit_actor_time ON audit_event (actor_user_id, occurred_at);
 CREATE INDEX idx_audit_account_time ON audit_event (account_id, occurred_at);
 
--- Trilha imutável: qualquer UPDATE ou DELETE é recusado pelo banco, mesmo para quem usa a aplicação.
+-- qualquer update ou delete é recusado pelo banco, mesmo para quem usa a aplicação.
 CREATE FUNCTION audit_event_append_only() RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'audit_event é append-only: UPDATE e DELETE não são permitidos';

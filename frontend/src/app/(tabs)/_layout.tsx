@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SIDEBAR_WIDTH } from '@/theme/tokens';
 import { useIsWide, useTheme } from '@/theme/theme-context';
 
-/** Altura da barra sem a área segura do aparelho (ícone + rótulo). */
 const TAB_BAR_CONTENT_HEIGHT = 40;
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -17,14 +16,11 @@ function tabIcon(active: IconName, inactive: IconName) {
 }
 
 /**
- * No celular a navegação fica embaixo. No desktop/web (janela larga) vira uma barra lateral:
- * uma barra horizontal esticada ocupava a largura toda da janela.
+ * No celular a navegação fica embaixo. No desktop/web (janela larga) vira uma barra lateral.
  */
 export default function TabsLayout() {
   const { palette } = useTheme();
   const wide = useIsWide();
-  // A área segura inferior (indicador da tela inicial no iPhone) entra explicitamente na altura da barra,
-  // para os rótulos ficarem acima dela e nada ser empurrado para fora da tela.
   const insets = useSafeAreaInsets();
 
   return (
@@ -40,11 +36,9 @@ export default function TabsLayout() {
           : {
               backgroundColor: palette.surface,
               borderTopColor: palette.border,
-              // No web a barra fica compacta; no aparelho, soma a área segura do sistema.
               height: Platform.OS === 'web' ? 60 : TAB_BAR_CONTENT_HEIGHT + insets.bottom,
               paddingBottom: Platform.OS === 'web' ? 0 : insets.bottom,
             },
-        // Com cinco abas no celular, "Transferências" não cabe em 13: o rótulo diminui só na barra de baixo.
         tabBarLabelStyle: { fontSize: wide ? 13 : 11, fontWeight: '600' },
       }}
     >

@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenRepository {
-    /** Lê travando a linha: duas renovações simultâneas do mesmo token não podem ambas ser aceitas. */
+    /** previne duas renovações simultâneas do mesmo token. */
     Optional<RefreshToken> findByHashForUpdate(String hash);
 
     Optional<RefreshToken> findByHash(String hash);
@@ -14,6 +14,6 @@ public interface RefreshTokenRepository {
 
     void revokeFamily(UUID familyId, Instant now);
 
-    /** Remove tokens expirados. Token expirado já é rejeitado antes da checagem de reuso, então apagá-lo não muda nada. */
+    /** Remove tokens expirados. */
     int deleteExpired(Instant now);
 }

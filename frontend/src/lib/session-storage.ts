@@ -5,9 +5,6 @@ import { Platform } from 'react-native';
  * Armazenamento do token de sessão.
  * - Nativo: Keychain (iOS) / Keystore (Android) via expo-secure-store, criptografado pelo sistema.
  * - Web: localStorage. É o melhor que um SPA consegue sem cookies httpOnly do servidor.
- *   Em produção web, o padrão bancário é cookie httpOnly + SameSite=Strict emitido pelo backend.
- *
- * Todas as operações são tolerantes a falha (modo privado, storage bloqueado): nunca derrubam o app.
  */
 const KEY = 'fintech.session.v1';
 

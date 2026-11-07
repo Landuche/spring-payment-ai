@@ -37,7 +37,6 @@ interface FieldProps extends Omit<React.ComponentProps<typeof TextInput>, 'style
   readonly secure?: boolean;
 }
 
-/** Campo com rótulo, erro visível e alternância de exibição da senha quando `secure`. */
 export function AuthField({ label, error, secure, ...input }: FieldProps) {
   const { palette } = useTheme();
   const styles = useStyles(makeStyles);

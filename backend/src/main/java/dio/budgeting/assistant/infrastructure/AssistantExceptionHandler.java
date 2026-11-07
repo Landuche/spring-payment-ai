@@ -16,10 +16,6 @@ import org.springframework.web.client.ResourceAccessException;
 public class AssistantExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(AssistantExceptionHandler.class);
 
-    /**
-     * Provedor de IA fora do ar, sem resposta ou no limite de uso, depois de esgotadas as tentativas do Spring AI.
-     * O cliente recebe uma mensagem amigável; o detalhe do provedor (que pode citar chave e cotas) fica só no log.
-     */
     @ExceptionHandler({TransientAiException.class, NonTransientAiException.class, ResourceAccessException.class})
     ResponseEntity<ProblemDetail> handleAiUnavailable(RuntimeException ex) {
         log.warn("Provedor de IA indisponível mesmo após as tentativas: {}", ex.getMessage());

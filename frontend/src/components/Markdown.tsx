@@ -2,8 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { font, space } from '@/theme/tokens';
 
 /**
- * Renderizador de Markdown mínimo para as respostas do assistente: negrito (**x**), itálico (*x*),
- * listas com "-" ou "*", e títulos (#). Cobre o que o prompt pede; não é um parser completo.
+ * Renderizador de Markdown para as respostas do claudinho.
  */
 
 const INLINE = /(\*\*[^*\n]+\*\*|\*[^*\s][^*\n]*\*)/g;
@@ -74,6 +73,5 @@ const styles = StyleSheet.create({
   text: { fontSize: font.body, lineHeight: 21 },
   heading: { fontWeight: '700' },
   bulletRow: { flexDirection: 'row', gap: space.sm, paddingLeft: space.xs },
-  // flexShrink (e não flex: 1): o balão se ajusta ao conteúdo, e flex: 1 faria o texto colapsar em colunas estreitas.
   bulletText: { flexShrink: 1 },
 });

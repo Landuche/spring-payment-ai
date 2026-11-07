@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Regras de arquitetura verificadas sobre o código-fonte (sem dependência extra):
+ * Regras de arquitetura verificadas sobre o código-fonte, sem dependência extra):
  * <ul>
  *   <li>{@code domain} não conhece frameworks nem camadas externas;</li>
  *   <li>{@code application} não conhece a infraestrutura nem o Spring AI: a IA é só um adaptador, e as ferramentas

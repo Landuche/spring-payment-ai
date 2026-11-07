@@ -32,7 +32,7 @@ export default function LoginScreen() {
       await signIn(email.trim(), password);
       // O AuthGate da raiz redireciona para a área logada.
     } catch (error) {
-      // Mensagem genérica no servidor: não revela se o e-mail existe.
+      // não revela se o e-mail existe.
       if (error instanceof ApiError && error.status === 429) {
         const wait = describeWait(error.retryAfterSeconds ?? 900);
         setServerError(`Muitas tentativas de acesso. Aguarde ${wait} e tente novamente.`);

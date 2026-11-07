@@ -17,10 +17,6 @@ interface ThemeValue {
 
 const ThemeContext = createContext<ThemeValue | null>(null);
 
-/**
- * Tema claro, escuro ou seguir o sistema. A escolha é guardada no aparelho.
- * Padrão "sistema", com o escuro como fallback quando o sistema não informa.
- */
 export function ThemeProvider({ children }: { readonly children: ReactNode }) {
   const system = useColorScheme();
   const [mode, setModeState] = useState<ThemeMode>('system');
@@ -61,16 +57,11 @@ export function useTheme(): ThemeValue {
   return context;
 }
 
-/**
- * Estilos que dependem da paleta. `factory` deve ser estável (definida no nível do módulo),
- * para que o resultado seja recalculado só quando o tema muda.
- */
 export function useStyles<T>(factory: (palette: Palette) => T): T {
   const { palette } = useTheme();
   return useMemo(() => factory(palette), [factory, palette]);
 }
 
-/** true a partir de {@link WIDE_BREAKPOINT}: usado para trocar a navegação e ampliar o conteúdo. */
 export function useIsWide(): boolean {
   const { width } = useWindowDimensions();
   return width >= WIDE_BREAKPOINT;

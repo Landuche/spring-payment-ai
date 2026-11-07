@@ -25,8 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Clientes nativos recebem o refresh token no corpo JSON (guardado no SecureStore).
- * O cliente web (header {@code X-Client: web}) recebe o refresh token apenas em cookie HttpOnly:
- * JavaScript não consegue lê-lo, então um XSS não consegue roubar a sessão de longa duração.
+ * O cliente web (header {@code X-Client: web}) recebe o refresh token apenas em cookie HttpOnly.
  */
 @RestController
 @RequestMapping("/auth")
@@ -59,7 +58,6 @@ public class AuthController {
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {
     }
 
-    /** Opcional: o web envia o refresh token pelo cookie; o nativo envia pelo corpo. */
     public record RefreshRequest(@Size(max = 128) String refreshToken) {
     }
 
@@ -93,7 +91,6 @@ public class AuthController {
         return sessionResponse(HttpStatus.OK, session, httpRequest);
     }
 
-    /** Rotação: o refresh token usado deixa de valer e um novo par é devolvido. */
     @PostMapping("/refresh")
     public ResponseEntity<SessionResponse> refresh(@RequestBody(required = false) RefreshRequest request,
                                                    HttpServletRequest httpRequest) {
@@ -102,7 +99,6 @@ public class AuthController {
         return sessionResponse(HttpStatus.OK, refreshSession.execute(token), httpRequest);
     }
 
-    /** Revoga a sessão inteira. Sempre 204, mesmo para token desconhecido ou ausente. */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshRequest request,
                                        HttpServletRequest httpRequest) {
@@ -143,7 +139,7 @@ public class AuthController {
         return WEB_CLIENT.equalsIgnoreCase(httpRequest.getHeader(WEB_CLIENT_HEADER));
     }
 
-    /** Secure + SameSite=Strict: o cookie só segue para o próprio /auth, nunca em requisições cross-site. */
+    /** Secure + SameSite=Strict: o cookie só segue para o próprio /auth */
     private static ResponseCookie refreshCookie(String value, long maxAgeSeconds) {
         return ResponseCookie.from(REFRESH_COOKIE, value)
                 .httpOnly(true)

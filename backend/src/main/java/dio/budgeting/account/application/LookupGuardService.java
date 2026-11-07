@@ -17,11 +17,7 @@ import java.time.Instant;
 
 /**
  * Limite de buscas de destinatário por conta: {@link LookupGuard#MAX_LOOKUPS} buscas sem transferência concluída
- * geram bloqueio temporário. Limites por IP foram deliberadamente deixados de fora: em desenvolvimento e atrás de
- * proxy/Docker, todos os clientes compartilham o mesmo IP, o que bloquearia usuários legítimos.
- *
- * <p>Roda em transação própria (REQUIRES_NEW): a contagem persiste mesmo quando a busca falha e a transação do
- * chamador é revertida. Não contar tentativas falhas anularia a proteção.
+ * geram bloqueio temporário.
  */
 @Service
 public class LookupGuardService {
@@ -41,7 +37,6 @@ public class LookupGuardService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = LookupBlockedException.class)
     public void recordLookup(AccountId accountId) {
-        // Trava a conta: buscas concorrentes do mesmo usuário são contadas uma a uma.
         accountRepository.lockForUpdate(accountId);
         var now = Instant.now(clock);
 

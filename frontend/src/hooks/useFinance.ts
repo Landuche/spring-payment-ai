@@ -28,7 +28,6 @@ type Result =
     }
   | { readonly ok: false; readonly message: string };
 
-/** Busca os três dados em paralelo. Não toca em estado: quem chama decide como aplicar o resultado. */
 async function fetchData(): Promise<Result> {
   try {
     const [balance, transactions, report] = await Promise.all([
@@ -55,12 +54,9 @@ function apply(prev: FinanceState, result: Result): FinanceState {
     : { ...prev, loading: false, error: result.message };
 }
 
-/** Carrega saldo, extrato e relatório do mês. Expõe `refresh` para atualização manual ou ao focar a tela. */
 export function useFinance() {
   const [state, setState] = useState<FinanceState>(INITIAL);
 
-  // Carga inicial: a resposta chega por callback, sem setState síncrono no effect.
-  // `active` impede atualizar o estado depois que a tela foi desmontada.
   useEffect(() => {
     let active = true;
     void fetchData().then((result) => {

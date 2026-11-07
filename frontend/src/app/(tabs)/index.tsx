@@ -17,7 +17,6 @@ import { useAuth } from '@/lib/auth-context';
 import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
-/** Quantas movimentações aparecem no resumo; o restante fica na aba Extrato. */
 const RECENT_COUNT = 5;
 
 export default function DashboardScreen() {
@@ -30,7 +29,6 @@ export default function DashboardScreen() {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 
-  // Ao voltar para a aba (ex.: depois de uma conversa ou transferência), recarrega os dados.
   useFocusEffect(
     useCallback(() => {
       void refresh();

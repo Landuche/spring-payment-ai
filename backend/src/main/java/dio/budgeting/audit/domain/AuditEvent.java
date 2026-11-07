@@ -13,13 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Registro imutável de um evento sensível (login, sessão, transferência, bloqueios).
- *
- * <p>Minimização de dados: nunca guarda senha, token, nem e-mail em claro. Quando um e-mail precisa ser
- * correlacionado (tentativas de login de quem nem tem conta), guarda-se apenas o {@link #hashSubject(String) hash}.
- *
- * <p>Os identificadores são UUIDs simples, sem chave estrangeira: a trilha precisa existir mesmo quando as linhas
- * referenciadas mudam, e uma FK faria a gravação de falhas esperar locks da transação de negócio.
+ * Registro imutável de eventos.
  */
 public record AuditEvent(
         UUID id,
@@ -53,8 +47,7 @@ public record AuditEvent(
     }
 
     /**
-     * Pseudônimo estável de um e-mail (SHA-256 do valor normalizado). Serve para correlacionar tentativas, não para
-     * esconder o e-mail de quem tenta uma lista de candidatos: sem segredo, é pseudonimização, não criptografia.
+     * Guarda só o hash do e-mail, para contar tentativas sem armazenar o e-mail.
      */
     public static String hashSubject(String email) {
         if (email == null) {

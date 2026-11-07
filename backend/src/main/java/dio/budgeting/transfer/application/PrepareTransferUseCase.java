@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 /**
- * Prepara uma transferência pedida ao assistente. NÃO move dinheiro: localiza o destinatário, confere saldo e conta
- * própria e devolve uma proposta. Quem executa é o cliente, tocando no botão de confirmação do app, pelo mesmo
- * endpoint de transferência (com chave de idempotência e todas as validações). Assim, nem a IA nem este caso de uso
- * decidem mover dinheiro.
+ * Prepara uma transferência pedida ao assistente.
  */
 @Service
 public class PrepareTransferUseCase {
@@ -26,10 +23,6 @@ public class PrepareTransferUseCase {
         this.getBalance = getBalance;
     }
 
-    /**
-     * @param emailOrNumber e-mail do titular ou número da conta de destino
-     * @param description    opcional
-     */
     public TransferProposal execute(String emailOrNumber, BigDecimal amount, String description) {
         var money = Money.ofPositiveReais(amount);
         var recipient = locate(emailOrNumber);

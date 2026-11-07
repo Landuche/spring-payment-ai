@@ -14,13 +14,12 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Manutenção periódica do banco. Cada regra só apaga o que já não tem efeito sobre segurança:
+ * Manutenção periódica do banco.
  * <ul>
- *   <li>contadores de falha com mais de 1 dia, sem bloqueio ativo (a janela de login é de 15 min);</li>
- *   <li>contadores de busca zerados e sem bloqueio ativo (equivalem a um registro novo);</li>
+ *   <li>contadores de falha com mais de 1 dia, sem bloqueio ativo (a janela de login é de 15 min)</li>
+ *   <li>contadores de busca zerados e sem bloqueio ativo</li>
  *   <li>refresh tokens expirados.</li>
  * </ul>
- * A margem de 1 dia nos contadores é conservadora de propósito: apaga um pouco menos do que o mínimo necessário.
  */
 @Service
 public class CleanupRecordsUseCase {

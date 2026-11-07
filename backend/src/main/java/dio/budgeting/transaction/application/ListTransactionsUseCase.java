@@ -9,10 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Extrato da conta do usuário logado, da mais recente para a mais antiga. Dentro do mesmo dia, a hora desempata;
- * lançamentos sem hora ficam depois dos que têm.
- */
 @Service
 public class ListTransactionsUseCase {
     private static final Comparator<Transaction> NEWEST_FIRST =

@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Contador de falhas de autenticação por chave (hoje "email:...").
- * Janela fixa: as falhas só acumulam dentro de {@code windowStart + window}. Ao atingir o máximo, bloqueia por um período.
+ * Contador de falhas de autenticação.
+ * as falhas só acumulam dentro de {@code windowStart + window}. Ao atingir o máximo, bloqueia por um período.
  * Imutável: cada operação devolve o novo estado, que o chamador persiste.
  */
 public record FailureCounter(String key, int failures, Instant windowStart, Instant blockedUntil) {

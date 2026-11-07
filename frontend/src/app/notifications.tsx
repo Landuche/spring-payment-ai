@@ -9,9 +9,7 @@ import { font, radius, space, type Palette } from '@/theme/tokens';
 import { useStyles, useTheme } from '@/theme/theme-context';
 
 /**
- * Notificações de transferência. Abrir a tela marca tudo como lido (o contador do sino zera), mas as novas
- * continuam com um ponto colorido enquanto a tela está aberta, para o usuário ver o que chegou.
- * Limite conhecido: são derivadas do extrato com o app aberto. Não há notificação push.
+ * Notificações de transferência. Abrir a tela marca tudo como lido.
  */
 export default function NotificationsScreen() {
   const { palette } = useTheme();
@@ -19,7 +17,6 @@ export default function NotificationsScreen() {
   const { transactions, loading, refresh } = useFinance();
   const { items, unread, fresh, markAllSeen } = useNotifications(transactions);
 
-  // Abrir a tela é ver as notificações: marca como lidas assim que houver alguma não lida.
   useEffect(() => {
     if (unread > 0) markAllSeen();
   }, [unread, markAllSeen]);

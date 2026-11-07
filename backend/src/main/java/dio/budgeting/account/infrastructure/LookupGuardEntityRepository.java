@@ -10,7 +10,7 @@ import java.util.UUID;
 
 interface LookupGuardEntityRepository extends CrudRepository<LookupGuardEntity, UUID> {
 
-    /** Só remove contadores zerados e sem bloqueio: sem eles, a linha equivale a um registro novo. */
+    /** remove contadores zerados e sem bloqueio. */
     @Modifying
     @Query("""
             delete from LookupGuardEntity g

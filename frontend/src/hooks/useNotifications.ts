@@ -4,18 +4,11 @@ import { mergeSeen, notificationsFrom, parseSeen, SEEN_KEY } from '@/lib/notific
 import { prefsStorage } from '@/lib/prefs-storage';
 import type { Transaction } from '@/lib/types';
 
-/**
- * Notificações de transferência e quantas ainda não foram vistas.
- * Enquanto as preferências não carregam, o contador fica em zero, para não piscar um número falso.
- * `fresh` guarda, só enquanto o hook está montado, o que estava não lido quando foi marcado como visto.
- */
 export function useNotifications(transactions: readonly Transaction[]) {
   const items = useMemo(() => notificationsFrom(transactions), [transactions]);
   const [seen, setSeen] = useState<readonly string[] | null>(null);
   const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set());
 
-  // Relê a cada vez que a tela ganha foco. Cada tela tem a sua cópia de `seen`, e o início continua montado por
-  // baixo das notificações: sem reler, ele nunca saberia que as notificações foram vistas e o contador não zeraria.
   useFocusEffect(
     useCallback(() => {
       let alive = true;
