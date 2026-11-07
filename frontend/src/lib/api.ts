@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 import { API_URL } from './config';
 import type {
@@ -154,16 +155,6 @@ function webAudioExtension(mimeType: string): string {
   return mimeType.includes('mp4') ? 'm4a' : 'webm';
 }
 
-// O aviso vai só para o log do Metro (a tela mostra a mensagem genérica) e diz se a falha foi ao ler o arquivo.
-async function readRecording(uri: string): Promise<Blob> {
-  try {
-    return await (await fetch(uri)).blob();
-  } catch (cause) {
-    console.warn('[api] não foi possível ler a gravação', uri, cause);
-    throw cause;
-  }
-}
-
 export const api = {
   register: (input: { name: string; email: string; password: string }) =>
     request<Session>('/auth/register', json(input)),
@@ -242,10 +233,13 @@ export const api = {
   sendVoice: async (uri: string, conversationId: string): Promise<VoiceReply> => {
     const form = new FormData();
     form.append('conversationId', conversationId);
-    // A gravação é um arquivo local (nativo) ou um blob URL (web)
-    const blob = await readRecording(uri);
-    const extension = Platform.OS === 'web' ? webAudioExtension(blob.type) : 'm4a';
-    form.append('file', blob, `comando.${extension}`);
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(uri)).blob();
+      form.append('file', blob, `comando.${webAudioExtension(blob.type)}`);
+    } else {
+      // No Android, fetch de uma URI local devolve um corpo de poucos bytes em vez do áudio; o File lê o arquivo de verdade.
+      form.append('file', new File(uri));
+    }
     const response = await send('/assistant/voice', { method: 'POST', body: form });
     return (await response.json()) as VoiceReply;
   },
