@@ -9,5 +9,3 @@ build
 *.iml
 .git
 
-# O front não faz parte da imagem do backend
-../mobile
