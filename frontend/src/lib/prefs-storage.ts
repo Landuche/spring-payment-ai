@@ -21,6 +21,7 @@ export const prefsStorage = {
       }
       await SecureStore.setItemAsync(key, value);
     } catch {
+      // Sem persistência: a preferência vale só enquanto o app estiver aberto.
     }
   },
 };

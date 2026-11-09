@@ -22,8 +22,7 @@ class NotificationKafkaConfig {
 
     /**
      * Falha ao processar: tenta mais algumas vezes e, se continuar falhando, move a mensagem para a fila de falhas
-     * do próprio tópico (.DLT) para não travar as seguintes. Mensagem ilegível pula as tentativas, porque tentar de
-     * novo não a conserta.
+     * (.DLT) para não travar as seguintes.
      */
     @Bean
     DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, String> kafka) {
@@ -34,7 +33,7 @@ class NotificationKafkaConfig {
         return handler;
     }
 
-    /** Este módulo publica o aviso de notificação nova; a chave é a conta. */
+    /** Este módulo publica o aviso de notificação nova, e a chave é a conta. */
     @Bean
     NewTopic notificationsCreatedTopic() {
         return topic(NotificationsCreated.TOPIC);

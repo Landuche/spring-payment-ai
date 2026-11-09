@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * {@code total} e {@code count} contam só despesas. As transferências do período vêm separado
+ * {@code total} e {@code count} contam só despesas. As transferências do período vêm separadas, em
+ * {@code sentTransfers} e {@code receivedTransfers}.
  */
 public record ExpenseReportOutput(
         String period,

@@ -1,5 +1,3 @@
--- Schema inicial completo do Fintech Agent (versão consolidada, projeto ainda sem produção).
-
 -- Usuários e contas --------------------------------------------------------------------------------
 CREATE TABLE app_user (
     id            UUID PRIMARY KEY,
@@ -62,8 +60,7 @@ CREATE TABLE outbox_event (
 
 CREATE INDEX idx_outbox_pending ON outbox_event (created_at) WHERE published_at IS NULL;
 
--- Uma linha por conta e por evento. A restrição única torna o consumidor idempotente:
--- o Kafka entrega "pelo menos uma vez", e reprocessar o mesmo evento não duplica a notificação.
+-- Uma linha por conta e por evento. A restrição única torna o consumidor idempotente
 CREATE TABLE notification (
     id               UUID PRIMARY KEY,
     event_id         UUID         NOT NULL,
@@ -86,7 +83,7 @@ CREATE TABLE lookup_guard (
     blocked_until TIMESTAMPTZ
 );
 
--- Falhas de login por e-mail (chave "email:...").
+-- Falhas de login por e-mail.
 CREATE TABLE failure_counter (
     counter_key   VARCHAR(200) PRIMARY KEY,
     failures      INT         NOT NULL DEFAULT 0 CHECK (failures >= 0),
@@ -95,7 +92,7 @@ CREATE TABLE failure_counter (
 );
 
 -- Sessões ------------------------------------------------------------------------------------------
--- Só o hash SHA-256 do refresh token é guardado. A família agrupa os tokens de uma mesma sessão.
+-- Só o hash SHA-256 do refresh token é guardado.
 CREATE TABLE refresh_token (
     token_hash  VARCHAR(64) PRIMARY KEY,
     user_id     UUID        NOT NULL REFERENCES app_user (id),

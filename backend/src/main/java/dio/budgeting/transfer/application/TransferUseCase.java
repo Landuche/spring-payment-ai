@@ -132,7 +132,7 @@ public class TransferUseCase {
                 transfer.id(), origin.uuid(), destination.id().uuid(), money.cents(),
                 sourceHolder.maskedName(), destinationHolder.maskedName(), now));
 
-        // Transferência concluída.
+        // Uma transferência concluída zera o contador de buscas da conta.
         lookupGuard.reset(origin);
 
         return output(transfer, false);

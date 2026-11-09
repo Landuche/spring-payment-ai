@@ -106,7 +106,7 @@ export interface NotificationsResponse {
   readonly unread: number;
 }
 
-/** O que o servidor oferece. `aiSpeech`: gera a voz do Claudinho; sem ela, o app lê com a voz do aparelho. */
+/** O que o servidor oferece. `aiSpeech`: gera a voz do Claudinho. Sem ela, o app lê com a voz do aparelho. */
 export interface Capabilities {
   readonly aiSpeech: boolean;
 }

@@ -9,7 +9,7 @@ interface NotificationsValue {
   readonly items: readonly AppNotification[];
   readonly unread: number;
   readonly loading: boolean;
-  /** Ids que estavam não lidos quando a lista foi marcada como lida; ficam destacados enquanto a tela está aberta. */
+  /** Ids que estavam não lidos quando a lista foi marcada como lida, e ficam destacados enquanto a tela está aberta. */
   readonly fresh: ReadonlySet<string>;
   /** Quantos avisos de novidade chegaram pelo WebSocket. Telas com dados que mudam junto (saldo, extrato) reagem a isso. */
   readonly changes: number;

@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenRepository {
-    /** previne duas renovações simultâneas do mesmo token. */
+    /** Busca o token travando a linha: impede duas renovações simultâneas do mesmo token. */
     Optional<RefreshToken> findByHashForUpdate(String hash);
 
     Optional<RefreshToken> findByHash(String hash);

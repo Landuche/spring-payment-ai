@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Proteção contra enumeração de contas. Cada busca de destinatário (por número ou e-mail) conta;
- * ao ultrapassar {@link #MAX_LOOKUPS} sem uma transferência concluída, a conta fica bloqueada por {@link #BLOCK_DURATION}.
+ * Proteção contra enumeração de contas. Cada busca de destinatário (por número ou e-mail) conta.
+ * Ao ultrapassar {@link #MAX_LOOKUPS} sem uma transferência concluída, a conta fica bloqueada por {@link #BLOCK_DURATION}.
  */
 public record LookupGuard(AccountId accountId, int attempts, Instant blockedUntil) {
 

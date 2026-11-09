@@ -132,7 +132,7 @@ export default function AssistantScreen() {
       append({ role: 'assistant', text: reply, transfer: cardFor(transfer) });
       if (viaVoice) speak(reply);
     } catch {
-      // sem a resposta do Claudinho, o cartão e o aviso já mostram o desfecho
+      // Sem a resposta do Claudinho, o cartão e o aviso já mostram o desfecho.
     } finally {
       setBusy(false);
     }
@@ -145,7 +145,7 @@ export default function AssistantScreen() {
         append({ role: 'assistant', text: 'Preciso de permissão do microfone para ouvir seus comandos.' });
         return;
       }
-      // O modo de áudio só existe no iOS; no Android a gravação não precisa dele.
+      // O modo de áudio só existe no iOS. No Android a gravação não precisa dele.
       if (Platform.OS !== 'android') {
         await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       }

@@ -8,7 +8,7 @@ import java.util.HexFormat;
 import java.util.UUID;
 
 /**
- * Refresh token persistido só pelo hash. ao renovar, o token é marcado como usado e um novo é emitido
+ * Refresh token persistido só pelo hash. Ao renovar, o token é marcado como usado e um novo é emitido
  * na mesma família. Apresentar um token já usado revoga a família inteira.
  */
 public record RefreshToken(

@@ -17,7 +17,7 @@ class WebSocketConfig implements WebSocketConfigurer {
     /**
      * Qualquer origem. O app nativo sempre envia o Origin do endereço público (o do túnel, por exemplo), que atrás de
      * um proxy não bate com o que o Spring enxerga. A checagem de origem protege conexões que se autenticam por
-     * cookie; esta não usa cookie: nasce anônima e só vale depois de a primeira mensagem trazer o token de acesso.
+     * cookie, essa não usa cookie, nasce anônima e só vale depois de a primeira mensagem trazer o token de acesso.
      */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {

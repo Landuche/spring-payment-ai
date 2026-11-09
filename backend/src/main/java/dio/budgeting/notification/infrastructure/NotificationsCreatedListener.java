@@ -19,7 +19,7 @@ class NotificationsCreatedListener {
 
     /**
      * Cada instância lê com um grupo só dela e, portanto, recebe todos os avisos: quem está conectado em qualquer
-     * instância é avisado pela instância onde a conexão está. O grupo é novo a cada subida e começa do fim do
+     * instância é avisado pela instância onde a conexão está. O grupo começa do fim do
      * tópico, porque aviso antigo não interessa a quem acabou de conectar (o app lê a lista ao conectar).
      */
     @KafkaListener(topics = NotificationsCreated.TOPIC,

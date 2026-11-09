@@ -9,7 +9,7 @@ import java.util.UUID;
 
 /**
  * Aviso para uma conta sobre algo que aconteceu nela. Guarda dados estruturados (tipo, valor, outra parte) e não
- * um texto pronto: quem exibe decide a frase e o idioma. {@code eventId} identifica o fato que o originou; junto com a
+ * um texto pronto: quem exibe decide a frase e o idioma. {@code eventId} identifica o fato que o originou. Junto com a
  * conta, garante que o mesmo evento nunca gera dois avisos.
  */
 public record Notification(

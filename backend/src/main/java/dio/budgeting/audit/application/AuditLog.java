@@ -14,7 +14,8 @@ import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Regras de transação.
+ * Grava os eventos de auditoria. O sucesso entra na transação do chamador (existe só se o fato existiu), e a falha usa
+ * uma transação própria, para continuar registrada mesmo quando a operação é desfeita.
  */
 @Service
 public class AuditLog {

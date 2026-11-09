@@ -249,7 +249,7 @@ export const api = {
       const blob = await (await fetch(uri)).blob();
       form.append('file', blob, `comando.${webAudioExtension(blob.type)}`);
     } else {
-      // No Android, fetch de uma URI local devolve um corpo de poucos bytes em vez do áudio; o File lê o arquivo de verdade.
+      // No Android, fetch de uma URI local devolve um corpo de poucos bytes em vez do áudio. O File lê o arquivo de verdade.
       form.append('file', new File(uri));
     }
     const response = await send('/assistant/voice', { method: 'POST', body: form });

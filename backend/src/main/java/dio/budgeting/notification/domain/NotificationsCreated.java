@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Evento publicado depois que há notificação nova para uma conta. Serve para avisar quem está conectado em tempo
- * real; só carrega o id da conta, e o app busca o conteúdo pela API.
+ * real. Só carrega o id da conta, e o app busca o conteúdo pela API.
  */
 public record NotificationsCreated(UUID accountId) {
 

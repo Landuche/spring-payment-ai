@@ -19,7 +19,7 @@ import java.util.UUID;
 /**
  * Canal de aviso em tempo real. O navegador e o app não conseguem mandar cabeçalho de autenticação ao abrir um
  * WebSocket de forma portátil, então a conexão abre anônima e o cliente se autentica na primeira mensagem:
- * {@code {"type":"auth","token":"<access token>"}}. O servidor só empurra {@code notifications-changed}; o conteúdo
+ * {@code {"type":"auth","token":"<access token>"}}. O servidor só manda {@code notifications-changed}. O conteúdo
  * continua vindo da API REST.
  */
 @Component

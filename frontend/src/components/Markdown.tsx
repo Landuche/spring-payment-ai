@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { font, space } from '@/theme/tokens';
 
 /**
- * Renderizador de Markdown para as respostas do claudinho.
+ * Renderizador de Markdown para as respostas do Claudinho.
  */
 
 const INLINE = /(\*\*[^*\n]+\*\*|\*[^*\s][^*\n]*\*)/g;

@@ -1,24 +1,21 @@
-# Segredos e credenciais vêm do arquivo .env.
 services:
   database:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: transaction
+      POSTGRES_DB: spring_payment_ai
     # 5433 no host para não colidir com um Postgres da máquina (5432).
     ports:
       - "5433:5432"
     volumes:
-      - fintech_pgdata:/var/lib/postgresql/data
+      - spring_payment_ai_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d transaction" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d spring_payment_ai" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Broker de um nó só em modo KRaft (sem Zookeeper). Dentro do compose a aplicação usa kafka:9092;
-  # quem roda a aplicação fora do Docker (bootRun) usa localhost:29092.
   kafka:
     image: apache/kafka:3.9.1
     environment:
@@ -37,17 +34,15 @@ services:
     ports:
       - "29092:29092"
     volumes:
-      - fintech_kafkadata:/var/lib/kafka/data
+      - spring_payment_ai_kafkadata:/var/lib/kafka/data
     healthcheck:
       test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1" ]
       interval: 10s
       timeout: 10s
       retries: 10
 
-  # Voz local (Kokoro) com a mesma API da OpenAI: é a voz do Claudinho quando o provedor é a Groq, que não tem voz
-  # em português. Com a OpenAI ele não é usado; para não gastar memória, `docker compose stop kokoro`.
   kokoro:
-    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    image: ghcr.io/remsky/kokoro-fastapi-cpu@sha256:cbcc28802fb5d1eaaba8b91e38b0e872a669e85831c513cf6a29c709cbe25405
     ports:
       - "8880:8880"
     restart: unless-stopped
@@ -57,18 +52,18 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/transaction
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/spring_payment_ai
       SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
       SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      # Provedor de IA (OpenAI ou Groq): só URL e chave; os modelos são escolhidos pela URL.
+      JWT_SECRET: ${JWT_SECRET:-}
+      # Provedor de IA (OpenAI ou Groq): só URL e chave, os modelos são escolhidos pela URL.
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com}
       AI_API_KEY: ${AI_API_KEY}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       AI_SPEECH: ${AI_SPEECH:-true}
-      # Endereço do Kokoro dentro do compose; só é usado quando o provedor é a Groq.
+      # Endereço do Kokoro dentro do compose, só usado quando o provedor é a Groq.
       KOKORO_URL: http://kokoro:8880
     depends_on:
       database:
@@ -77,5 +72,5 @@ services:
         condition: service_healthy
 
 volumes:
-  fintech_pgdata:
-  fintech_kafkadata:
+  spring_payment_ai_pgdata:
+  spring_payment_ai_kafkadata:

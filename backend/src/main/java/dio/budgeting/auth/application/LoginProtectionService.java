@@ -39,7 +39,7 @@ public class LoginProtectionService {
         }
     }
 
-    /** Registra uma falha, em transação, a contagem persiste mesmo que a transação do chamador seja revertida. */
+    /** Registra uma falha em transação própria: a contagem persiste mesmo que a transação do chamador seja revertida. */
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = LoginBlockedException.class)
     public void recordFailure(String emailKey) {
         var now = Instant.now(clock);

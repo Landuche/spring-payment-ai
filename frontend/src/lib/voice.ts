@@ -2,7 +2,8 @@ import * as Speech from 'expo-speech';
 import { isAiSpeechAvailable, playAiSpeech, stopAiSpeech } from './ai-speech';
 
 /**
- * O expo-speech não informa o gênero das vozes (só nome, identificador, idioma e qualidade), vozes estão sendo escolhidas pelo nome.
+ * O expo-speech não informa o gênero das vozes (só nome, identificador, idioma e qualidade), então a voz masculina
+ * é escolhida pelo nome. É a voz de reserva, usada quando a voz da IA não está disponível.
  */
 const MALE_VOICE_PREFERENCE = ['felipe', 'antonio', 'daniel'];
 
@@ -10,7 +11,7 @@ let maleVoice: Promise<string | undefined> | null = null;
 
 const isEnhanced = (voice: Speech.Voice) => voice.quality === Speech.VoiceQuality.Enhanced;
 
-/** Procura uma vez e guarda o resultado: as vozes instaladas não mudam enquanto o app está aberto. */
+/** Procura uma vez e guarda o resultado. */
 function findMaleVoice(): Promise<string | undefined> {
   maleVoice ??= Speech.getAvailableVoicesAsync()
     .then((voices) => {
@@ -37,10 +38,10 @@ async function speakWithDevice(text: string): Promise<void> {
   Speech.speak(text, { language: 'pt-BR', ...(voice ? { voice } : {}) });
 }
 
-// Cada fala ganha um número; se o número mudou quando uma espera termina, outra fala (ou um "silenciar") passou na frente.
+// Cada fala ganha um número. Se o número mudou quando uma espera termina, outra fala (ou um "silenciar") passou na frente.
 let currentSpeech = 0;
 
-/** Fala com a voz da IA quando o servidor oferece; sem ela, ou se ela falhar, usa a voz do aparelho. */
+/** Fala com a voz da IA quando o servidor oferece. */
 export async function speakAloud(text: string): Promise<void> {
   const mine = ++currentSpeech;
   const stillWanted = () => mine === currentSpeech;

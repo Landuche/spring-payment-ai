@@ -11,7 +11,7 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 class TransferTopics {
 
-    /** Três partições para permitir mais de um consumidor; a chave (id da transferência) mantém a ordem por transferência. */
+    /** Três partições para permitir mais de um consumidor, e a chave (id da transferência) mantém a ordem por transferência. */
     @Bean
     NewTopic transferCompletedTopic() {
         return TopicBuilder.name(TransferCompleted.TOPIC).partitions(3).replicas(1).build();

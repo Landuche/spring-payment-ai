@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Fluxo completo do aviso em tempo real, com Postgres e Kafka reais e um cliente WebSocket de verdade: a transferência
+ * Fluxo completo do aviso em tempo real, com Postgres, Websockets e Kafka reais, a transferência
  * grava os eventos no outbox, o Kafka os entrega, a notificação é criada e quem está conectado é avisado.
  */
 @IntegrationTest
@@ -152,7 +152,7 @@ class NotificationPushFlowTest {
             return connect(port, null);
         }
 
-        /** O app nativo envia sempre um Origin; passar um simula a conexão vinda do app. */
+        /** O app nativo envia sempre um Origin, e passar um simula a conexão vinda do app. */
         WebSocketSession connect(int port, String origin) throws Exception {
             var headers = new WebSocketHttpHeaders();
             if (origin != null) {

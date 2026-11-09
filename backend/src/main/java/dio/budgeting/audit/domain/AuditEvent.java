@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Registro imutável de eventos.
+ * Registro imutável de um evento de segurança. O e-mail de quem tentou entrar nunca é guardado: só o hash.
  */
 public record AuditEvent(
         UUID id,

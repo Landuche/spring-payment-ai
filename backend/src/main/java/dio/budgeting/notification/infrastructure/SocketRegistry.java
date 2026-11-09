@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Conexões WebSocket abertas desta instância. A conexão nasce anônima e só vira "autenticada" depois de a mensagem
- * de autenticação trazer um token válido; quem não se autentica a tempo é fechado. O aviso só chega a conexões
+ * de autenticação trazer um token válido, e quem não se autentica a tempo é fechado. O aviso só chega a conexões
  * autenticadas da conta certa.
  */
 @Component
@@ -54,7 +54,7 @@ class SocketRegistry {
 
     void authenticate(WebSocketSession session, UUID accountId, Instant expiresAt) {
         pending.remove(session.getId());
-        // Enviar de várias threads na mesma sessão não é seguro; o decorador serializa os envios.
+        // Enviar de várias threads na mesma sessão não é seguro, então o decorador serializa os envios.
         var safeSession = new ConcurrentWebSocketSessionDecorator(session, SEND_TIME_LIMIT_MS, BUFFER_SIZE_LIMIT_BYTES);
         var connection = new Authenticated(safeSession, accountId, expiresAt);
         authenticated.put(session.getId(), connection);

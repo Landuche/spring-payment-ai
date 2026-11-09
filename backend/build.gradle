@@ -8,7 +8,7 @@ plugins {
 
 group = 'dio'
 version = '0.0.1-SNAPSHOT'
-description = 'budgeting'
+description = 'Spring Payment AI'
 
 java {
     toolchain {
@@ -36,7 +36,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
     testImplementation 'org.springframework.security:spring-security-test'
-    // Sobe um Postgres descartável para o teste de contexto: `./gradlew test` não depende de banco instalado.
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     testImplementation 'org.testcontainers:testcontainers-postgresql'

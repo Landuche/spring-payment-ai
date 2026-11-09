@@ -52,7 +52,7 @@ export async function playAiSpeech(text: string, stillWanted: () => boolean): Pr
     return;
   }
   stopAiSpeech();
-  // Depois de gravar, o iOS manda o som para o fone de ouvido (a "conversa"), baixo; e o modo silencioso o cala.
+  // Depois de gravar, o iOS manda o som para o fone de ouvido (a "conversa"), baixo, e o modo silencioso o cala.
   if (Platform.OS === 'ios') {
     await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
   }

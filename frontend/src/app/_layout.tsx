@@ -9,7 +9,7 @@ import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
 const PUBLIC_ROUTES = new Set(['login', 'signup']);
 
-/** sem sessão, só telas públicas */
+/** Sem sessão, só as telas públicas (login e cadastro). Com sessão, essas telas redirecionam para a área logada. */
 function AuthGate() {
   const { session, restoring } = useAuth();
   const segments = useSegments();

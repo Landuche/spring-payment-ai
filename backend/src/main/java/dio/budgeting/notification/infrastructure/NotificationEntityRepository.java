@@ -12,7 +12,6 @@ import java.util.UUID;
 
 interface NotificationEntityRepository extends CrudRepository<NotificationEntity, UUID> {
 
-    /** ON CONFLICT DO NOTHING: a restrição única (evento, conta) decide, sem corrida entre consumidores. */
     @Modifying
     @Query(value = """
             insert into notification (id, event_id, account_id, type, amount_cents, counterpart_name, created_at)

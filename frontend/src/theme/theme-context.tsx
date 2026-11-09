@@ -5,7 +5,7 @@ import { darkPalette, lightPalette, WIDE_BREAKPOINT, type Palette } from './toke
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
-const THEME_KEY = 'fintech.theme.v1';
+const THEME_KEY = 'springpaymentai.theme.v1';
 const MODES: readonly ThemeMode[] = ['system', 'light', 'dark'];
 
 interface ThemeValue {

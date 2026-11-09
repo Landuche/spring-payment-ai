@@ -4,9 +4,9 @@ import { Platform } from 'react-native';
 /**
  * Armazenamento do token de sessão.
  * - Nativo: Keychain (iOS) / Keystore (Android) via expo-secure-store, criptografado pelo sistema.
- * - Web: localStorage. É o melhor que um SPA consegue sem cookies httpOnly do servidor.
+ * - Web: localStorage, só com o token de acesso. O refresh token não passa por aqui: o servidor o entrega em cookie HttpOnly.
  */
-const KEY = 'fintech.session.v1';
+const KEY = 'springpaymentai.session.v1';
 
 export const sessionStorage = {
   async read(): Promise<string | null> {

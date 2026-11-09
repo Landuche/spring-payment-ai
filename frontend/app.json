@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Fintech Agent",
-    "slug": "fintech-agent",
+    "name": "Spring Payment AI",
+    "slug": "spring-payment-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -38,7 +38,7 @@
       ],
       "expo-secure-store"
     ],
-    "scheme": "fintechagent",
+    "scheme": "springpaymentai",
     "experiments": {
       "typedRoutes": true
     }

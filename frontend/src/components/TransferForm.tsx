@@ -15,7 +15,7 @@ import { useStyles, useTheme } from '@/theme/theme-context';
 
 type Destination = { number: string } | { email: string };
 
-/** Letras ou @ indicam e-mail */
+/** Letras ou @ indicam que o usuário digitou um e-mail. */
 const isEmailInput = (value: string) => /[a-z@]/i.test(value);
 /** Aceita "1234-567890" ou só dígitos, devolve só os 10 dígitos. */
 const onlyDigits = (value: string) => value.replace(/\D/g, '').slice(0, 10);

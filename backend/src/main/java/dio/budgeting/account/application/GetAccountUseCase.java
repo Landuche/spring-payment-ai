@@ -54,7 +54,7 @@ public class GetAccountUseCase {
     }
 
     /**
-     * Busca por e-mail (como uma chave Pix).
+     * Busca por e-mail.
      */
     public AccountOutput findByEmail(String email) {
         if (email == null || !EMAIL.matcher(email).matches()) {

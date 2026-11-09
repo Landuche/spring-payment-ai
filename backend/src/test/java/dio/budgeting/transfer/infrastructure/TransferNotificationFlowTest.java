@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 /**
- * Fluxo completo com Postgres e Kafka reais: a transferência grava o evento no outbox, o publicador o envia ao
+ * Fluxo completo com Postgres e Kafka reais, a transferência grava o evento no outbox, o publicador o envia ao
  * Kafka, o consumidor lê e cria as notificações das duas contas.
  */
 @IntegrationTest
