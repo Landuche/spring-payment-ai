@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "Cabeçalho obrigatório", "Cabeçalho " + ex.getHeaderName() + " é obrigatório");
     }
 
-    /** 429 com Retry-After, padrão RFC 9110. */
+    /** 429 com Retry-After. */
     @ExceptionHandler(RateLimitExceededException.class)
     ResponseEntity<ProblemDetail> handleRateLimited(RateLimitExceededException ex) {
         var seconds = Math.max(1, Duration.between(Instant.now(), ex.getUntil()).toSeconds());
@@ -64,13 +64,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * duas requisições com a mesma Idempotency-Key: a restrição única do banco barra a segunda.
-     * retorna 409 em vez de 500. Repetir com a mesma chave devolve o resultado da primeira.
+     * Restrição única do banco violada por requisições concorrentes (duas transferências com a mesma Idempotency-Key,
+     * dois cadastros com o mesmo e-mail): responde 409 em vez de 500. Repetir a requisição resolve, porque a
+     * segunda tentativa já encontra o resultado da primeira.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
         return problem(HttpStatus.CONFLICT, "Conflito de concorrência",
-                "Operação concorrente com o mesmo identificador. Repita a requisição com a mesma chave.");
+                "Outra operação igual estava em andamento. Tente novamente.");
     }
 
     @ExceptionHandler(ConflictException.class)

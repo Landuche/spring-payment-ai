@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * CORS para o cliente web do Expo em desenvolvimento.
- * Liberado apenas para localhost; em produção, a origem deve ser configurada explicitamente.
+ * Liberado apenas para localhost. Em produção, a origem deve ser configurada explicitamente.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
