@@ -8,8 +8,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  /** Token de acesso vigente, renovado antes se estiver perto de vencer. null sem sessão. Para quem abre conexões longas. */
-  getAccessToken: () => Promise<string | null>;
+  getAccessToken: (forceRenew?: boolean) => Promise<string | null>;
 }
 
 /** Renova um pouco antes de vencer, para o token não expirar no meio do handshake. */
@@ -131,10 +130,10 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     [persist],
   );
 
-  const getAccessToken = useCallback(async (): Promise<string | null> => {
+  const getAccessToken = useCallback(async (forceRenew = false): Promise<string | null> => {
     const current = sessionRef.current;
     if (!current) return null;
-    if (Date.now() >= issuedAtRef.current + current.expiresIn * 1000 - TOKEN_RENEW_MARGIN_MS) {
+    if (forceRenew || Date.now() >= issuedAtRef.current + current.expiresIn * 1000 - TOKEN_RENEW_MARGIN_MS) {
       await renew();
     }
     return sessionRef.current?.accessToken ?? null;

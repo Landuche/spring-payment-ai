@@ -2,13 +2,11 @@ import { API_URL } from './config';
 
 const FIRST_BACKOFF_MS = 1_000;
 const MAX_BACKOFF_MS = 30_000;
+const UNAUTHORIZED_CLOSE = 4401;
 
 interface Options {
-  /** Token de acesso vigente (já renovado, se preciso); null se não há sessão. */
-  readonly getToken: () => Promise<string | null>;
-  /** O servidor aceitou a conexão. Vale reler a lista: pode ter chegado algo enquanto estava desconectado. */
+  readonly getToken: (forceRenew: boolean) => Promise<string | null>;
   readonly onReady: () => void;
-  /** Chegou notificação nova. */
   readonly onChange: () => void;
 }
 
@@ -32,6 +30,8 @@ export function connectNotificationSocket({ getToken, onReady, onChange }: Optio
   let timer: ReturnType<typeof setTimeout> | null = null;
   let backoff = FIRST_BACKOFF_MS;
   let stopped = false;
+  // O servidor recusou o token (por exemplo, a chave de assinatura mudou ao reiniciar): a próxima tentativa renova antes.
+  let forceRenew = false;
 
   const scheduleReconnect = () => {
     if (stopped) return;
@@ -40,7 +40,8 @@ export function connectNotificationSocket({ getToken, onReady, onChange }: Optio
   };
 
   async function open() {
-    const token = await getToken().catch(() => null);
+    const token = await getToken(forceRenew).catch(() => null);
+    forceRenew = false;
     if (stopped) return;
     if (!token) {
       scheduleReconnect();
@@ -58,8 +59,9 @@ export function connectNotificationSocket({ getToken, onReady, onChange }: Optio
         onChange();
       }
     };
-    connection.onclose = () => {
+    connection.onclose = (event) => {
       if (socket === connection) socket = null;
+      forceRenew = event.code === UNAUTHORIZED_CLOSE;
       scheduleReconnect();
     };
   }
