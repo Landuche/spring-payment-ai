@@ -4,22 +4,20 @@ import dio.budgeting.cleanup.application.CleanupRecordsUseCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
  * Agenda a limpeza de registros expirados. Padrão: 03:15 todo dia.
  * Para alterar o horário, defina {@code budgeting.cleanup.cron}.
  */
-@Configuration
-@EnableScheduling
-public class SchedulingConfig {
-    private static final Logger log = LoggerFactory.getLogger(SchedulingConfig.class);
+@Component
+class CleanupScheduler {
+    private static final Logger log = LoggerFactory.getLogger(CleanupScheduler.class);
 
     private final CleanupRecordsUseCase cleanup;
 
-    public SchedulingConfig(CleanupRecordsUseCase cleanup) {
+    CleanupScheduler(CleanupRecordsUseCase cleanup) {
         this.cleanup = cleanup;
     }
 
