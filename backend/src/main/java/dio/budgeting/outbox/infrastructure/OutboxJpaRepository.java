@@ -5,6 +5,7 @@ import dio.budgeting.outbox.domain.OutboxRepository;
 
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -23,5 +24,10 @@ class OutboxJpaRepository implements OutboxRepository {
     @Override
     public List<OutboxEvent> findPendingForUpdate(int limit) {
         return entityRepository.findPendingForUpdate(limit).stream().map(OutboxEventEntity::toDomain).toList();
+    }
+
+    @Override
+    public int deletePublishedBefore(Instant limit) {
+        return entityRepository.deletePublishedBefore(limit);
     }
 }

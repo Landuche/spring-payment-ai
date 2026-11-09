@@ -1,5 +1,6 @@
 package dio.budgeting.outbox.domain;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface OutboxRepository {
@@ -10,4 +11,7 @@ public interface OutboxRepository {
      * aplicação não publicam o mesmo evento ao mesmo tempo.
      */
     List<OutboxEvent> findPendingForUpdate(int limit);
+
+    /** Apaga os eventos já publicados antes de {@code limit}, os pendentes nunca são apagados. */
+    int deletePublishedBefore(Instant limit);
 }

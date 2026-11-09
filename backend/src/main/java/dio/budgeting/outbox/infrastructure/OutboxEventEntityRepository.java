@@ -1,9 +1,11 @@
 package dio.budgeting.outbox.infrastructure;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,4 +20,8 @@ interface OutboxEventEntityRepository extends CrudRepository<OutboxEventEntity, 
             for update skip locked
             """, nativeQuery = true)
     List<OutboxEventEntity> findPendingForUpdate(@Param("limit") int limit);
+
+    @Modifying
+    @Query(value = "delete from outbox_event where published_at < :limit", nativeQuery = true)
+    int deletePublishedBefore(@Param("limit") Instant limit);
 }

@@ -13,7 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
-/** MANDATORY: gravar o evento fora da transação do fato de negócio anularia o motivo de existir do outbox. */
+/** Exige transação aberta (MANDATORY): gravar o evento fora da transação do fato de negócio anularia o outbox. */
 @Component
 class JsonOutboxRecorder implements OutboxRecorder {
     private final OutboxRepository outbox;

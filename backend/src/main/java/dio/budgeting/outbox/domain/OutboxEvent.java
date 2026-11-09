@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Evento de domínio à espera de publicação. É gravado na mesma transação do fato de negócio que o originou,
- * então os dois existem ou não existem juntos; um publicador o envia ao broker depois.
+ * então os dois existem ou não existem juntos.
  */
 public record OutboxEvent(
         UUID id,

@@ -3,6 +3,7 @@ package dio.budgeting.outbox.application;
 import dio.budgeting.outbox.domain.OutboxEvent;
 import dio.budgeting.outbox.domain.OutboxRepository;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +26,13 @@ public class InMemoryOutboxRepository implements OutboxRepository {
                 .sorted(Comparator.comparing(OutboxEvent::createdAt))
                 .limit(limit)
                 .toList();
+    }
+
+    @Override
+    public int deletePublishedBefore(Instant limit) {
+        int before = store.size();
+        store.values().removeIf(event -> event.isPublished() && event.publishedAt().isBefore(limit));
+        return before - store.size();
     }
 
     public OutboxEvent get(UUID id) {

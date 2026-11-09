@@ -11,7 +11,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Publica os eventos pendentes, do mais antigo ao mais novo. Entrega "pelo menos uma vez": se a aplicação cair
+ * Publica os eventos pendentes, do mais antigo ao mais novo. se a aplicação cair
  * depois de o broker confirmar e antes de marcar o evento como publicado, ele é enviado de novo no próximo ciclo,
  * por isso os consumidores precisam ser idempotentes. Na primeira falha o lote para, para manter a ordem.
  */

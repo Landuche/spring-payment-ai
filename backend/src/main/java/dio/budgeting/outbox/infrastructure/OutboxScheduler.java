@@ -22,7 +22,7 @@ class OutboxScheduler {
         try {
             publishPendingEvents.execute();
         } catch (RuntimeException e) {
-            log.error("Falha ao publicar eventos pendentes; o próximo ciclo tenta de novo", e);
+            log.error("Falha ao publicar eventos pendentes.", e);
         }
     }
 }

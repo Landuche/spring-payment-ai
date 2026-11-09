@@ -8,6 +8,8 @@ import dio.budgeting.auth.application.InMemoryRefreshTokenRepository;
 import dio.budgeting.auth.domain.FailureCounter;
 import dio.budgeting.auth.domain.RefreshToken;
 import dio.budgeting.auth.domain.UserId;
+import dio.budgeting.outbox.application.InMemoryOutboxRepository;
+import dio.budgeting.outbox.domain.OutboxEvent;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +28,9 @@ class CleanupRecordsUseCaseTest {
     private final InMemoryFailureCounterRepository failureCounters = new InMemoryFailureCounterRepository();
     private final InMemoryLookupGuardRepository lookupGuards = new InMemoryLookupGuardRepository();
     private final InMemoryRefreshTokenRepository refreshTokens = new InMemoryRefreshTokenRepository();
+    private final InMemoryOutboxRepository outbox = new InMemoryOutboxRepository();
     private final CleanupRecordsUseCase useCase =
-            new CleanupRecordsUseCase(failureCounters, lookupGuards, refreshTokens, clock);
+            new CleanupRecordsUseCase(failureCounters, lookupGuards, refreshTokens, outbox, clock);
 
     @Test
     void should_removeOnlyCountersOlderThanTheOneDayMargin_andWithoutActiveBlock() {
@@ -74,5 +77,27 @@ class CleanupRecordsUseCaseTest {
         assertThat(result.refreshTokens()).isEqualTo(1);
         assertThat(refreshTokens.findByHash("expired")).isEmpty();
         assertThat(refreshTokens.findByHash("valid")).isPresent();
+    }
+
+    @Test
+    void should_removeOnlyOutboxEventsPublishedBeforeTheRetention_keepingThePendingOnes() {
+        var created = now.minus(Duration.ofDays(30));
+        var oldPublished = event(created).markPublished(now.minus(Duration.ofDays(8)));
+        var recentPublished = event(created).markPublished(now.minus(Duration.ofDays(1)));
+        var oldPending = event(created);
+        outbox.save(oldPublished);
+        outbox.save(recentPublished);
+        outbox.save(oldPending);
+
+        var result = useCase.execute();
+
+        assertThat(result.outboxEvents()).isEqualTo(1);
+        assertThat(outbox.get(oldPublished.id())).isNull();
+        assertThat(outbox.get(recentPublished.id())).isNotNull();
+        assertThat(outbox.get(oldPending.id())).isNotNull();
+    }
+
+    private OutboxEvent event(Instant createdAt) {
+        return OutboxEvent.pending("transfer.completed", UUID.randomUUID(), "TransferCompleted", "{}", createdAt);
     }
 }
