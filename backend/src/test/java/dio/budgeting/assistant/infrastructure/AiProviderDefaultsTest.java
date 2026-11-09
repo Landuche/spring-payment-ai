@@ -59,7 +59,7 @@ class AiProviderDefaultsTest {
         var env = apply(new MockEnvironment().withProperty("AI_BASE_URL", "https://api.openai.com"));
 
         assertThat(env.getProperty(SPEECH_MODEL)).isEqualTo("gpt-4o-mini-tts");
-        assertThat(env.getProperty(SPEECH_VOICE)).isEqualTo("nova");
+        assertThat(env.getProperty(SPEECH_VOICE)).isEqualTo("onyx");
         assertThat(env.getProperty(SPEECH_URL)).isNull();
         assertThat(env.getProperty(SPEECH_KEY)).isNull();
     }
