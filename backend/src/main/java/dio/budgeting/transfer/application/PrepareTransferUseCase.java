@@ -42,7 +42,8 @@ public class PrepareTransferUseCase {
     }
 
     private AccountOutput locate(String recipient) {
-        var text = recipient == null ? "" : recipient.strip();
+        // A transcrição de voz costuma colar a pontuação da frase no fim do e-mail ("maria@gmail.com."), e o modelo a repassa.
+        var text = recipient == null ? "" : recipient.strip().replaceAll("[\\p{Punct}\\s]+$", "");
         return text.contains("@") ? getAccount.findByEmail(text) : getAccount.findByNumber(text);
     }
 }

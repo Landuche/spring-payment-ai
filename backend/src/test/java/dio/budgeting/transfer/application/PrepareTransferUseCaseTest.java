@@ -67,6 +67,15 @@ class PrepareTransferUseCaseTest {
     }
 
     @Test
+    void should_ignoreSentencePunctuationGluedToTheEmail() {
+        TestData.deposit(transactions, source, "100.00");
+
+        var proposal = useCase.execute("bruno.lima@example.com.", new BigDecimal("10.00"), null);
+
+        assertThat(proposal.destinationAccount()).isEqualTo("0000-000002");
+    }
+
+    @Test
     void should_acceptAccountNumberWithDash() {
         TestData.deposit(transactions, source, "100.00");
 

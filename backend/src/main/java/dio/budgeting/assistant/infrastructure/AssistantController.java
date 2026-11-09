@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * A conversa em si fica no {@link AssistantChat}.
  * <p>
- * A resposta é falada usando a voz do celular, o backend só transcreve e responde em texto.
+ * Aqui a resposta é só texto: a voz de entrada é transcrita neste controlador e a de saída vem do {@link SpeechController}.
  */
 @RestController
 @RequestMapping("/assistant")

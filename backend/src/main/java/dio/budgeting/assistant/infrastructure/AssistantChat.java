@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * monta o prompt do turno, aplica a memória e devolve a resposta com o que o app precisa.
+ * Monta o prompt do turno, aplica a memória e devolve a resposta com o que o app precisa.
  * <p>
  * A memória de conversa é isolada por conta: a chave é {@code conta:conversa}.
  */

@@ -13,7 +13,7 @@ class AssistantConfig {
     /**
      * Client de chat do Claudinho.
      * O prompt de sistema não é fixo aqui porque vai a cada chamada, junto com a data de hoje (ver {@link AssistantChat}).
-     * as últimas 20 mensagens bastam para acompanhar o tom e o contexto.
+     * A memória guarda as últimas 20 mensagens de cada conversa, o bastante para acompanhar o tom e o contexto.
      */
     @Bean
     ChatClient assistantChatClient(ChatClient.Builder builder, AssistantTools tools) {

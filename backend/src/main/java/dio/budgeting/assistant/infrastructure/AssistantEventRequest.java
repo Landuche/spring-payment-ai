@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
- * Avisa o claudinho se a transferencia do card foi concluida.
+ * Avisa o Claudinho como terminou a transferência do cartão: confirmada, cancelada ou com falha.
  */
 public record AssistantEventRequest(
         @NotNull Type type,

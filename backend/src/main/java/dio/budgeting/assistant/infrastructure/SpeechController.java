@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Voz do Claudinho. O app diz qual texto quer ouvir (já resumido para a fala) e recebe o áudio; se a voz por IA
- * estiver desligada ou falhar, ele usa a voz do aparelho.
+ * Voz do Claudinho. O app diz qual texto quer ouvir (já resumido para a fala) e recebe o áudio. Se a voz por IA
+ * estiver desligada ou falhar, ele usa a voz do dispositivo.
  */
 @RestController
 @RequestMapping("/assistant")
