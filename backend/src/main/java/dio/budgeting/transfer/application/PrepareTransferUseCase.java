@@ -41,9 +41,20 @@ public class PrepareTransferUseCase {
         return new TransferProposal(recipient.number(), recipient.holderName(), money.toReais(), text);
     }
 
+    /**
+     * O destinatário chega do modelo, que repassa o que a transcrição de voz entregou, às vezes com a pontuação da
+     * frase colada no fim do e-mail. O resto não é adivinhado: sem @ e sem ser um número, o cliente é chamado a repetir.
+     */
     private AccountOutput locate(String recipient) {
-        // A transcrição de voz costuma colar a pontuação da frase no fim do e-mail ("maria@gmail.com."), e o modelo a repassa.
         var text = recipient == null ? "" : recipient.strip().replaceAll("[\\p{Punct}\\s]+$", "");
-        return text.contains("@") ? getAccount.findByEmail(text) : getAccount.findByNumber(text);
+        if (text.contains("@")) {
+            return getAccount.findByEmail(text);
+        }
+        if (text.matches(".*\\p{L}.*")) {
+            throw new BusinessRuleViolationException(
+                    "O destinatário não é um e-mail completo (falta o @) nem um número de conta. "
+                            + "Peça ao cliente para repetir o e-mail ou informar o número da conta");
+        }
+        return getAccount.findByNumber(text);
     }
 }

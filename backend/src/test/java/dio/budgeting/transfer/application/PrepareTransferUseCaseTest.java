@@ -76,6 +76,15 @@ class PrepareTransferUseCaseTest {
     }
 
     @Test
+    void should_askForTheEmailAgain_whenTheAtSignIsMissing() {
+        TestData.deposit(transactions, source, "100.00");
+
+        assertThatThrownBy(() -> useCase.execute("bruno.lima example.com", new BigDecimal("10.00"), null))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("falta o @");
+    }
+
+    @Test
     void should_acceptAccountNumberWithDash() {
         TestData.deposit(transactions, source, "100.00");
 

@@ -50,7 +50,7 @@ public class AssistantTools {
     @Tool(name = "createTransaction",
             description = "Registra uma nova receita ou despesa na data de hoje. Não serve para transferências entre contas")
     public TransactionOutput createTransaction(
-            @ToolParam(description = "Valor em reais, maior que zero. Ex: 45.90") BigDecimal amount,
+            @ToolParam(description = "Valor em reais, maior que zero") BigDecimal amount,
             @ToolParam(description = "Categoria da transação. GROCERIES: mercado, padaria, hortifruti. PHARMA: farmácia, remédios. "
                     + "AUTO: combustível, estacionamento, oficina, IPVA, carro. OTHER: qualquer outro gasto, como adega, bar, restaurante, lazer. "
                     + "Use OTHER quando nenhuma outra categoria se encaixar. Nunca recuse um gasto por causa da categoria.") Category category,
@@ -72,7 +72,7 @@ public class AssistantTools {
                     + "O total e a lista contam só despesas. Sem filtro, informa também o total de transferências "
                     + "enviadas e recebidas no mês, que NÃO fazem parte do total de gastos")
     public ExpenseReportOutput generateExpenseReport(
-            @ToolParam(description = "Mês de referência, no formato interno yyyy-MM (ex: 2026-10). Se o cliente disser "
+            @ToolParam(description = "Mês de referência, no formato interno yyyy-MM. Se o cliente disser "
                     + "\"este mês\" ou não indicar o mês, use o mês atual. Nunca peça nem mostre esse formato ao cliente") String period,
             @ToolParam(description = "Categoria para filtrar. Se omitida, considera todas", required = false)
             Category category) {
@@ -82,21 +82,22 @@ public class AssistantTools {
     @Tool(name = "simulateInvestment",
             description = "Simula o montante final de um investimento com juros compostos mensais")
     public SimulationOutput simulateInvestment(
-            @ToolParam(description = "Valor a investir em reais, maior que zero. Ex: 1000") BigDecimal amount,
+            @ToolParam(description = "Valor a investir em reais, maior que zero") BigDecimal amount,
             @ToolParam(description = "Prazo do investimento em meses, entre 1 e 360") int termMonths) {
         return simulateInvestment.execute(amount, termMonths);
     }
 
     @Tool(name = "prepareTransfer",
             description = "Prepara uma transferência de dinheiro para outra pessoa. NÃO executa: o cliente confirma tocando "
-                    + "num botão que aparece no chat. Use quando o cliente quiser enviar dinheiro a alguém e informar o "
-                    + "e-mail ou o número da conta do destinatário e o valor. Depois de chamar, diga que a transferência "
-                    + "foi preparada e precisa ser confirmada no cartão; nunca diga que foi enviada")
+                    + "num botão que aparece no chat. Chame assim que o cliente informar o valor e o destinatário (e-mail "
+                    + "ou número da conta), sem avisar antes. Depois de chamar, diga que a transferência foi preparada e "
+                    + "precisa ser confirmada no cartão; nunca diga que foi enviada")
     public TransferPreparation prepareTransfer(
-            @ToolParam(description = "E-mail do titular da conta de destino OU o número da conta (10 dígitos, "
-                    + "ex: 1234-567890). Se o cliente ditou o e-mail ('arroba', 'ponto'), converta para o formato normal")
+            @ToolParam(description = "E-mail completo do titular da conta de destino, com @, OU o número da conta, com 10 dígitos. "
+                    + "Se o e-mail foi ditado por extenso, escreva-o com os símbolos. Nunca omita o @ nem inclua "
+                    + "pontuação no fim")
             String recipient,
-            @ToolParam(description = "Valor em reais, maior que zero. Ex: 50.00") BigDecimal amount,
+            @ToolParam(description = "Valor em reais, maior que zero") BigDecimal amount,
             @ToolParam(description = "Descrição curta da transferência. Opcional", required = false) String description,
             ToolContext toolContext) {
 
