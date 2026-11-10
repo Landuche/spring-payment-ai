@@ -31,7 +31,7 @@ class AiProviderDefaultsTest {
         var env = apply(new MockEnvironment());
 
         assertThat(env.getProperty(CHAT)).isEqualTo("gpt-4o-mini");
-        assertThat(env.getProperty(TRANSCRIPTION)).isEqualTo("whisper-1");
+        assertThat(env.getProperty(TRANSCRIPTION)).isEqualTo("gpt-4o-transcribe");
     }
 
     @Test

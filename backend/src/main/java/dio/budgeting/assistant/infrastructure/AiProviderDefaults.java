@@ -24,7 +24,7 @@ public class AiProviderDefaults implements EnvironmentPostProcessor {
 
         var defaults = new HashMap<String, Object>();
         defaults.put("spring.ai.openai.chat.options.model", groq ? "openai/gpt-oss-120b" : "gpt-4o-mini");
-        defaults.put("spring.ai.openai.audio.transcription.options.model", groq ? "whisper-large-v3" : "whisper-1");
+        defaults.put("spring.ai.openai.audio.transcription.options.model", groq ? "whisper-large-v3" : "gpt-4o-transcribe");
         if (groq) {
             defaults.put(SPEECH + "base-url", environment.getProperty("KOKORO_URL", DEFAULT_KOKORO_URL));
             // O Kokoro não confere a chave, mas o cliente exige uma. Não vale mandar a chave da Groq para ele.
